@@ -1,5 +1,5 @@
 <div align="center">
-  <a href="https://github.com/Instagram-Clone-Coding">
+  <a href="https://github.com/WeGrus">
     <img src="https://user-images.githubusercontent.com/68049320/148059706-59c1967d-d035-49e1-9557-2149640a8d2a.png" alt="Logo" width="130" height="130">
   </a>
   <h3 align="center">WeGrus-BE-Spring</h3>
