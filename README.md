@@ -30,7 +30,7 @@
 ```txt
 /src.main.java.wegrus.clubwebsite
 ├── /advice
-│ ├── GlobalExceptionHandler.java 본문
+│ ├── GlobalExceptionHandler.java
 ├── /config
 ├── /controller
 ├── /dto
