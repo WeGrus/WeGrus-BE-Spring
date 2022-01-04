@@ -1,0 +1,49 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/wegrus?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: root
+    password: 1234
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  redis:
+    host: localhost
+    port: 6379
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+        default_batch_fetch_size: 100
+        dialect: org.hibernate.dialect.MySQL5Dialect
+    open-in-view: false
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: GraduProject11@gmail.com
+    password: rmfkeb1216!@#
+    properties:
+      mail:
+        smtp:
+          auth: true
+          timeout: 5000
+          starttls:
+            enable: true
+
+logging:
+  level:
+    #    root: debug
+    org:
+      hibernate:
+        SQL: debug
+        type: trace
+
+jwt:
+  access:
+    secret: access-token-wegrus-secret-key-spring-boot
+    validity: 1800000 # 30minutes
+  refresh:
+    secret: refresh-token-wegrus-secret-key-spring-boot
+    validity: 1209600000 # 2weeks
