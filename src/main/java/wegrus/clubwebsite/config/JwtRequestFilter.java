@@ -11,7 +11,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import wegrus.clubwebsite.exception.AuthorizationHeaderInvalidException;
-import wegrus.clubwebsite.service.JwtUserDetailsService;
+import wegrus.clubwebsite.util.JwtUserDetailsUtil;
 import wegrus.clubwebsite.util.JwtTokenUtil;
 
 import javax.servlet.FilterChain;
@@ -26,7 +26,7 @@ import static wegrus.clubwebsite.dto.error.ErrorCode.*;
 @RequiredArgsConstructor
 public class JwtRequestFilter extends OncePerRequestFilter {
 
-    private final JwtUserDetailsService jwtUserDetailsService;
+    private final JwtUserDetailsUtil jwtUserDetailsUtil;
     private final JwtTokenUtil jwtTokenUtil;
 
     @Override
@@ -40,7 +40,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             String id = jwtTokenUtil.getUsernameFromAccessToken(jwtToken);
 
             if (id != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserDetails userDetails = this.jwtUserDetailsService.loadUserByUsername(id);
+                UserDetails userDetails = this.jwtUserDetailsUtil.loadUserByUsername(id);
 
                 if (jwtTokenUtil.validateAccessToken(jwtToken)) {
                     UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
