@@ -9,9 +9,11 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import wegrus.clubwebsite.dto.Status;
 import wegrus.clubwebsite.dto.VerificationResponse;
 import wegrus.clubwebsite.dto.member.*;
 import wegrus.clubwebsite.dto.result.ResultResponse;
+import wegrus.clubwebsite.exception.MemberNotFoundException;
 import wegrus.clubwebsite.service.MemberService;
 
 import javax.mail.MessagingException;
@@ -28,7 +30,7 @@ public class MemberController {
 
     private final MemberService memberService;
 
-    @ApiOperation(value = "본인 이메일 검증")
+    @ApiOperation(value = "본인 이메일 인증")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "Authorization", value = "불필요", example = " "),
             @ApiImplicitParam(name = "verificationKey", value = "인증키", required = true, example = "5ecc3d01-bd92-4f1a-bdf2-9a5a777871ae")
@@ -59,11 +61,17 @@ public class MemberController {
     public ResponseEntity<ResultResponse> login(
             @Validated @NotNull(message = "카카오 회원 번호는 필수입니다.") @RequestParam Long kakaoId,
             HttpServletResponse httpServletResponse) {
-        final MemberAndJwtDto dto = memberService.findMemberAndGenerateJwt(kakaoId);
-        final MemberLoginResponse response = new MemberLoginResponse(dto.getMember(), dto.getAccessToken());
-        putRefreshTokenToCookie(httpServletResponse, dto.getRefreshToken());
+        try {
+            final MemberAndJwtDto dto = memberService.findMemberAndGenerateJwt(kakaoId);
+            final MemberLoginSuccessResponse response = new MemberLoginSuccessResponse(Status.SUCCESS, dto.getMember(), dto.getAccessToken());
+            putRefreshTokenToCookie(httpServletResponse, dto.getRefreshToken());
 
-        return ResponseEntity.ok(ResultResponse.of(LOGIN_SUCCESS, response));
+            return ResponseEntity.ok(ResultResponse.of(LOGIN_SUCCESS, response));
+        } catch (MemberNotFoundException e) {
+            final MemberLoginFailResponse response = new MemberLoginFailResponse(Status.FAILURE);
+
+            return ResponseEntity.ok(ResultResponse.of(LOGIN_FAILURE, response));
+        }
     }
 
     private void putRefreshTokenToCookie(HttpServletResponse httpServletResponse, String refreshToken) {
@@ -99,5 +107,17 @@ public class MemberController {
         final ReIssueResponse response = new ReIssueResponse(jwtDto.getAccessToken());
 
         return ResponseEntity.ok(ResultResponse.of(REISSUE_SUCCESS, response));
+    }
+
+    @ApiOperation(value = "이메일 검증")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "불필요", example = " "),
+            @ApiImplicitParam(name = "email", value = "이메일", required = true, example = "12161542@inha.edu")
+    })
+    @PostMapping("/signup/check/email")
+    public ResponseEntity<ResultResponse> checkEmail(@RequestParam String email) {
+        final EmailCheckResponse response = memberService.checkEmail(email);
+
+        return ResponseEntity.ok(ResultResponse.of(CHECK_EMAIL_SUCCESS, response));
     }
 }

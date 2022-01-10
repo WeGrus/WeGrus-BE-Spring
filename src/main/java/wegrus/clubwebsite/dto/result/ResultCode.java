@@ -12,6 +12,8 @@ public enum ResultCode {
     LOGIN_SUCCESS(200, "M101", "로그인에 성공하였습니다."),
     LOGOUT_SUCCESS(200, "M102", "로그아웃에 성공하였습니다."),
     REISSUE_SUCCESS(200, "M103", "토큰 재발급에 성공하였습니다."),
+    LOGIN_FAILURE(200, "M104", "회원가입을 먼저 해주세요."),
+    CHECK_EMAIL_SUCCESS(200, "M105", "이메일 검증에 성공하였습니다."),
 
     // Verification
     REQUEST_VERIFY_SUCCESS(200, "V100", "인증 키 검증 요청에 성공하였습니다."),

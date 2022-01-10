@@ -17,7 +17,7 @@ import javax.validation.constraints.Pattern;
 public class MemberSignupRequest {
 
     @ApiModelProperty(value = "이메일", example = "12161542@inha.edu", required = true)
-    @Pattern(regexp = "^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@(inha.edu|inha.ac.kr)$", message = "이메일은 인하대학교 메일 형식만 가능합니다.")
+    @Pattern(regexp = "^[0-9]{8}@(inha.edu|inha.ac.kr)$", message = "인하대학교 이메일 형식만 가능합니다.")
     private String email;
 
     @ApiModelProperty(value = "카카오 회원 번호", example = "123456789", required = true)

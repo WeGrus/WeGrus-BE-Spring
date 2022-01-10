@@ -6,6 +6,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import wegrus.clubwebsite.dto.Status;
+import wegrus.clubwebsite.dto.member.EmailCheckResponse;
 import wegrus.clubwebsite.dto.member.JwtDto;
 import wegrus.clubwebsite.util.JwtTokenUtil;
 import wegrus.clubwebsite.dto.VerificationResponse;
@@ -25,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 import static wegrus.clubwebsite.dto.error.ErrorCode.*;
 import static wegrus.clubwebsite.dto.result.ResultCode.*;
@@ -124,5 +127,13 @@ public class MemberService {
 
         redisUtil.set(newRefreshToken, userDetails.getUsername(), REFRESH_TOKEN_VALID_TIME);
         return new JwtDto(newAccessToken, newRefreshToken);
+    }
+
+    public EmailCheckResponse checkEmail(String email) {
+        if (memberRepository.findByEmail(email).isPresent())
+            return new EmailCheckResponse(Status.FAILURE, "이미 존재하는 이메일입니다.");
+        else if (!Pattern.matches("^[0-9]{8}@(inha.edu|inha.ac.kr)$", email))
+            return new EmailCheckResponse(Status.FAILURE, "인하대학교 이메일 형식만 가능합니다.");
+        return new EmailCheckResponse(Status.SUCCESS, "사용 가능한 이메일입니다.");
     }
 }
