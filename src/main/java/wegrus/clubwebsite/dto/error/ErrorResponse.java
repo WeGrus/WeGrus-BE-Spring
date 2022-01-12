@@ -65,7 +65,7 @@ public class ErrorResponse {
                 errors.add(new FieldError(fieldName, requestedValue, message));
             }
         }
-        return new ErrorResponse(ErrorCode.INVALID_TYPE_VALUE, errors);
+        return new ErrorResponse(ErrorCode.INVALID_INPUT_VALUE, errors);
     }
 
     @Getter

@@ -24,9 +24,7 @@ public enum ErrorCode {
     MEMBER_NOT_FOUND(400, "M000", "존재하지 않는 회원입니다."),
     KAKAOID_ALREADY_EXIST(400, "M001", "이미 존재하는 카카오 회원 번호입니다."),
     EMAIL_ALREADY_EXIST(400, "M002", "이미 존재하는 이메일입니다."),
-
-    // Verification
-    EXPIRED_VERIFICATION_KEY(400, "V000", "만료된 인증 키입니다."),
+    INVALID_EMAIL(400, "M002", "인하대학교 이메일 형식만 가능합니다."),
     ;
 
     private int status;

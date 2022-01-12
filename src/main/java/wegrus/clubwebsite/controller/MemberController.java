@@ -19,11 +19,13 @@ import wegrus.clubwebsite.service.MemberService;
 import javax.mail.MessagingException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import static wegrus.clubwebsite.dto.result.ResultCode.*;
 
 @Api(tags = "회원 API")
+@Validated
 @RestController
 @RequiredArgsConstructor
 public class MemberController {
@@ -36,7 +38,7 @@ public class MemberController {
             @ApiImplicitParam(name = "verificationKey", value = "인증키", required = true, example = "5ecc3d01-bd92-4f1a-bdf2-9a5a777871ae")
     })
     @PostMapping("/signup/verify")
-    public ResponseEntity<ResultResponse> verifySchoolEmail(@RequestParam String verificationKey) {
+    public ResponseEntity<ResultResponse> verifySchoolEmail(@NotBlank(message = "인증 키는 필수입니다.") @RequestParam String verificationKey) {
         final VerificationResponse response = memberService.checkVerificationKey(verificationKey);
 
         return ResponseEntity.ok(ResultResponse.of(REQUEST_VERIFY_SUCCESS, response));
@@ -57,8 +59,8 @@ public class MemberController {
             @ApiImplicitParam(name = "Authorization", value = "불필요", example = " "),
             @ApiImplicitParam(name = "kakaoId", value = "카카오 회원 번호", required = true, example = "123456789")
     })
-    @PostMapping("/login")
-    public ResponseEntity<ResultResponse> login(
+    @PostMapping("/signin")
+    public ResponseEntity<ResultResponse> signin(
             @Validated @NotNull(message = "카카오 회원 번호는 필수입니다.") @RequestParam Long kakaoId,
             HttpServletResponse httpServletResponse) {
         try {
@@ -89,8 +91,8 @@ public class MemberController {
     }
 
     @ApiOperation(value = "로그아웃")
-    @PostMapping("/members/logout")
-    public ResponseEntity<ResultResponse> logout(@CookieValue(value = "refreshToken") Cookie cookie) {
+    @PostMapping("/members/signout")
+    public ResponseEntity<ResultResponse> signout(@CookieValue(value = "refreshToken") Cookie cookie) {
         memberService.deleteRefreshToken(cookie.getValue());
 
         return ResponseEntity.ok(ResultResponse.of(LOGOUT_SUCCESS, null));
@@ -98,7 +100,7 @@ public class MemberController {
 
     @ApiOperation(value = "토큰 재발급")
     @PostMapping("/reissue")
-    public ResponseEntity<ResultResponse> reIssue(
+    public ResponseEntity<ResultResponse> reissue(
             @RequestHeader("Authorization") String accessToken,
             @CookieValue(value = "refreshToken") Cookie cookie,
             HttpServletResponse httpServletResponse) {

@@ -2,6 +2,7 @@ package wegrus.clubwebsite.dto.member;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import wegrus.clubwebsite.entity.MemberAcademicStatus;
@@ -14,6 +15,7 @@ import javax.validation.constraints.Pattern;
 @ApiModel(description = "회원가입 요청 데이터 모델")
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
 public class MemberSignupRequest {
 
     @ApiModelProperty(value = "이메일", example = "12161542@inha.edu", required = true)
