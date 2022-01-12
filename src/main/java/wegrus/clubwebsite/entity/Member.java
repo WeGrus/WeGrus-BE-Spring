@@ -29,6 +29,10 @@ public class Member {
     @OneToMany(mappedBy = "boards", fetch = FetchType.LAZY)
     private List<Board> boards = new ArrayList<>();
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "replys", fetch = FetchType.LAZY)
+    private List<Reply> replies = new ArrayList<>();
+
     @Column(name = "member_kakao_id", unique = true, nullable = false)
     private Long kakaoId;
 

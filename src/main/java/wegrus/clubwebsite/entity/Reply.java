@@ -17,46 +17,41 @@ import java.util.List;
 @EntityListeners(AuditingEntityListener.class)
 @Getter
 @Entity
-@Table(name = "boards")
-public class Board {
+@Table(name = "replys")
+public class Reply {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "board_id", updatable = false)
+    @Column(name = "reply_id", updatable = false)
     private Long id;
 
     @ManyToOne
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
+    @ManyToOne
+    @JoinColumn(name = "board_id", nullable = false)
+    private Board board;
+
+    @ManyToOne
+    @JoinColumn(name = "reply_parent_id")
+    private Reply parent;
+
     @JsonIgnore
     @OneToMany(mappedBy = "replys", fetch = FetchType.LAZY)
     private List<Reply> replies = new ArrayList<>();
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "board_category", nullable = false)
-    private BoardCategory category;
-
-    @Column(name = "board_type", nullable = false)
-    private BoardType type;
-
-    @Column(name = "board_title", nullable = false)
-    private String title;
-
-    @Column(name = "board_content", nullable = false)
+    @Column(name = "reply_content", nullable = false)
     private String content;
 
     @CreatedDate
-    @Column(name = "board_create_date", nullable = false)
+    @Column(name = "reply_create_date", nullable = false)
     private LocalDateTime createdDate;
 
     @LastModifiedDate
-    @Column(name = "board_update_date", nullable = false)
+    @Column(name = "reply_update_date", nullable = false)
     private LocalDateTime updatedDate;
 
-    @Column(name = "board_secret_flag", nullable = false)
-    private boolean secretFlag;
-
-    @Column(name = "board_state", nullable = false)
-    private BoardState state;
+    @Column(name = "reply_state", nullable = false)
+    private ReplyState state;
 }
