@@ -2,6 +2,7 @@ package wegrus.clubwebsite.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
@@ -67,4 +68,15 @@ public class Board {
 
     @Column(name = "board_state", nullable = false)
     private BoardState state;
+
+    @Builder
+    public Board(Member member, BoardCategory category, BoardType type, String title, String content, boolean secretFlag, BoardState state){
+        this.member = member;
+        this.category = category;
+        this.type = type;
+        this.title = title;
+        this.content = content;
+        this.secretFlag = secretFlag;
+        this.state = state;
+    }
 }

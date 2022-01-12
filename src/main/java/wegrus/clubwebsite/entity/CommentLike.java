@@ -1,6 +1,7 @@
 package wegrus.clubwebsite.entity;
 
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -26,4 +27,10 @@ public class CommentLike {
     @ManyToOne
     @JoinColumn(name = "reply_id", nullable = false)
     private Reply reply;
+
+    @Builder
+    public CommentLike(Member member, Reply reply){
+        this.member = member;
+        this.reply = reply;
+    }
 }

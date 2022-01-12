@@ -2,6 +2,7 @@ package wegrus.clubwebsite.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
@@ -58,4 +59,13 @@ public class Reply {
 
     @Column(name = "reply_state", nullable = false)
     private ReplyState state;
+
+    @Builder
+    public Reply(Member member, Board board, Reply parent, String content, ReplyState state){
+        this.member = member;
+        this.board = board;
+        this.parent = parent;
+        this.content = content;
+        this.state = state;
+    }
 }
