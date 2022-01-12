@@ -56,7 +56,7 @@ public class MemberService {
             return new VerificationResponse(false, EXPIRED_VERIFICATION_KEY.getMessage());
         redisUtil.delete(verificationKey);
         final Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
-        member.updateRole(MemberRole.ROLE_GUEST);
+        member.updateRole(MemberRole.ROLE_CERTIFIED);
         // TODO: 회원가입 축하 이메일 전송 -> 내용 논의
 
         return new VerificationResponse(true, VERIFY_EMAIL_SUCCESS.getMessage());
