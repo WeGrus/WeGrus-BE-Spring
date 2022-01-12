@@ -31,15 +31,15 @@ public class Board {
     private Member member;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "replys", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "board", fetch = FetchType.LAZY)
     private List<Reply> replies = new ArrayList<>();
 
     @JsonIgnore
-    @OneToMany(mappedBy = "post_likes", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "board", fetch = FetchType.LAZY)
     private List<PostLike> postLikes = new ArrayList<>();
 
     @JsonIgnore
-    @OneToMany(mappedBy = "views", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "board", fetch = FetchType.LAZY)
     private List<View> views = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)

@@ -39,11 +39,11 @@ public class Reply {
     private Reply parent;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "comment_likes", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "reply", fetch = FetchType.LAZY)
     private List<CommentLike> commentLikes = new ArrayList<>();
 
     @JsonIgnore
-    @OneToMany(mappedBy = "replys", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY)
     private List<Reply> replies = new ArrayList<>();
 
     @Column(name = "reply_content", nullable = false)
