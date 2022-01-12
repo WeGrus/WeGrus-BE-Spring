@@ -131,9 +131,9 @@ public class MemberService {
 
     public EmailCheckResponse checkEmail(String email) {
         if (memberRepository.findByEmail(email).isPresent())
-            return new EmailCheckResponse(Status.FAILURE, "이미 존재하는 이메일입니다.");
+            return new EmailCheckResponse(Status.FAILURE, EMAIL_ALREADY_EXIST.getMessage());
         else if (!Pattern.matches("^[0-9]{8}@(inha.edu|inha.ac.kr)$", email))
-            return new EmailCheckResponse(Status.FAILURE, "인하대학교 이메일 형식만 가능합니다.");
-        return new EmailCheckResponse(Status.SUCCESS, "사용 가능한 이메일입니다.");
+            return new EmailCheckResponse(Status.FAILURE, INVALID_EMAIL.getMessage());
+        return new EmailCheckResponse(Status.SUCCESS, VALID_EMAIL.getMessage());
     }
 }
