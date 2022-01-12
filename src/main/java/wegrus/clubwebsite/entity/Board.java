@@ -33,6 +33,14 @@ public class Board {
     @OneToMany(mappedBy = "replys", fetch = FetchType.LAZY)
     private List<Reply> replies = new ArrayList<>();
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "post_likes", fetch = FetchType.LAZY)
+    private List<PostLike> postLikes = new ArrayList<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "views", fetch = FetchType.LAZY)
+    private List<View> views = new ArrayList<>();
+
     @Enumerated(EnumType.STRING)
     @Column(name = "board_category", nullable = false)
     private BoardCategory category;

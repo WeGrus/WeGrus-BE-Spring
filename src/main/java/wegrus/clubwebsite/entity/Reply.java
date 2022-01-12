@@ -38,6 +38,10 @@ public class Reply {
     private Reply parent;
 
     @JsonIgnore
+    @OneToMany(mappedBy = "comment_likes", fetch = FetchType.LAZY)
+    private List<CommentLike> commentLikes = new ArrayList<>();
+
+    @JsonIgnore
     @OneToMany(mappedBy = "replys", fetch = FetchType.LAZY)
     private List<Reply> replies = new ArrayList<>();
 

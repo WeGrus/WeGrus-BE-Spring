@@ -33,6 +33,18 @@ public class Member {
     @OneToMany(mappedBy = "replys", fetch = FetchType.LAZY)
     private List<Reply> replies = new ArrayList<>();
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "post_likes", fetch = FetchType.LAZY)
+    private List<PostLike> postLikes = new ArrayList<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "views", fetch = FetchType.LAZY)
+    private List<View> views = new ArrayList<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "comment_likes", fetch = FetchType.LAZY)
+    private List<CommentLike> commentLikes = new ArrayList<>();
+
     @Column(name = "member_kakao_id", unique = true, nullable = false)
     private Long kakaoId;
 
