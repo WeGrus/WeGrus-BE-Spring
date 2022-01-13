@@ -9,10 +9,10 @@ public enum ResultCode {
 
     // Member
     SIGNUP_SUCCESS(200, "M100", "회원가입에 성공하였습니다."),
-    LOGIN_SUCCESS(200, "M101", "로그인에 성공하였습니다."),
-    LOGOUT_SUCCESS(200, "M102", "로그아웃에 성공하였습니다."),
+    SIGNIN_SUCCESS(200, "M101", "로그인에 성공하였습니다."),
+    SIGNOUT_SUCCESS(200, "M102", "로그아웃에 성공하였습니다."),
     REISSUE_SUCCESS(200, "M103", "토큰 재발급에 성공하였습니다."),
-    LOGIN_FAILURE(200, "M104", "회원가입을 먼저 해주세요."),
+    SIGNIN_FAILURE(200, "M104", "회원가입을 먼저 해주세요."),
     CHECK_EMAIL_SUCCESS(200, "M105", "이메일 검증에 성공하였습니다."),
     VALID_EMAIL(200, "M105", "사용 가능한 이메일입니다."),
 

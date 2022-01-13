@@ -65,14 +65,14 @@ public class MemberController {
             HttpServletResponse httpServletResponse) {
         try {
             final MemberAndJwtDto dto = memberService.findMemberAndGenerateJwt(kakaoId);
-            final MemberLoginSuccessResponse response = new MemberLoginSuccessResponse(Status.SUCCESS, dto.getMember(), dto.getAccessToken());
+            final MemberSigninSuccessResponse response = new MemberSigninSuccessResponse(Status.SUCCESS, dto.getMember(), dto.getAccessToken());
             putRefreshTokenToCookie(httpServletResponse, dto.getRefreshToken());
 
-            return ResponseEntity.ok(ResultResponse.of(LOGIN_SUCCESS, response));
+            return ResponseEntity.ok(ResultResponse.of(SIGNIN_SUCCESS, response));
         } catch (MemberNotFoundException e) {
-            final MemberLoginFailResponse response = new MemberLoginFailResponse(Status.FAILURE);
+            final MemberSigninFailResponse response = new MemberSigninFailResponse(Status.FAILURE);
 
-            return ResponseEntity.ok(ResultResponse.of(LOGIN_FAILURE, response));
+            return ResponseEntity.ok(ResultResponse.of(SIGNIN_FAILURE, response));
         }
     }
 
@@ -94,17 +94,18 @@ public class MemberController {
     @PostMapping("/members/signout")
     public ResponseEntity<ResultResponse> signout(@CookieValue(value = "refreshToken") Cookie cookie) {
         memberService.deleteRefreshToken(cookie.getValue());
+        final MemberSignoutResponse response = new MemberSignoutResponse(Status.SUCCESS);
 
-        return ResponseEntity.ok(ResultResponse.of(LOGOUT_SUCCESS, null));
+        return ResponseEntity.ok(ResultResponse.of(SIGNOUT_SUCCESS, response));
     }
 
     @ApiOperation(value = "토큰 재발급")
+    @ApiImplicitParam(name = "Authorization", value = "불필요", example = " ")
     @PostMapping("/reissue")
     public ResponseEntity<ResultResponse> reissue(
-            @RequestHeader("Authorization") String accessToken,
             @CookieValue(value = "refreshToken") Cookie cookie,
             HttpServletResponse httpServletResponse) {
-        final JwtDto jwtDto = memberService.reIssueJwt(accessToken, cookie.getValue());
+        final JwtDto jwtDto = memberService.reIssueJwt(cookie.getValue());
         putRefreshTokenToCookie(httpServletResponse, jwtDto.getRefreshToken());
         final ReIssueResponse response = new ReIssueResponse(jwtDto.getAccessToken());
 

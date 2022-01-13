@@ -2,7 +2,6 @@ package wegrus.clubwebsite.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -116,12 +115,11 @@ public class MemberService {
         redisUtil.delete(refreshToken);
     }
 
-    public JwtDto reIssueJwt(String accessToken, String refreshToken) {
-        jwtTokenUtil.validateAccessToken(accessToken);
+    public JwtDto reIssueJwt(String refreshToken) {
         jwtTokenUtil.validateRefreshToken(refreshToken);
         redisUtil.delete(refreshToken);
 
-        final UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getDetails();
+        final UserDetails userDetails = jwtUserDetailsUtil.loadUserByUsername(jwtTokenUtil.getUsernameFromRefreshToken(refreshToken));
         final String newAccessToken = jwtTokenUtil.generateAccessToken(userDetails);
         final String newRefreshToken = jwtTokenUtil.generateRefreshToken(userDetails);
 
