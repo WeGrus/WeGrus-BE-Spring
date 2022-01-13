@@ -233,8 +233,8 @@ public class MemberControllerTest {
         // then
         perform
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("code").value(LOGIN_SUCCESS.getCode()))
-                .andExpect(jsonPath("message").value(LOGIN_SUCCESS.getMessage()))
+                .andExpect(jsonPath("code").value(SIGNIN_SUCCESS.getCode()))
+                .andExpect(jsonPath("message").value(SIGNIN_SUCCESS.getMessage()))
                 .andExpect(jsonPath("data.status").value(Status.SUCCESS))
                 .andExpect(jsonPath("data.member.kakaoId").value(123456789L))
                 .andExpect(jsonPath("data.accessToken").value(accessToken))
@@ -259,8 +259,8 @@ public class MemberControllerTest {
         // then
         perform
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("code").value(LOGIN_FAILURE.getCode()))
-                .andExpect(jsonPath("message").value(LOGIN_FAILURE.getMessage()))
+                .andExpect(jsonPath("code").value(SIGNIN_FAILURE.getCode()))
+                .andExpect(jsonPath("message").value(SIGNIN_FAILURE.getMessage()))
                 .andExpect(jsonPath("data.status").value(Status.FAILURE));
     }
 
@@ -301,8 +301,8 @@ public class MemberControllerTest {
         perform
                 .andExpect(status().isOk())
                 .andExpect(cookie().doesNotExist("refreshToken"))
-                .andExpect(jsonPath("code").value(LOGOUT_SUCCESS.getCode()))
-                .andExpect(jsonPath("message").value(LOGOUT_SUCCESS.getMessage()));
+                .andExpect(jsonPath("code").value(SIGNOUT_SUCCESS.getCode()))
+                .andExpect(jsonPath("message").value(SIGNOUT_SUCCESS.getMessage()));
     }
 
     @Test
@@ -314,7 +314,7 @@ public class MemberControllerTest {
         final Cookie cookie = new Cookie("refreshToken", refreshToken);
 
         final JwtDto dto = new JwtDto(accessToken, refreshToken);
-        doReturn(dto).when(memberService).reIssueJwt(any(String.class), any(String.class));
+        doReturn(dto).when(memberService).reIssueJwt(any(String.class));
 
         // when
         final ResultActions perform = mockMvc.perform(

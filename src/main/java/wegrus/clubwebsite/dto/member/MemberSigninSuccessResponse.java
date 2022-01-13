@@ -8,7 +8,7 @@ import wegrus.clubwebsite.entity.Member;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class MemberLoginSuccessResponse {
+public class MemberSigninSuccessResponse {
 
     private String status;
     private Member member;

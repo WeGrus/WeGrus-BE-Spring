@@ -26,6 +26,7 @@ import wegrus.clubwebsite.entity.MemberAcademicStatus;
 import wegrus.clubwebsite.entity.MemberGrade;
 import wegrus.clubwebsite.exception.MemberAlreadyExistException;
 import wegrus.clubwebsite.exception.MemberNotFoundException;
+import wegrus.clubwebsite.exception.RefreshTokenExpiredException;
 import wegrus.clubwebsite.repository.MemberRepository;
 import wegrus.clubwebsite.service.MailService;
 import wegrus.clubwebsite.service.MemberService;
@@ -178,7 +179,6 @@ public class MemberServiceTest {
     @DisplayName("JWT 토큰 재발급: 성공")
     void reIssueJwt_success() throws Exception {
         // given
-        doReturn(true).when(jwtTokenUtil).validateAccessToken(any(String.class));
         doNothing().when(jwtTokenUtil).validateRefreshToken(any(String.class));
         doReturn(true).when(redisUtil).delete(any(String.class));
 
@@ -187,7 +187,7 @@ public class MemberServiceTest {
         doNothing().when(redisUtil).set(any(String.class), any(String.class), any(Integer.class));
 
         // when
-        final JwtDto jwtDto = memberService.reIssueJwt("expiredToken1", "expiredToken2");
+        final JwtDto jwtDto = memberService.reIssueJwt("expiredToken");
 
         // then
         assertThat(jwtDto.getAccessToken()).isEqualTo("accessToken");
@@ -198,13 +198,13 @@ public class MemberServiceTest {
     @DisplayName("JWT 토큰 재발급: 실패")
     void reIssueJwt_fail() throws Exception {
         // given
-        doThrow(JwtException.class).when(jwtTokenUtil).validateAccessToken(any(String.class));
+        doThrow(RefreshTokenExpiredException.class).when(jwtTokenUtil).validateRefreshToken(any(String.class));
 
         // when
-        final Executable executable = () -> memberService.reIssueJwt("expiredToken1", "expiredToken2");
+        final Executable executable = () -> memberService.reIssueJwt("expiredToken");
 
         // then
-        assertThrows(JwtException.class, executable);
+        assertThrows(RefreshTokenExpiredException.class, executable);
     }
 
     @Test

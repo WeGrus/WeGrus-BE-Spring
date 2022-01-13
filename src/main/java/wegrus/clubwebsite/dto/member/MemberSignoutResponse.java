@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class MemberLoginFailResponse {
+public class MemberSignoutResponse {
 
     private String status;
 }
