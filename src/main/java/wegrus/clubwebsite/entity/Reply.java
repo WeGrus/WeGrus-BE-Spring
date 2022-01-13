@@ -18,7 +18,7 @@ import java.util.List;
 @EntityListeners(AuditingEntityListener.class)
 @Getter
 @Entity
-@Table(name = "replys")
+@Table(name = "replies")
 public class Reply {
 
     @Id

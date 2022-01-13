@@ -2,11 +2,8 @@ package wegrus.clubwebsite.Board;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.web.WebAppConfiguration;
 import wegrus.clubwebsite.entity.*;
 import wegrus.clubwebsite.repository.*;
 
@@ -14,8 +11,6 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@WebAppConfiguration
-@ExtendWith(SpringExtension.class)
 @DataJpaTest
 public class BoardRepositoryTest {
 
@@ -82,7 +77,7 @@ public class BoardRepositoryTest {
         assertThat(board1.getState()).isEqualTo(boardState);
 
 
-        // Replys
+        // Replies
         String replyContent = "테스트 댓글 내용";
         ReplyState replyState = ReplyState.ACTIVATE;
         final Reply reply = Reply.builder()
