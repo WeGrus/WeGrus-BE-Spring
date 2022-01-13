@@ -26,24 +26,24 @@ public class Reply {
     @Column(name = "reply_id", updatable = false)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "board_id", nullable = false)
     private Board board;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reply_parent_id")
     private Reply parent;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "reply", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "reply")
     private List<CommentLike> commentLikes = new ArrayList<>();
 
     @JsonIgnore
-    @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "parent")
     private List<Reply> replies = new ArrayList<>();
 
     @Column(name = "reply_content", nullable = false)
@@ -57,6 +57,7 @@ public class Reply {
     @Column(name = "reply_update_date", nullable = false)
     private LocalDateTime updatedDate;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "reply_state", nullable = false)
     private ReplyState state;
 

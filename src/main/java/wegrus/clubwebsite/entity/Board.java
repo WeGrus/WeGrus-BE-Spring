@@ -26,26 +26,27 @@ public class Board {
     @Column(name = "board_id", updatable = false)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "board", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "board")
     private List<Reply> replies = new ArrayList<>();
 
     @JsonIgnore
-    @OneToMany(mappedBy = "board", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "board")
     private List<PostLike> postLikes = new ArrayList<>();
 
     @JsonIgnore
-    @OneToMany(mappedBy = "board", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "board")
     private List<View> views = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     @Column(name = "board_category", nullable = false)
     private BoardCategory category;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "board_type", nullable = false)
     private BoardType type;
 
@@ -66,6 +67,7 @@ public class Board {
     @Column(name = "board_secret_flag", nullable = false)
     private boolean secretFlag;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "board_state", nullable = false)
     private BoardState state;
 
