@@ -30,15 +30,12 @@ public class Board {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    @JsonIgnore
     @OneToMany(mappedBy = "board")
     private List<Reply> replies = new ArrayList<>();
 
-    @JsonIgnore
     @OneToMany(mappedBy = "board")
     private List<PostLike> postLikes = new ArrayList<>();
 
-    @JsonIgnore
     @OneToMany(mappedBy = "board")
     private List<View> views = new ArrayList<>();
 

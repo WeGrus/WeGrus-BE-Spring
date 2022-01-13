@@ -38,11 +38,9 @@ public class Reply {
     @JoinColumn(name = "reply_parent_id")
     private Reply parent;
 
-    @JsonIgnore
     @OneToMany(mappedBy = "reply")
     private List<CommentLike> commentLikes = new ArrayList<>();
 
-    @JsonIgnore
     @OneToMany(mappedBy = "parent")
     private List<Reply> replies = new ArrayList<>();
 

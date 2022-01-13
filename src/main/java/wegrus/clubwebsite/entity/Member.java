@@ -25,23 +25,15 @@ public class Member {
     @Column(name = "member_id", updatable = false)
     private Long id;
 
-    @JsonIgnore
     @OneToMany(mappedBy = "member")
     private List<Board> boards = new ArrayList<>();
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "member")
-    private List<Reply> replies = new ArrayList<>();
-
-    @JsonIgnore
     @OneToMany(mappedBy = "member")
     private List<PostLike> postLikes = new ArrayList<>();
 
-    @JsonIgnore
     @OneToMany(mappedBy = "member")
     private List<View> views = new ArrayList<>();
 
-    @JsonIgnore
     @OneToMany(mappedBy = "member")
     private List<CommentLike> commentLikes = new ArrayList<>();
 
