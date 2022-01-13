@@ -1,6 +1,8 @@
 package wegrus.clubwebsite.dto.error;
 
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
@@ -12,6 +14,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ErrorResponse {
 
     private int status;
@@ -65,10 +68,11 @@ public class ErrorResponse {
                 errors.add(new FieldError(fieldName, requestedValue, message));
             }
         }
-        return new ErrorResponse(ErrorCode.INVALID_TYPE_VALUE, errors);
+        return new ErrorResponse(ErrorCode.INVALID_INPUT_VALUE, errors);
     }
 
     @Getter
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
     public static class FieldError {
         private String field;
         private String value;
