@@ -41,6 +41,7 @@ public class Member {
     @Column(name = "member_department", nullable = false)
     private String department;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "member_grade", nullable = false)
     private MemberGrade grade;
 
@@ -58,6 +59,7 @@ public class Member {
     @Column(name = "member_image_url")
     private String imageUrl;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "member_academic_status", nullable = false)
     private MemberAcademicStatus academicStatus;
 
