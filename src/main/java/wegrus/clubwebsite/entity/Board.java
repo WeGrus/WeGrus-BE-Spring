@@ -50,6 +50,7 @@ public class Board {
     @Column(name = "board_title", nullable = false)
     private String title;
 
+    @Lob
     @Column(name = "board_content", nullable = false)
     private String content;
 
