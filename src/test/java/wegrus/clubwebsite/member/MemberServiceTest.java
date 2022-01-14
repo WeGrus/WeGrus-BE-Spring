@@ -1,6 +1,5 @@
 package wegrus.clubwebsite.member;
 
-import io.jsonwebtoken.JwtException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,9 +20,9 @@ import wegrus.clubwebsite.dto.member.EmailCheckResponse;
 import wegrus.clubwebsite.dto.member.JwtDto;
 import wegrus.clubwebsite.dto.member.MemberAndJwtDto;
 import wegrus.clubwebsite.dto.member.MemberSignupRequest;
-import wegrus.clubwebsite.entity.Member;
-import wegrus.clubwebsite.entity.MemberAcademicStatus;
-import wegrus.clubwebsite.entity.MemberGrade;
+import wegrus.clubwebsite.entity.member.Member;
+import wegrus.clubwebsite.entity.member.MemberAcademicStatus;
+import wegrus.clubwebsite.entity.member.MemberGrade;
 import wegrus.clubwebsite.exception.MemberAlreadyExistException;
 import wegrus.clubwebsite.exception.MemberNotFoundException;
 import wegrus.clubwebsite.exception.RefreshTokenExpiredException;
@@ -182,6 +181,8 @@ public class MemberServiceTest {
         doNothing().when(jwtTokenUtil).validateRefreshToken(any(String.class));
         doReturn(true).when(redisUtil).delete(any(String.class));
 
+        doReturn("username").when(jwtTokenUtil).getUsernameFromRefreshToken(any(String.class));
+        doReturn(new User("usernme", "password", Collections.EMPTY_LIST)).when(jwtUserDetailsUtil).loadUserByUsername(any(String.class));
         doReturn("accessToken").when(jwtTokenUtil).generateAccessToken(any(UserDetails.class));
         doReturn("refreshToken").when(jwtTokenUtil).generateRefreshToken(any(UserDetails.class));
         doNothing().when(redisUtil).set(any(String.class), any(String.class), any(Integer.class));
