@@ -1,12 +1,15 @@
-package wegrus.clubwebsite.entity;
+package wegrus.clubwebsite.entity.member;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import wegrus.clubwebsite.entity.board.Board;
+import wegrus.clubwebsite.entity.board.CommentLike;
+import wegrus.clubwebsite.entity.board.PostLike;
+import wegrus.clubwebsite.entity.board.View;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;

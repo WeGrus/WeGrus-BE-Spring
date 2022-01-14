@@ -25,9 +25,9 @@ import wegrus.clubwebsite.dto.member.EmailCheckResponse;
 import wegrus.clubwebsite.dto.member.JwtDto;
 import wegrus.clubwebsite.dto.member.MemberAndJwtDto;
 import wegrus.clubwebsite.dto.member.MemberSignupRequest;
-import wegrus.clubwebsite.entity.Member;
-import wegrus.clubwebsite.entity.MemberAcademicStatus;
-import wegrus.clubwebsite.entity.MemberGrade;
+import wegrus.clubwebsite.entity.member.Member;
+import wegrus.clubwebsite.entity.member.MemberAcademicStatus;
+import wegrus.clubwebsite.entity.member.MemberGrade;
 import wegrus.clubwebsite.exception.MemberNotFoundException;
 import wegrus.clubwebsite.service.MemberService;
 

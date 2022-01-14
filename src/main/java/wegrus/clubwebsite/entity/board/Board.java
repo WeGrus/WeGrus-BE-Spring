@@ -1,6 +1,5 @@
-package wegrus.clubwebsite.entity;
+package wegrus.clubwebsite.entity.board;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -8,6 +7,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import wegrus.clubwebsite.entity.member.Member;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;

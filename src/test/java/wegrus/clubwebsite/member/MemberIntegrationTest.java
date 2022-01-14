@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.context.annotation.Profile;
 import org.springframework.http.*;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
@@ -15,17 +14,16 @@ import wegrus.clubwebsite.dto.Status;
 import wegrus.clubwebsite.dto.VerificationResponse;
 import wegrus.clubwebsite.dto.member.*;
 import wegrus.clubwebsite.dto.result.ResultResponse;
-import wegrus.clubwebsite.entity.MemberAcademicStatus;
-import wegrus.clubwebsite.entity.MemberGrade;
-import wegrus.clubwebsite.entity.MemberRole;
+import wegrus.clubwebsite.entity.member.MemberAcademicStatus;
+import wegrus.clubwebsite.entity.member.MemberGrade;
+import wegrus.clubwebsite.entity.member.MemberRole;
 import wegrus.clubwebsite.util.RedisUtil;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static wegrus.clubwebsite.dto.result.ResultCode.*;
+import static wegrus.clubwebsite.dto.result.ResultCode.VERIFY_EMAIL_SUCCESS;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Transactional
-@Profile("test")
 public class MemberIntegrationTest {
 
     @Autowired
@@ -101,7 +99,7 @@ public class MemberIntegrationTest {
     @DisplayName("이메일 검증")
     void checkEmail() throws Exception {
         // given
-        final String email = "12161542@inha.edu";
+        final String email = "12345678@inha.edu";
 
         // when
         final EmailCheckResponse response = checkEmailAPI(email);
@@ -109,23 +107,23 @@ public class MemberIntegrationTest {
         // then
         assertThat(response.getStatus()).isEqualTo(Status.SUCCESS);
     }
-    
+
     @Test
     @DisplayName("회원 가입")
     void signup() throws Exception {
         // given
-        final String email = "12161542@inha.edu";
+        final String email = "12345679@inha.edu";
         checkEmailAPI(email);
         
         // when
-        final MemberSignupResponse response = signupAPI(email, 123456789L, "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.FRESHMAN);
+        final MemberSignupResponse response = signupAPI(email, 123433789L, "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.FRESHMAN);
         final String verificationKey = response.getVerificationKey();
         redisUtil.delete(verificationKey);
 
         // then
         assertThat(response.getVerificationKey()).isNotBlank();
     }
-    
+
     @Test
     @DisplayName("본인 이메일 인증")
     void verifyEmail() throws Exception {
@@ -147,8 +145,8 @@ public class MemberIntegrationTest {
     @DisplayName("로그인")
     void signin() throws Exception {
         // given
-        final String email = "12161542@inha.edu";
-        final long kakaoId = 123456789L;
+        final String email = "12344279@inha.edu";
+        final long kakaoId = 111456789L;
         checkEmailAPI(email);
         final MemberSignupResponse memberSignupResponse = signupAPI(email, kakaoId, "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.FRESHMAN);
         final String verificationKey = memberSignupResponse.getVerificationKey();
@@ -171,8 +169,8 @@ public class MemberIntegrationTest {
     @DisplayName("로그아웃")
     void signout() throws Exception {
         // given
-        final String email = "12161542@inha.edu";
-        final long kakaoId = 123456789L;
+        final String email = "12845679@inha.edu";
+        final long kakaoId = 123477789L;
         checkEmailAPI(email);
         final MemberSignupResponse memberSignupResponse = signupAPI(email, kakaoId, "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.FRESHMAN);
         final String verificationKey = memberSignupResponse.getVerificationKey();
@@ -191,13 +189,13 @@ public class MemberIntegrationTest {
         assertThat(responseEntity.getHeaders().get("Set-Cookie")).isNull();
         assertThat(response.getStatus()).isEqualTo(Status.SUCCESS);
     }
-    
+
     @Test
     @DisplayName("토큰 재발급")
     void reissue() throws Exception {
         // given
-        final String email = "12161542@inha.edu";
-        final long kakaoId = 123456789L;
+        final String email = "44345679@inha.edu";
+        final long kakaoId = 123455789L;
         checkEmailAPI(email);
         final MemberSignupResponse memberSignupResponse = signupAPI(email, kakaoId, "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.FRESHMAN);
         final String verificationKey = memberSignupResponse.getVerificationKey();

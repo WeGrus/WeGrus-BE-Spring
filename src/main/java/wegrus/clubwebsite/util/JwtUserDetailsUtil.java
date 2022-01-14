@@ -7,7 +7,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import wegrus.clubwebsite.entity.Member;
+import wegrus.clubwebsite.entity.member.Member;
 import wegrus.clubwebsite.exception.MemberNotFoundException;
 import wegrus.clubwebsite.repository.MemberRepository;
 
