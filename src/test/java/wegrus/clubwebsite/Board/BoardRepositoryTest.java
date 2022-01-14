@@ -4,7 +4,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import wegrus.clubwebsite.entity.*;
+import wegrus.clubwebsite.entity.board.*;
+import wegrus.clubwebsite.entity.member.Member;
+import wegrus.clubwebsite.entity.member.MemberAcademicStatus;
+import wegrus.clubwebsite.entity.member.MemberGrade;
 import wegrus.clubwebsite.repository.*;
 
 import java.util.List;

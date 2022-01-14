@@ -5,8 +5,8 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import wegrus.clubwebsite.entity.MemberAcademicStatus;
-import wegrus.clubwebsite.entity.MemberGrade;
+import wegrus.clubwebsite.entity.member.MemberAcademicStatus;
+import wegrus.clubwebsite.entity.member.MemberGrade;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;

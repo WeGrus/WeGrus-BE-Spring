@@ -1,22 +1,24 @@
-package wegrus.clubwebsite.entity;
+package wegrus.clubwebsite.entity.board;
 
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import wegrus.clubwebsite.entity.board.Board;
+import wegrus.clubwebsite.entity.member.Member;
 
 import javax.persistence.*;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
-@Table(name = "views")
-public class View {
+@Table(name = "post_likes")
+public class PostLike {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "view_id", updatable = false)
-    private Long Id;
+    @Column(name = "post_like_id", updatable = false)
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
@@ -27,7 +29,7 @@ public class View {
     private Board board;
 
     @Builder
-    public View(Member member, Board board){
+    public PostLike(Member member, Board board){
         this.member = member;
         this.board = board;
     }
