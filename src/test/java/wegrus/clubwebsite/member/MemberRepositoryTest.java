@@ -29,7 +29,6 @@ public class MemberRepositoryTest {
                     .academicStatus(i % 2 == 1 ? MemberAcademicStatus.ATTENDING : MemberAcademicStatus.ABSENCE)
                     .phone("010-1234-567" + i)
                     .kakaoId((long) (1234567 + i))
-                    .studentId("1216154" + i)
                     .grade(MemberGrade.FRESHMAN)
                     .build();
 

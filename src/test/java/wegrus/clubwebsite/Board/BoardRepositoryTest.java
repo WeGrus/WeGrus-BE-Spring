@@ -40,7 +40,6 @@ public class BoardRepositoryTest {
     public void boardSaveLoad(){
         final Member member = Member.builder()
                 .name("김철수")
-                .studentId("12191634")
                 .department("컴퓨터공학과")
                 .grade(MemberGrade.JUNIOR)
                 .kakaoId((long) 987654321)

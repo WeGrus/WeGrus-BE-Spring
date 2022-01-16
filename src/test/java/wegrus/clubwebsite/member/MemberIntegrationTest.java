@@ -16,7 +16,7 @@ import wegrus.clubwebsite.dto.member.*;
 import wegrus.clubwebsite.dto.result.ResultResponse;
 import wegrus.clubwebsite.entity.member.MemberAcademicStatus;
 import wegrus.clubwebsite.entity.member.MemberGrade;
-import wegrus.clubwebsite.entity.member.MemberRole;
+import wegrus.clubwebsite.entity.member.MemberRoles;
 import wegrus.clubwebsite.util.RedisUtil;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -161,8 +161,7 @@ public class MemberIntegrationTest {
         assertThat(responseEntity.getHeaders().get("Set-Cookie").get(0)).isNotBlank();
         assertThat(response.getStatus()).isEqualTo(Status.SUCCESS);
         assertThat(response.getAccessToken()).isNotBlank();
-        assertThat(response.getMember().getKakaoId()).isEqualTo(kakaoId);
-        assertThat(response.getMember().getRole()).isEqualTo(MemberRole.ROLE_CERTIFIED);
+        assertThat(response.getMember().getRoles().contains(MemberRoles.ROLE_CERTIFIED.name())).isTrue();
     }
 
     @Test

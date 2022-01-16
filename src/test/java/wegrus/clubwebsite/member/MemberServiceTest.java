@@ -16,17 +16,14 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.util.ReflectionTestUtils;
 import wegrus.clubwebsite.dto.Status;
 import wegrus.clubwebsite.dto.VerificationResponse;
-import wegrus.clubwebsite.dto.member.EmailCheckResponse;
-import wegrus.clubwebsite.dto.member.JwtDto;
-import wegrus.clubwebsite.dto.member.MemberAndJwtDto;
-import wegrus.clubwebsite.dto.member.MemberSignupRequest;
-import wegrus.clubwebsite.entity.member.Member;
-import wegrus.clubwebsite.entity.member.MemberAcademicStatus;
-import wegrus.clubwebsite.entity.member.MemberGrade;
+import wegrus.clubwebsite.dto.member.*;
+import wegrus.clubwebsite.entity.member.*;
 import wegrus.clubwebsite.exception.MemberAlreadyExistException;
 import wegrus.clubwebsite.exception.MemberNotFoundException;
 import wegrus.clubwebsite.exception.RefreshTokenExpiredException;
 import wegrus.clubwebsite.repository.MemberRepository;
+import wegrus.clubwebsite.repository.MemberRoleRepository;
+import wegrus.clubwebsite.repository.RoleRepository;
 import wegrus.clubwebsite.service.MailService;
 import wegrus.clubwebsite.service.MemberService;
 import wegrus.clubwebsite.util.JwtTokenUtil;
@@ -45,6 +42,12 @@ public class MemberServiceTest {
 
     @Mock
     private MemberRepository memberRepository;
+
+    @Mock
+    private RoleRepository roleRepository;
+
+    @Mock
+    private MemberRoleRepository memberRoleRepository;
 
     @Mock
     private MailService mailService;
@@ -81,7 +84,8 @@ public class MemberServiceTest {
         final String email = "12161111@inha.edu";
         doReturn(email).when(redisUtil).get(any(String.class));
         doReturn(true).when(redisUtil).delete(any(String.class));
-        final Optional<Member> member = Optional.of(new Member(123456789L, email, "홍길동", "12161111", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
+        doReturn(Optional.of(new Role(MemberRoles.ROLE_CERTIFIED.name()))).when(roleRepository).findByName(any(String.class));
+        final Optional<Member> member = Optional.of(new Member(123456789L, "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
         doReturn(member).when(memberRepository).findByEmail(any(String.class));
 
         // when
@@ -110,16 +114,17 @@ public class MemberServiceTest {
         // given
         final MemberSignupRequest request = new MemberSignupRequest("12161111@inha.edu", 123456789L, "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.SENIOR);
         doReturn(Optional.empty()).when(memberRepository).findByKakaoIdOrEmail(any(Long.class), any(String.class));
-        final Optional<Member> member = Optional.of(new Member(123456789L, "12161111@inha.edu", "홍길동", "12161111", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
+        final Optional<Member> member = Optional.of(new Member(123456789L, "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
         doReturn(member.get()).when(memberRepository).save(any(Member.class));
         doNothing().when(mailService).sendSchoolMailVerification(any(String.class), any(String.class));
         doNothing().when(redisUtil).set(any(String.class), any(Object.class), any(Integer.class));
+        doReturn(Optional.of(new Role(MemberRoles.ROLE_GUEST.name()))).when(roleRepository).findByName(any(String.class));
 
         // when
-        final String verificationKey = memberService.validateAndSendVerificationMailAndSaveMember(request);
+        final MemberSignupResponse response = memberService.validateAndSendVerificationMailAndSaveMember(request);
 
         // then
-        assertThat(verificationKey).isNotBlank();
+        assertThat(response.getVerificationKey()).isNotBlank();
     }
 
     @Test
@@ -127,7 +132,7 @@ public class MemberServiceTest {
     void validateAndSendVerificationMailAndSaveMember_fail() throws Exception {
         // given
         final MemberSignupRequest request = new MemberSignupRequest("12161111@inha.edu", 123456789L, "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.SENIOR);
-        final Optional<Member> member = Optional.of(new Member(123456789L, "12161111@inha.edu", "홍길동", "12161111", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
+        final Optional<Member> member = Optional.of(new Member(123456789L, "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
         doReturn(member).when(memberRepository).findByKakaoIdOrEmail(any(Long.class), any(String.class));
 
         // when
@@ -141,11 +146,10 @@ public class MemberServiceTest {
     @DisplayName("회원 조회 & JWT 생성: 성공")
     void findMemberAndGenerateJwt_success() throws Exception {
         // given
-        final Optional<Member> member = Optional.of(new Member(123456789L, "12161111@inha.edu", "홍길동", "12161111", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
+        final Optional<Member> member = Optional.of(new Member(123456789L, "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
         doReturn(member).when(memberRepository).findByKakaoId(any(Long.class));
 
         List<GrantedAuthority> authorities = new ArrayList<>();
-        authorities.add((GrantedAuthority) () -> String.valueOf(member.get().getRole()));
         final User user = new User(String.valueOf(member.get().getId()), UUID.randomUUID().toString(), new ArrayList<>(authorities));
         doReturn(user).when(jwtUserDetailsUtil).loadUserByUsername(any(String.class));
 
@@ -158,7 +162,7 @@ public class MemberServiceTest {
         final MemberAndJwtDto memberAndJwtDto = memberService.findMemberAndGenerateJwt(123456789L);
 
         // then
-        assertThat(memberAndJwtDto.getMember()).isEqualTo(member.get());
+        assertThat(memberAndJwtDto.getMember().getEmail()).isEqualTo(member.get().getEmail());
     }
 
     @Test
@@ -225,7 +229,7 @@ public class MemberServiceTest {
     @DisplayName("이메일 검증: 실패")
     void checkEmail_fail() throws Exception {
         // given
-        final Optional<Member> member = Optional.of(new Member(123456789L, "12161111@inha.edu", "홍길동", "12161111", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
+        final Optional<Member> member = Optional.of(new Member(123456789L, "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
         doReturn(member).when(memberRepository).findByEmail(any(String.class));
 
         // when
