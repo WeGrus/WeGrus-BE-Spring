@@ -21,10 +21,7 @@ import wegrus.clubwebsite.config.WebSecurityConfig;
 import wegrus.clubwebsite.controller.MemberController;
 import wegrus.clubwebsite.dto.Status;
 import wegrus.clubwebsite.dto.VerificationResponse;
-import wegrus.clubwebsite.dto.member.EmailCheckResponse;
-import wegrus.clubwebsite.dto.member.JwtDto;
-import wegrus.clubwebsite.dto.member.MemberAndJwtDto;
-import wegrus.clubwebsite.dto.member.MemberSignupRequest;
+import wegrus.clubwebsite.dto.member.*;
 import wegrus.clubwebsite.entity.member.Member;
 import wegrus.clubwebsite.entity.member.MemberAcademicStatus;
 import wegrus.clubwebsite.entity.member.MemberGrade;
@@ -145,7 +142,9 @@ public class MemberControllerTest {
     void signup_success() throws Exception {
         // given
         final String verificationKey = UUID.randomUUID().toString();
-        doReturn(verificationKey).when(memberService).validateAndSendVerificationMailAndSaveMember(any(MemberSignupRequest.class));
+        final Member member = new Member(123456789L, "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING);
+        final MemberSignupResponse response = new MemberSignupResponse(new MemberDto(member), verificationKey);
+        doReturn(response).when(memberService).validateAndSendVerificationMailAndSaveMember(any(MemberSignupRequest.class));
         final MemberSignupRequest request = new MemberSignupRequest("12161111@inha.edu", 123456789L, "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.SENIOR);
 
         // when
@@ -216,10 +215,10 @@ public class MemberControllerTest {
     @DisplayName("로그인 API: 성공")
     void login_success() throws Exception {
         // given
-        final Member member = new Member(123456789L, "12161111@inha.edu", "홍길동", "12161111", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING);
+        final Member member = new Member(123456789L, "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING);
         final String accessToken = "accessToken";
         final String refreshToken = "refreshToken";
-        final MemberAndJwtDto dto = new MemberAndJwtDto(member, accessToken, refreshToken);
+        final MemberAndJwtDto dto = new MemberAndJwtDto(new MemberDto(member), accessToken, refreshToken);
 
         doReturn(dto).when(memberService).findMemberAndGenerateJwt(any(Long.class));
 
@@ -236,7 +235,6 @@ public class MemberControllerTest {
                 .andExpect(jsonPath("code").value(SIGNIN_SUCCESS.getCode()))
                 .andExpect(jsonPath("message").value(SIGNIN_SUCCESS.getMessage()))
                 .andExpect(jsonPath("data.status").value(Status.SUCCESS))
-                .andExpect(jsonPath("data.member.kakaoId").value(123456789L))
                 .andExpect(jsonPath("data.accessToken").value(accessToken))
                 .andExpect(cookie().value("refreshToken", refreshToken))
                 .andExpect(cookie().httpOnly("refreshToken", true))
