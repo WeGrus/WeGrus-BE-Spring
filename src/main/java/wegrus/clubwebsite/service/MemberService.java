@@ -6,15 +6,17 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import wegrus.clubwebsite.dto.Status;
-import wegrus.clubwebsite.dto.member.EmailCheckResponse;
-import wegrus.clubwebsite.dto.member.JwtDto;
+import wegrus.clubwebsite.dto.member.*;
+import wegrus.clubwebsite.entity.member.MemberRole;
+import wegrus.clubwebsite.entity.member.MemberRoles;
+import wegrus.clubwebsite.exception.MemberRoleNotFoundException;
+import wegrus.clubwebsite.repository.MemberRoleRepository;
+import wegrus.clubwebsite.repository.RoleRepository;
 import wegrus.clubwebsite.util.JwtTokenUtil;
 import wegrus.clubwebsite.dto.VerificationResponse;
 import wegrus.clubwebsite.dto.error.ErrorResponse;
-import wegrus.clubwebsite.dto.member.MemberAndJwtDto;
-import wegrus.clubwebsite.dto.member.MemberSignupRequest;
 import wegrus.clubwebsite.entity.member.Member;
-import wegrus.clubwebsite.entity.member.MemberRole;
+import wegrus.clubwebsite.entity.member.Role;
 import wegrus.clubwebsite.exception.MemberAlreadyExistException;
 import wegrus.clubwebsite.exception.MemberNotFoundException;
 import wegrus.clubwebsite.repository.MemberRepository;
@@ -37,6 +39,8 @@ import static wegrus.clubwebsite.dto.result.ResultCode.*;
 public class MemberService {
 
     private final MemberRepository memberRepository;
+    private final MemberRoleRepository memberRoleRepository;
+    private final RoleRepository roleRepository;
     private final MailService mailService;
     private final RedisUtil redisUtil;
     private final JwtTokenUtil jwtTokenUtil;
@@ -55,14 +59,15 @@ public class MemberService {
             return new VerificationResponse(false, EXPIRED_VERIFICATION_KEY.getMessage());
         redisUtil.delete(verificationKey);
         final Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
-        member.updateRole(MemberRole.ROLE_CERTIFIED);
+        final Role role = roleRepository.findByName(MemberRoles.ROLE_CERTIFIED.name()).orElseThrow(MemberRoleNotFoundException::new);
+        memberRoleRepository.save(new MemberRole(member, role));
         // TODO: 회원가입 축하 이메일 전송 -> 내용 논의
 
         return new VerificationResponse(true, VERIFY_EMAIL_SUCCESS.getMessage());
     }
 
     @Transactional
-    public String validateAndSendVerificationMailAndSaveMember(MemberSignupRequest request) throws MessagingException {
+    public MemberSignupResponse validateAndSendVerificationMailAndSaveMember(MemberSignupRequest request) throws MessagingException {
         validateDuplication(request.getEmail(), request.getKakaoId());
         final Member member = Member.builder()
                 .kakaoId(request.getKakaoId())
@@ -72,11 +77,13 @@ public class MemberService {
                 .grade(request.getGrade())
                 .name(request.getName())
                 .phone(request.getPhone())
-                .studentId(request.getEmail().substring(0, 8))
                 .build();
+        final Role role = roleRepository.findByName(MemberRoles.ROLE_GUEST.name()).orElseThrow(MemberRoleNotFoundException::new);
+        memberRoleRepository.save(new MemberRole(member, role));
 
         memberRepository.save(member);
-        return sendVerificationMail(request.getEmail());
+        final String verificationKey = sendVerificationMail(request.getEmail());
+        return new MemberSignupResponse(new MemberDto(member), verificationKey);
     }
 
     private void validateDuplication(String email, Long kakaoId) {
@@ -108,7 +115,7 @@ public class MemberService {
         final String refreshToken = jwtTokenUtil.generateRefreshToken(userDetails);
 
         redisUtil.set(refreshToken, member.getId(), REFRESH_TOKEN_VALID_TIME);
-        return new MemberAndJwtDto(member, accessToken, refreshToken);
+        return new MemberAndJwtDto(new MemberDto(member), accessToken, refreshToken);
     }
 
     public void deleteRefreshToken(String refreshToken) {

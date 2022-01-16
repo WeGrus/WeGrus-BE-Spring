@@ -48,8 +48,7 @@ public class MemberController {
     @ApiImplicitParam(name = "Authorization", value = "불필요", example = " ")
     @PostMapping("/signup")
     public ResponseEntity<ResultResponse> signup(@Validated @RequestBody MemberSignupRequest request) throws MessagingException {
-        final String verificationKey = memberService.validateAndSendVerificationMailAndSaveMember(request);
-        final MemberSignupResponse response = new MemberSignupResponse(verificationKey);
+        final MemberSignupResponse response = memberService.validateAndSendVerificationMailAndSaveMember(request);
 
         return ResponseEntity.ok(ResultResponse.of(SIGNUP_SUCCESS, response));
     }
