@@ -9,5 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class MemberSignupResponse {
 
+    private MemberDto member;
     private String verificationKey;
 }
