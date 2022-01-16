@@ -14,7 +14,9 @@ import wegrus.clubwebsite.entity.board.View;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -46,9 +48,8 @@ public class Member {
     @Column(name = "member_email", unique = true, nullable = false)
     private String email;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "member_role", nullable = false)
-    private MemberRole role;
+    @OneToMany(mappedBy = "member")
+    private Set<MemberRole> roles = new LinkedHashSet<>();
 
     @Column(name = "member_name", nullable = false)
     private String name;
@@ -72,7 +73,7 @@ public class Member {
 
     @Lob
     @Column(name = "member_introduce")
-    private String introduce;
+    private String introduce = "";
 
     @Column(name = "member_image_url")
     private String imageUrl;
@@ -82,19 +83,14 @@ public class Member {
     private MemberAcademicStatus academicStatus;
 
     @Builder
-    public Member(Long kakaoId, String email, String name, String studentId, String department, MemberGrade grade, String phone, MemberAcademicStatus academicStatus) {
+    public Member(Long kakaoId, String email, String name, String department, MemberGrade grade, String phone, MemberAcademicStatus academicStatus) {
         this.kakaoId = kakaoId;
         this.email = email;
         this.name = name;
-        this.studentId = studentId;
+        this.studentId = email.substring(0, 8);
         this.department = department;
         this.grade = grade;
         this.phone = phone;
         this.academicStatus = academicStatus;
-        this.role = MemberRole.ROLE_GUEST;
-    }
-
-    public void updateRole(MemberRole role){
-        this.role = role;
     }
 }
