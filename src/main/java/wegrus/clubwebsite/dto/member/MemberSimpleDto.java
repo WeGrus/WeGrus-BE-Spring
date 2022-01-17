@@ -3,7 +3,6 @@ package wegrus.clubwebsite.dto.member;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import wegrus.clubwebsite.entity.member.Member;
-import wegrus.clubwebsite.entity.member.MemberAcademicStatus;
 import wegrus.clubwebsite.entity.member.MemberGrade;
 
 import java.time.LocalDateTime;
@@ -13,33 +12,25 @@ import java.util.stream.Collectors;
 
 @Getter
 @NoArgsConstructor
-public class MemberDto {
+public class MemberSimpleDto {
 
-    private Long id;
-    private String email;
     private String name;
     private String studentId;
     private String department;
     private MemberGrade grade;
-    private String phone;
     private LocalDateTime createdDate;
     private String introduce;
     private String imageUrl;
-    private MemberAcademicStatus academicStatus;
     private List<String> roles = new ArrayList<>();
 
-    public MemberDto(Member member) {
-        this.id = member.getId();
-        this.email = member.getEmail();
+    public MemberSimpleDto(Member member) {
         this.name = member.getName();
-        this.studentId = member.getStudentId();
+        this.studentId = member.getStudentId().substring(2, 4);
         this.department = member.getDepartment();
         this.grade = member.getGrade();
-        this.phone = member.getPhone();
         this.createdDate = member.getCreatedDate();
         this.introduce = member.getIntroduce();
         this.imageUrl = member.getImageUrl();
-        this.academicStatus = member.getAcademicStatus();
         member.getRoles()
                 .forEach(r -> this.roles.add(r.getRole().getName()));
     }

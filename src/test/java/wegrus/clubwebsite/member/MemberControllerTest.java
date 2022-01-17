@@ -37,6 +37,7 @@ import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static wegrus.clubwebsite.dto.error.ErrorCode.*;
@@ -46,7 +47,7 @@ import static wegrus.clubwebsite.dto.result.ResultCode.*;
 @WebMvcTest(value = MemberController.class, excludeFilters = {
         @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = {WebSecurityConfig.class, JwtRequestFilter.class})
 })
-@WithMockUser
+@WithMockUser(roles = {"GUEST"})
 public class MemberControllerTest {
 
     private MockMvc mockMvc;
@@ -394,5 +395,54 @@ public class MemberControllerTest {
                 .andExpect(jsonPath("message").value(CHECK_EMAIL_SUCCESS.getMessage()))
                 .andExpect(jsonPath("data.status").value(Status.FAILURE))
                 .andExpect(jsonPath("data.reason").value(INVALID_EMAIL.getMessage()));
+    }
+
+    @Test
+    @DisplayName("회원 정보 조회 API: 성공")
+    void getInfo_success() throws Exception {
+        // given
+        final Member member = new Member(123456789L, "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING);
+        final MemberInfoResponse response = new MemberInfoResponse(Status.SUCCESS, new MemberDto(member));
+        final MemberInfoResponse response2 = new MemberInfoResponse(Status.SUCCESS, new MemberSimpleDto(member));
+        doReturn(response).when(memberService).getMemberInfo(1L);
+        doReturn(response2).when(memberService).getMemberInfo(2L);
+
+        // when
+        final ResultActions perform = mockMvc.perform(
+                get("/members/info/1").with(csrf())
+        );
+        final ResultActions perform2 = mockMvc.perform(
+                get("/members/info/2").with(csrf())
+        );
+
+        // then
+        perform
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("code").value(GET_MEMBER_INFO_SUCCESS.getCode()))
+                .andExpect(jsonPath("message").value(GET_MEMBER_INFO_SUCCESS.getMessage()))
+                .andExpect(jsonPath("data.info.studentId").value("12161111"));
+        perform2
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("code").value(GET_MEMBER_INFO_SUCCESS.getCode()))
+                .andExpect(jsonPath("message").value(GET_MEMBER_INFO_SUCCESS.getMessage()))
+                .andExpect(jsonPath("data.info.studentId").value("16"));
+    }
+
+    @Test
+    @DisplayName("회원 정보 조회 API: 실패")
+    void getInfo_fail() throws Exception {
+        // given
+        doThrow(new MemberNotFoundException()).when(memberService).getMemberInfo(any(Long.class));
+
+        // when
+        final ResultActions perform = mockMvc.perform(
+                get("/members/info/1").with(csrf())
+        );
+
+        // then
+        perform
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("code").value(MEMBER_NOT_FOUND.getCode()))
+                .andExpect(jsonPath("message").value(MEMBER_NOT_FOUND.getMessage()));
     }
 }
