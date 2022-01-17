@@ -122,4 +122,16 @@ public class MemberController {
 
         return ResponseEntity.ok(ResultResponse.of(CHECK_EMAIL_SUCCESS, response));
     }
+
+    @ApiOperation(value = "회원 정보 조회")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "본인 정보 조회 시 필요", example = "Bearer AAA.BBB.CCC"),
+            @ApiImplicitParam(name = "memberId", value = "회원 순번(PK)", required = true, example = "1")
+    })
+    @GetMapping("/members/info/{memberId}")
+    public ResponseEntity<ResultResponse> getInfo(@NotNull(message = "회원 순번은 필수입니다.") @PathVariable Long memberId) {
+        final MemberInfoResponse response = memberService.getMemberInfo(memberId);
+
+        return ResponseEntity.ok(ResultResponse.of(GET_MEMBER_INFO_SUCCESS, response));
+    }
 }

@@ -2,6 +2,7 @@ package wegrus.clubwebsite.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -140,5 +141,13 @@ public class MemberService {
         else if (!Pattern.matches("^[0-9]{8}@(inha.edu|inha.ac.kr)$", email))
             return new EmailCheckResponse(Status.FAILURE, INVALID_EMAIL.getMessage());
         return new EmailCheckResponse(Status.SUCCESS, VALID_EMAIL.getMessage());
+    }
+
+    public MemberInfoResponse getMemberInfo(Long memberId) {
+        final Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
+        if (member.getId().toString().equals(SecurityContextHolder.getContext().getAuthentication().getName()))
+            return new MemberInfoResponse(Status.SUCCESS, new MemberDto(member));
+        else
+            return new MemberInfoResponse(Status.SUCCESS, new MemberSimpleDto(member));
     }
 }
