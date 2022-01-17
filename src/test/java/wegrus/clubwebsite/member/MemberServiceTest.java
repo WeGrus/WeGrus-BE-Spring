@@ -71,7 +71,7 @@ public class MemberServiceTest {
 
         List<GrantedAuthority> authorities = new ArrayList<>();
         authorities.add((GrantedAuthority) () -> "ROLE_GUEST");
-        User user = new User("username", "password", authorities);
+        User user = new User("1", "password", authorities);
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user,null);
         auth.setDetails(user);
         SecurityContextHolder.getContext().setAuthentication(auth);
@@ -237,5 +237,40 @@ public class MemberServiceTest {
 
         // then
         assertThat(response.getStatus()).isEqualTo(Status.FAILURE);
+    }
+
+    @Test
+    @DisplayName("회원 정보 조회: 성공")
+    void getMemberInfo_success() throws Exception {
+        // given
+        final Optional<Member> me = Optional.of(new Member(123456789L, "12161111@inha.edu", "username", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
+        ReflectionTestUtils.setField(me.get(), "id", 1L);
+        final Optional<Member> someone = Optional.of(new Member(123456789L, "12161111@inha.edu", "asdfasdf", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
+        ReflectionTestUtils.setField(someone.get(), "id", 2L);
+        doReturn(me).when(memberRepository).findById(1L);
+        doReturn(someone).when(memberRepository).findById(2L);
+
+        // when
+        final MemberInfoResponse response = memberService.getMemberInfo(1L);
+        final MemberInfoResponse response2 = memberService.getMemberInfo(2L);
+        final MemberDto myInfo = (MemberDto) response.getInfo();
+        final MemberSimpleDto someoneInfo = (MemberSimpleDto) response2.getInfo();
+
+        // then
+        assertThat(myInfo.getStudentId()).isEqualTo("12161111");
+        assertThat(someoneInfo.getStudentId()).isEqualTo("16");
+    }
+
+    @Test
+    @DisplayName("회원 정보 조회: 실패")
+    void getMemberInfo_fail() throws Exception {
+        // given
+        doReturn(Optional.empty()).when(memberRepository).findById(any(Long.class));
+
+        // when
+        final Executable executable = () -> memberService.getMemberInfo(1L);
+
+        // then
+        assertThrows(MemberNotFoundException.class, executable);
     }
 }

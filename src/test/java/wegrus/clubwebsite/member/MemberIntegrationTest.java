@@ -14,9 +14,11 @@ import wegrus.clubwebsite.dto.Status;
 import wegrus.clubwebsite.dto.VerificationResponse;
 import wegrus.clubwebsite.dto.member.*;
 import wegrus.clubwebsite.dto.result.ResultResponse;
+import wegrus.clubwebsite.entity.member.Member;
 import wegrus.clubwebsite.entity.member.MemberAcademicStatus;
 import wegrus.clubwebsite.entity.member.MemberGrade;
 import wegrus.clubwebsite.entity.member.MemberRoles;
+import wegrus.clubwebsite.repository.MemberRepository;
 import wegrus.clubwebsite.util.RedisUtil;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,6 +36,9 @@ public class MemberIntegrationTest {
 
     @Autowired
     private RedisUtil redisUtil;
+
+    @Autowired
+    private MemberRepository memberRepository;
 
     public EmailCheckResponse checkEmailAPI(String email) {
         HttpHeaders headers = new HttpHeaders();
@@ -93,6 +98,15 @@ public class MemberIntegrationTest {
 
         final HttpEntity<MultiValueMap<String, Long>> request = new HttpEntity<>(null, headers);
         return restTemplate.exchange("/reissue", HttpMethod.POST, request, ResultResponse.class);
+    }
+
+    public MemberInfoResponse getInfoAPI(String accessToken, Long memberId) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
+
+        final HttpEntity<MultiValueMap<String, Long>> request = new HttpEntity<>(null, headers);
+        final ResponseEntity<ResultResponse> responseEntity = restTemplate.exchange("/members/info/" + memberId, HttpMethod.GET, request, ResultResponse.class);
+        return objectMapper.convertValue(responseEntity.getBody().getData(), MemberInfoResponse.class);
     }
 
     @Test
@@ -212,5 +226,35 @@ public class MemberIntegrationTest {
         assertThat(responseEntity.getHeaders().get("Set-Cookie").get(0)).isNotBlank();
         System.out.println("accessToken=" + response.getAccessToken());
         assertThat(response.getAccessToken()).isNotBlank();
+    }
+
+    @Test
+    @DisplayName("회원 정보 조회")
+    void getInfo() throws Exception {
+        // given
+        checkEmailAPI("12344379@inha.edu");
+        final MemberSignupResponse memberSignupResponse = signupAPI("12344379@inha.edu", 111456389L, "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.FRESHMAN);
+        final String verificationKey = memberSignupResponse.getVerificationKey();
+        verifySchoolEmailAPI(verificationKey);
+        final ResponseEntity<ResultResponse> responseEntity = signinAPI(111456389L);
+        final MemberSigninSuccessResponse memberSigninSuccessResponse = objectMapper.convertValue(responseEntity.getBody().getData(), MemberSigninSuccessResponse.class);
+        final String accessToken = memberSigninSuccessResponse.getAccessToken();
+
+        final MemberSignupResponse memberSignupResponse2 = signupAPI("12444379@inha.edu", 111222389L, "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.FRESHMAN);
+        final String verificationKey2 = memberSignupResponse2.getVerificationKey();
+        verifySchoolEmailAPI(verificationKey2);
+        final ResponseEntity<ResultResponse> responseEntity2 = signinAPI(111222389L);
+        final MemberSigninSuccessResponse memberSigninSuccessResponse2 = objectMapper.convertValue(responseEntity2.getBody().getData(), MemberSigninSuccessResponse.class);
+
+        // when
+        final MemberInfoResponse response = getInfoAPI(accessToken, memberSigninSuccessResponse.getMember().getId());
+        final MemberDto info = objectMapper.convertValue(response.getInfo(), MemberDto.class);
+
+        final MemberInfoResponse response2 = getInfoAPI(accessToken, memberSigninSuccessResponse2.getMember().getId());
+        final MemberSimpleDto info2 = objectMapper.convertValue(response2.getInfo(), MemberSimpleDto.class);
+
+        // then
+        assertThat(info.getStudentId()).isEqualTo("12344379");
+        assertThat(info2.getStudentId()).isEqualTo("44");
     }
 }
