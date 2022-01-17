@@ -14,11 +14,9 @@ import wegrus.clubwebsite.dto.Status;
 import wegrus.clubwebsite.dto.VerificationResponse;
 import wegrus.clubwebsite.dto.member.*;
 import wegrus.clubwebsite.dto.result.ResultResponse;
-import wegrus.clubwebsite.entity.member.Member;
 import wegrus.clubwebsite.entity.member.MemberAcademicStatus;
 import wegrus.clubwebsite.entity.member.MemberGrade;
 import wegrus.clubwebsite.entity.member.MemberRoles;
-import wegrus.clubwebsite.repository.MemberRepository;
 import wegrus.clubwebsite.util.RedisUtil;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,9 +34,6 @@ public class MemberIntegrationTest {
 
     @Autowired
     private RedisUtil redisUtil;
-
-    @Autowired
-    private MemberRepository memberRepository;
 
     public EmailCheckResponse checkEmailAPI(String email) {
         HttpHeaders headers = new HttpHeaders();

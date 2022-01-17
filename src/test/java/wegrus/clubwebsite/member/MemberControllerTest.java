@@ -47,7 +47,7 @@ import static wegrus.clubwebsite.dto.result.ResultCode.*;
 @WebMvcTest(value = MemberController.class, excludeFilters = {
         @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = {WebSecurityConfig.class, JwtRequestFilter.class})
 })
-@WithMockUser
+@WithMockUser(roles = {"GUEST"})
 public class MemberControllerTest {
 
     private MockMvc mockMvc;
@@ -409,14 +409,10 @@ public class MemberControllerTest {
 
         // when
         final ResultActions perform = mockMvc.perform(
-                get("/members/info").with(csrf())
-                        .contentType(APPLICATION_FORM_URLENCODED)
-                        .param("memberId", "1")
+                get("/members/info/1").with(csrf())
         );
         final ResultActions perform2 = mockMvc.perform(
-                get("/members/info").with(csrf())
-                        .contentType(APPLICATION_FORM_URLENCODED)
-                        .param("memberId", "2")
+                get("/members/info/2").with(csrf())
         );
 
         // then
@@ -440,9 +436,7 @@ public class MemberControllerTest {
 
         // when
         final ResultActions perform = mockMvc.perform(
-                get("/members/info").with(csrf())
-                        .contentType(APPLICATION_FORM_URLENCODED)
-                        .param("memberId", "1")
+                get("/members/info/1").with(csrf())
         );
 
         // then
