@@ -273,4 +273,23 @@ public class MemberServiceTest {
         // then
         assertThrows(MemberNotFoundException.class, executable);
     }
+
+    @Test
+    @DisplayName("회원 정보 수정: 성공")
+    void updateMemberInfo_success() throws Exception {
+        // given
+        final Optional<Member> member = Optional.of(new Member(123456789L, "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
+        ReflectionTestUtils.setField(member.get(), "id", 1L);
+        final MemberInfoUpdateRequest request = new MemberInfoUpdateRequest("만두", "정통", "010-3333-1234", MemberAcademicStatus.ATTENDING, MemberGrade.SENIOR);
+        doReturn(member).when(memberRepository).findById(any(Long.class));
+
+        // when
+        final MemberInfoUpdateResponse response = memberService.updateMemberInfo(request);
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(Status.SUCCESS);
+        assertThat(response.getName()).isEqualTo("만두");
+        assertThat(response.getDepartment()).isEqualTo("정통");
+        assertThat(response.getPhone()).isEqualTo("010-3333-1234");
+    }
 }
