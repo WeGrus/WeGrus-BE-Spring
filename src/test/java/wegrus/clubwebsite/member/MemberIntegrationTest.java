@@ -264,7 +264,7 @@ public class MemberIntegrationTest {
     
     @Test
     @DisplayName("회원 정보 수정")
-    void updateInfoAPI() throws Exception {
+    void updateInfo() throws Exception {
         // given
         final MemberSignupResponse memberSignupResponse = signupAPI("24344311@inha.edu", 151456339L, "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.FRESHMAN);
         final String verificationKey = memberSignupResponse.getVerificationKey();
