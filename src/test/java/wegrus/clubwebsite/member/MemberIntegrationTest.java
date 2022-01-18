@@ -104,7 +104,7 @@ public class MemberIntegrationTest {
         return objectMapper.convertValue(responseEntity.getBody().getData(), MemberInfoResponse.class);
     }
 
-    public MemberInfoUpdateResponse updateInfo(String accessToken, MemberInfoUpdateRequest memberInfoUpdateRequest) {
+    public MemberInfoUpdateResponse updateInfoAPI(String accessToken, MemberInfoUpdateRequest memberInfoUpdateRequest) {
         HttpHeaders headers = new HttpHeaders();
         headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
 
@@ -264,7 +264,7 @@ public class MemberIntegrationTest {
     
     @Test
     @DisplayName("회원 정보 수정")
-    void updateInfo() throws Exception {
+    void updateInfoAPI() throws Exception {
         // given
         final MemberSignupResponse memberSignupResponse = signupAPI("24344311@inha.edu", 151456339L, "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.FRESHMAN);
         final String verificationKey = memberSignupResponse.getVerificationKey();
@@ -275,7 +275,7 @@ public class MemberIntegrationTest {
         final MemberInfoUpdateRequest request = new MemberInfoUpdateRequest("만두", "정통", "010-1234-1234", MemberAcademicStatus.ABSENCE, MemberGrade.FRESHMAN);
 
         // when
-        final MemberInfoUpdateResponse response = updateInfo(accessToken, request);
+        final MemberInfoUpdateResponse response = updateInfoAPI(accessToken, request);
 
         // then
         assertThat(response.getName()).isEqualTo("만두");
