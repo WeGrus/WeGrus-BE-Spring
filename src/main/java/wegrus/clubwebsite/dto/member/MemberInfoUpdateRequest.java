@@ -37,4 +37,7 @@ public class MemberInfoUpdateRequest {
     @ApiModelProperty(value = "회원 학년", example = "FRESHMAN", required = true)
     @NotNull(message = "회원 학년은 필수입니다.")
     private MemberGrade grade;
+
+    @ApiModelProperty(value = "회원 소개", example = "안녕하세요.", required = true)
+    private String introduce;
 }

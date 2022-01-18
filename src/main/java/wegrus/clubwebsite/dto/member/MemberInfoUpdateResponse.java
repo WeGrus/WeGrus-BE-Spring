@@ -16,6 +16,7 @@ public class MemberInfoUpdateResponse {
     private String name;
     private String department;
     private String phone;
+    private String introduce;
     private MemberAcademicStatus academicStatus;
     private MemberGrade grade;
 
@@ -26,5 +27,6 @@ public class MemberInfoUpdateResponse {
         this.phone = member.getPhone();
         this.academicStatus = member.getAcademicStatus();
         this.grade = member.getGrade();
+        this.introduce = member.getIntroduce();
     }
 }

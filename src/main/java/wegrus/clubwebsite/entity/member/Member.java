@@ -101,5 +101,6 @@ public class Member {
         this.phone = request.getPhone();
         this.department = request.getDepartment();
         this.academicStatus = request.getAcademicStatus();
+        this.introduce = request.getIntroduce();
     }
 }

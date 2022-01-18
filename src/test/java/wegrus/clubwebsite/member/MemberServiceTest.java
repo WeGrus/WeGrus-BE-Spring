@@ -280,7 +280,7 @@ public class MemberServiceTest {
         // given
         final Optional<Member> member = Optional.of(new Member(123456789L, "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
         ReflectionTestUtils.setField(member.get(), "id", 1L);
-        final MemberInfoUpdateRequest request = new MemberInfoUpdateRequest("만두", "정통", "010-3333-1234", MemberAcademicStatus.ATTENDING, MemberGrade.SENIOR);
+        final MemberInfoUpdateRequest request = new MemberInfoUpdateRequest("만두", "정통", "010-3333-1234", MemberAcademicStatus.ATTENDING, MemberGrade.SENIOR, "안녕");
         doReturn(member).when(memberRepository).findById(any(Long.class));
 
         // when
@@ -291,5 +291,6 @@ public class MemberServiceTest {
         assertThat(response.getName()).isEqualTo("만두");
         assertThat(response.getDepartment()).isEqualTo("정통");
         assertThat(response.getPhone()).isEqualTo("010-3333-1234");
+        assertThat(response.getIntroduce()).isEqualTo("안녕");
     }
 }

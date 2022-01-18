@@ -272,7 +272,7 @@ public class MemberIntegrationTest {
         final ResponseEntity<ResultResponse> responseEntity = signinAPI(151456339L);
         final MemberSigninSuccessResponse memberSigninSuccessResponse = objectMapper.convertValue(responseEntity.getBody().getData(), MemberSigninSuccessResponse.class);
         final String accessToken = memberSigninSuccessResponse.getAccessToken();
-        final MemberInfoUpdateRequest request = new MemberInfoUpdateRequest("만두", "정통", "010-1234-1234", MemberAcademicStatus.ABSENCE, MemberGrade.FRESHMAN);
+        final MemberInfoUpdateRequest request = new MemberInfoUpdateRequest("만두", "정통", "010-1234-1234", MemberAcademicStatus.ABSENCE, MemberGrade.FRESHMAN, "안녕");
 
         // when
         final MemberInfoUpdateResponse response = updateInfoAPI(accessToken, request);
@@ -281,5 +281,6 @@ public class MemberIntegrationTest {
         assertThat(response.getName()).isEqualTo("만두");
         assertThat(response.getDepartment()).isEqualTo("정통");
         assertThat(response.getAcademicStatus()).isEqualTo(MemberAcademicStatus.ABSENCE);
+        assertThat(response.getIntroduce()).isEqualTo("안녕");
     }
 }

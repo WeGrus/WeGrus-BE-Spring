@@ -449,8 +449,8 @@ public class MemberControllerTest {
     @DisplayName("회원 정보 수정 API: 성공")
     void updateInfo_success() throws Exception {
         // given
-        final MemberInfoUpdateRequest request = new MemberInfoUpdateRequest("만두", "정통", "010-2424-2424", MemberAcademicStatus.ATTENDING, MemberGrade.FRESHMAN);
-        final MemberInfoUpdateResponse response = new MemberInfoUpdateResponse(Status.SUCCESS, "만두", "정통", "010-2424-2424", MemberAcademicStatus.ATTENDING, MemberGrade.FRESHMAN);
+        final MemberInfoUpdateRequest request = new MemberInfoUpdateRequest("만두", "정통", "010-2424-2424", MemberAcademicStatus.ATTENDING, MemberGrade.FRESHMAN, "안녕");
+        final MemberInfoUpdateResponse response = new MemberInfoUpdateResponse(Status.SUCCESS, "만두", "정통", "010-2424-2424", "안녕", MemberAcademicStatus.ATTENDING, MemberGrade.FRESHMAN);
         doReturn(response).when(memberService).updateMemberInfo(any(MemberInfoUpdateRequest.class));
 
         // when
@@ -467,6 +467,7 @@ public class MemberControllerTest {
                 .andExpect(jsonPath("message").value(UPDATE_MEMBER_INFO_SUCCESS.getMessage()))
                 .andExpect(jsonPath("data.name").value("만두"))
                 .andExpect(jsonPath("data.department").value("정통"))
-                .andExpect(jsonPath("data.phone").value("010-2424-2424"));
+                .andExpect(jsonPath("data.phone").value("010-2424-2424"))
+                .andExpect(jsonPath("data.introduce").value("안녕"));
     }
 }
