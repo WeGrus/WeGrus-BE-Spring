@@ -16,6 +16,7 @@ public enum ResultCode {
     CHECK_EMAIL_SUCCESS(200, "M105", "이메일 검증에 성공하였습니다."),
     VALID_EMAIL(200, "M106", "사용 가능한 이메일입니다."),
     GET_MEMBER_INFO_SUCCESS(200, "M107", "회원 정보 조회에 성공하였습니다."),
+    UPDATE_MEMBER_INFO_SUCCESS(200, "M108", "회원 정보 수정에 성공하였습니다."),
 
     // Verification
     REQUEST_VERIFY_SUCCESS(200, "V100", "인증 키 검증 요청에 성공하였습니다."),
