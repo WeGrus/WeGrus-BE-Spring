@@ -20,6 +20,7 @@ public enum ResultCode {
 
     // Board
     CREATE_BOARD_SUCCESS(200, "B100", "게시물 등록에 성공하였습니다."),
+    CREATE_REPLY_SUCCESS(200, "B101", "댓글 등록에 성공하였습니다."),
 
     // Verification
     REQUEST_VERIFY_SUCCESS(200, "V100", "인증 키 검증 요청에 성공하였습니다."),

@@ -20,6 +20,9 @@ public enum ErrorCode {
     INVALID_TYPE_VALUE(400, "C008", "입력 타입이 유효하지 않습니다."),
     INSUFFICIENT_AUTHORITY(403, "C009", "접근 권한이 부족합니다."),
 
+    // Board
+    BOARD_NOT_FOUND(400, "B000", "존재하지 않는 게시물입니다."),
+
     // Member
     MEMBER_NOT_FOUND(400, "M000", "존재하지 않는 회원입니다."),
     KAKAOID_ALREADY_EXIST(400, "M001", "이미 존재하는 카카오 회원 번호입니다."),
