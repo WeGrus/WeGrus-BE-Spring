@@ -18,6 +18,9 @@ public enum ResultCode {
     GET_MEMBER_INFO_SUCCESS(200, "M107", "회원 정보 조회에 성공하였습니다."),
     UPDATE_MEMBER_INFO_SUCCESS(200, "M108", "회원 정보 수정에 성공하였습니다."),
 
+    // Board
+    CREATE_BOARD_SUCCESS(200, "B100", "게시물 등록에 성공하였습니다."),
+
     // Verification
     REQUEST_VERIFY_SUCCESS(200, "V100", "인증 키 검증 요청에 성공하였습니다."),
     VERIFY_EMAIL_SUCCESS(200, "V101", "이메일 인증에 성공하였습니다."),
