@@ -6,13 +6,16 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import wegrus.clubwebsite.dto.Status;
 import wegrus.clubwebsite.dto.member.*;
 import wegrus.clubwebsite.entity.member.MemberRole;
 import wegrus.clubwebsite.entity.member.MemberRoles;
+import wegrus.clubwebsite.exception.MemberImageAlreadyBasicException;
 import wegrus.clubwebsite.exception.MemberRoleNotFoundException;
 import wegrus.clubwebsite.repository.MemberRoleRepository;
 import wegrus.clubwebsite.repository.RoleRepository;
+import wegrus.clubwebsite.util.AmazonS3Util;
 import wegrus.clubwebsite.util.JwtTokenUtil;
 import wegrus.clubwebsite.dto.VerificationResponse;
 import wegrus.clubwebsite.dto.error.ErrorResponse;
@@ -23,8 +26,10 @@ import wegrus.clubwebsite.exception.MemberNotFoundException;
 import wegrus.clubwebsite.repository.MemberRepository;
 import wegrus.clubwebsite.util.JwtUserDetailsUtil;
 import wegrus.clubwebsite.util.RedisUtil;
+import wegrus.clubwebsite.vo.Image;
 
 import javax.mail.MessagingException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -33,6 +38,7 @@ import java.util.regex.Pattern;
 
 import static wegrus.clubwebsite.dto.error.ErrorCode.*;
 import static wegrus.clubwebsite.dto.result.ResultCode.*;
+import static wegrus.clubwebsite.util.ImageUtil.MEMBER_BASIC_IMAGE_URL;
 
 @Service
 @Transactional(readOnly = true)
@@ -46,6 +52,7 @@ public class MemberService {
     private final RedisUtil redisUtil;
     private final JwtTokenUtil jwtTokenUtil;
     private final JwtUserDetailsUtil jwtUserDetailsUtil;
+    private final AmazonS3Util amazonS3Util;
 
     @Value("${valid-time.verification-key}")
     private Integer VERIFICATION_KEY_VALID_TIME;
@@ -70,6 +77,7 @@ public class MemberService {
     @Transactional
     public MemberSignupResponse validateAndSendVerificationMailAndSaveMember(MemberSignupRequest request) throws MessagingException {
         validateDuplication(request.getEmail(), request.getKakaoId());
+
         final Member member = Member.builder()
                 .kakaoId(request.getKakaoId())
                 .email(request.getEmail())
@@ -79,10 +87,12 @@ public class MemberService {
                 .name(request.getName())
                 .phone(request.getPhone())
                 .build();
+        memberRepository.save(member);
+        amazonS3Util.createDirectory("members/" + member.getId());
+
         final Role role = roleRepository.findByName(MemberRoles.ROLE_GUEST.name()).orElseThrow(MemberRoleNotFoundException::new);
         memberRoleRepository.save(new MemberRole(member, role));
 
-        memberRepository.save(member);
         final String verificationKey = sendVerificationMail(request.getEmail());
         return new MemberSignupResponse(new MemberDto(member), verificationKey);
     }
@@ -157,5 +167,26 @@ public class MemberService {
         final Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
         member.update(request);
         return new MemberInfoUpdateResponse(Status.SUCCESS, member);
+    }
+
+    @Transactional
+    public MemberImageUpdateResponse updateMemberImage(MultipartFile multipartFile) throws IOException {
+        final Long memberId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
+        final Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
+
+        final String dirName = "members/" + member.getId();
+        if (multipartFile == null) {
+            if (member.getImage().getUrl().equals(MEMBER_BASIC_IMAGE_URL))
+                throw new MemberImageAlreadyBasicException();
+            amazonS3Util.deleteImage(member.getImage(), dirName);
+            member.updateImage(Image.builder().url(MEMBER_BASIC_IMAGE_URL).build());
+        } else {
+            if (!member.getImage().getUrl().equals(MEMBER_BASIC_IMAGE_URL))
+                amazonS3Util.deleteImage(member.getImage(), dirName);
+            final Image image = amazonS3Util.uploadImage(multipartFile, dirName);
+            member.updateImage(image);
+        }
+
+        return new MemberImageUpdateResponse(Status.SUCCESS, member.getImage().getUrl());
     }
 }
