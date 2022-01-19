@@ -150,4 +150,12 @@ public class MemberService {
         else
             return new MemberInfoResponse(Status.SUCCESS, new MemberSimpleDto(member));
     }
+
+    @Transactional
+    public MemberInfoUpdateResponse updateMemberInfo(MemberInfoUpdateRequest request) {
+        final Long memberId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
+        final Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
+        member.update(request);
+        return new MemberInfoUpdateResponse(Status.SUCCESS, member);
+    }
 }

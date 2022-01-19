@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import wegrus.clubwebsite.dto.member.MemberInfoUpdateRequest;
 import wegrus.clubwebsite.entity.board.Board;
 import wegrus.clubwebsite.entity.board.CommentLike;
 import wegrus.clubwebsite.entity.board.PostLike;
@@ -92,5 +93,14 @@ public class Member {
         this.grade = grade;
         this.phone = phone;
         this.academicStatus = academicStatus;
+    }
+
+    public void update(MemberInfoUpdateRequest request) {
+        this.name = request.getName();
+        this.grade = request.getGrade();
+        this.phone = request.getPhone();
+        this.department = request.getDepartment();
+        this.academicStatus = request.getAcademicStatus();
+        this.introduce = request.getIntroduce();
     }
 }

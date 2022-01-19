@@ -37,8 +37,7 @@ import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static wegrus.clubwebsite.dto.error.ErrorCode.*;
 import static wegrus.clubwebsite.dto.result.ResultCode.*;
@@ -444,5 +443,31 @@ public class MemberControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("code").value(MEMBER_NOT_FOUND.getCode()))
                 .andExpect(jsonPath("message").value(MEMBER_NOT_FOUND.getMessage()));
+    }
+
+    @Test
+    @DisplayName("회원 정보 수정 API: 성공")
+    void updateInfo_success() throws Exception {
+        // given
+        final MemberInfoUpdateRequest request = new MemberInfoUpdateRequest("만두", "정통", "010-2424-2424", MemberAcademicStatus.ATTENDING, MemberGrade.FRESHMAN, "안녕");
+        final MemberInfoUpdateResponse response = new MemberInfoUpdateResponse(Status.SUCCESS, "만두", "정통", "010-2424-2424", "안녕", MemberAcademicStatus.ATTENDING, MemberGrade.FRESHMAN);
+        doReturn(response).when(memberService).updateMemberInfo(any(MemberInfoUpdateRequest.class));
+
+        // when
+        final ResultActions perform = mockMvc.perform(
+                patch("/members/info").with(csrf())
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+        );
+
+        // then
+        perform
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("code").value(UPDATE_MEMBER_INFO_SUCCESS.getCode()))
+                .andExpect(jsonPath("message").value(UPDATE_MEMBER_INFO_SUCCESS.getMessage()))
+                .andExpect(jsonPath("data.name").value("만두"))
+                .andExpect(jsonPath("data.department").value("정통"))
+                .andExpect(jsonPath("data.phone").value("010-2424-2424"))
+                .andExpect(jsonPath("data.introduce").value("안녕"));
     }
 }

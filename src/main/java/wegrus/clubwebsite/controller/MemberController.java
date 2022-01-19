@@ -131,4 +131,12 @@ public class MemberController {
 
         return ResponseEntity.ok(ResultResponse.of(GET_MEMBER_INFO_SUCCESS, response));
     }
+
+    @ApiOperation(value = "회원 정보 수정")
+    @PatchMapping("/members/info")
+    public ResponseEntity<ResultResponse> updateInfo(@Validated @RequestBody MemberInfoUpdateRequest request) {
+        final MemberInfoUpdateResponse response = memberService.updateMemberInfo(request);
+
+        return ResponseEntity.ok(ResultResponse.of(UPDATE_MEMBER_INFO_SUCCESS, response));
+    }
 }

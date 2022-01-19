@@ -104,6 +104,15 @@ public class MemberIntegrationTest {
         return objectMapper.convertValue(responseEntity.getBody().getData(), MemberInfoResponse.class);
     }
 
+    public MemberInfoUpdateResponse updateInfoAPI(String accessToken, MemberInfoUpdateRequest memberInfoUpdateRequest) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
+
+        final HttpEntity<MemberInfoUpdateRequest> request = new HttpEntity<>(memberInfoUpdateRequest, headers);
+        final ResponseEntity<ResultResponse> responseEntity = restTemplate.exchange("/members/info", HttpMethod.PATCH, request, ResultResponse.class);
+        return objectMapper.convertValue(responseEntity.getBody().getData(), MemberInfoUpdateResponse.class);
+    }
+
     @Test
     @DisplayName("이메일 검증")
     void checkEmail() throws Exception {
@@ -251,5 +260,27 @@ public class MemberIntegrationTest {
         // then
         assertThat(info.getStudentId()).isEqualTo("12344379");
         assertThat(info2.getStudentId()).isEqualTo("44");
+    }
+    
+    @Test
+    @DisplayName("회원 정보 수정")
+    void updateInfo() throws Exception {
+        // given
+        final MemberSignupResponse memberSignupResponse = signupAPI("24344311@inha.edu", 151456339L, "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.FRESHMAN);
+        final String verificationKey = memberSignupResponse.getVerificationKey();
+        verifySchoolEmailAPI(verificationKey);
+        final ResponseEntity<ResultResponse> responseEntity = signinAPI(151456339L);
+        final MemberSigninSuccessResponse memberSigninSuccessResponse = objectMapper.convertValue(responseEntity.getBody().getData(), MemberSigninSuccessResponse.class);
+        final String accessToken = memberSigninSuccessResponse.getAccessToken();
+        final MemberInfoUpdateRequest request = new MemberInfoUpdateRequest("만두", "정통", "010-1234-1234", MemberAcademicStatus.ABSENCE, MemberGrade.FRESHMAN, "안녕");
+
+        // when
+        final MemberInfoUpdateResponse response = updateInfoAPI(accessToken, request);
+
+        // then
+        assertThat(response.getName()).isEqualTo("만두");
+        assertThat(response.getDepartment()).isEqualTo("정통");
+        assertThat(response.getAcademicStatus()).isEqualTo(MemberAcademicStatus.ABSENCE);
+        assertThat(response.getIntroduce()).isEqualTo("안녕");
     }
 }
