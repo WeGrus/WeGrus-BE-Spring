@@ -2,6 +2,7 @@ package wegrus.clubwebsite.dto.board;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import wegrus.clubwebsite.entity.board.BoardCategory;
@@ -13,6 +14,7 @@ import javax.validation.constraints.NotNull;
 @ApiModel(description = "게시물 등록 요청 데이터 모델")
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
 public class BoardCreateRequest {
 
     @ApiModelProperty(value = "게시판 종류", example = "BOARD", required = true)
