@@ -9,7 +9,6 @@ import wegrus.clubwebsite.entity.member.MemberGrade;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Getter
 @NoArgsConstructor
@@ -38,7 +37,7 @@ public class MemberDto {
         this.phone = member.getPhone();
         this.createdDate = member.getCreatedDate();
         this.introduce = member.getIntroduce();
-        this.imageUrl = member.getImageUrl();
+        this.imageUrl = member.getImage().getUrl();
         this.academicStatus = member.getAcademicStatus();
         member.getRoles()
                 .forEach(r -> this.roles.add(r.getRole().getName()));

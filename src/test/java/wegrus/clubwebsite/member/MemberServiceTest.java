@@ -8,17 +8,20 @@ import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.web.multipart.MultipartFile;
 import wegrus.clubwebsite.dto.Status;
 import wegrus.clubwebsite.dto.VerificationResponse;
 import wegrus.clubwebsite.dto.member.*;
 import wegrus.clubwebsite.entity.member.*;
 import wegrus.clubwebsite.exception.MemberAlreadyExistException;
+import wegrus.clubwebsite.exception.MemberImageAlreadyBasicException;
 import wegrus.clubwebsite.exception.MemberNotFoundException;
 import wegrus.clubwebsite.exception.RefreshTokenExpiredException;
 import wegrus.clubwebsite.repository.MemberRepository;
@@ -26,10 +29,10 @@ import wegrus.clubwebsite.repository.MemberRoleRepository;
 import wegrus.clubwebsite.repository.RoleRepository;
 import wegrus.clubwebsite.service.MailService;
 import wegrus.clubwebsite.service.MemberService;
-import wegrus.clubwebsite.util.JwtTokenUtil;
-import wegrus.clubwebsite.util.JwtUserDetailsUtil;
-import wegrus.clubwebsite.util.RedisUtil;
+import wegrus.clubwebsite.util.*;
+import wegrus.clubwebsite.vo.Image;
 
+import java.io.FileInputStream;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -60,6 +63,12 @@ public class MemberServiceTest {
 
     @Mock
     private JwtUserDetailsUtil jwtUserDetailsUtil;
+
+    @Mock
+    private AmazonS3Util amazonS3Util;
+
+    @Mock
+    private ImageUtil imageUtil;
 
     @InjectMocks
     private MemberService memberService;
@@ -292,5 +301,64 @@ public class MemberServiceTest {
         assertThat(response.getDepartment()).isEqualTo("정통");
         assertThat(response.getPhone()).isEqualTo("010-3333-1234");
         assertThat(response.getIntroduce()).isEqualTo("안녕");
+    }
+
+    @Test
+    @DisplayName("회원 이미지 변경: 성공(새 이미지)")
+    void updateMemberImage_success() throws Exception {
+        // given
+        final Optional<Member> member = Optional.of(new Member(123456789L, "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
+        member.get().updateImage(Image.builder().url("다른 이미지 url").build());
+        doReturn(member).when(memberRepository).findById(any(Long.class));
+
+        ReflectionTestUtils.setField(imageUtil, "MEMBER_BASIC_IMAGE_URL", "구 이미지 저장소 url");
+        doNothing().when(amazonS3Util).deleteImage(any(Image.class), any(String.class));
+        final Image image = Image.builder().url("새 이미지 저장소 url").build();
+        doReturn(image).when(amazonS3Util).uploadImage(any(MultipartFile.class), any(String.class));
+
+        final MockMultipartFile multipartFile = new MockMultipartFile("name", "name.png", "png", new FileInputStream("src/test/resources/static/image.jpg"));
+
+        // when
+        final MemberImageUpdateResponse response = memberService.updateMemberImage(multipartFile);
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(Status.SUCCESS);
+        assertThat(response.getImageUrl()).isEqualTo("새 이미지 저장소 url");
+    }
+
+    @Test
+    @DisplayName("회원 이미지 변경: 성공(기본 이미지)")
+    void updateMemberImage_success2() throws Exception {
+        // given
+        final Optional<Member> member = Optional.of(new Member(123456789L, "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
+        member.get().updateImage(Image.builder().url("다른 이미지 url").build());
+        doReturn(member).when(memberRepository).findById(any(Long.class));
+
+        ReflectionTestUtils.setField(imageUtil, "MEMBER_BASIC_IMAGE_URL", "구 이미지 저장소 url");
+        doNothing().when(amazonS3Util).deleteImage(any(Image.class), any(String.class));
+
+        // when
+        final MemberImageUpdateResponse response = memberService.updateMemberImage(null);
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(Status.SUCCESS);
+        assertThat(response.getImageUrl()).isEqualTo("구 이미지 저장소 url");
+    }
+    
+    @Test
+    @DisplayName("회원 이미지 변경: 실패")
+    void updateMemberImage_fail() throws Exception {
+        // given
+        final Optional<Member> member = Optional.of(new Member(123456789L, "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
+        member.get().updateImage(Image.builder().url("구 이미지 저장소 url").build());
+        doReturn(member).when(memberRepository).findById(any(Long.class));
+
+        ReflectionTestUtils.setField(imageUtil, "MEMBER_BASIC_IMAGE_URL", "구 이미지 저장소 url");
+        
+        // when
+        final Executable executable = () -> memberService.updateMemberImage(null);
+
+        // then
+        assertThrows(MemberImageAlreadyBasicException.class, executable);
     }
 }

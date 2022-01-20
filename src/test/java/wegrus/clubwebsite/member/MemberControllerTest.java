@@ -10,12 +10,14 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.filter.CharacterEncodingFilter;
+import org.springframework.web.multipart.MultipartFile;
 import wegrus.clubwebsite.config.JwtRequestFilter;
 import wegrus.clubwebsite.config.WebSecurityConfig;
 import wegrus.clubwebsite.controller.MemberController;
@@ -29,6 +31,7 @@ import wegrus.clubwebsite.exception.MemberNotFoundException;
 import wegrus.clubwebsite.service.MemberService;
 
 import javax.servlet.http.Cookie;
+import java.io.FileInputStream;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -469,5 +472,32 @@ public class MemberControllerTest {
                 .andExpect(jsonPath("data.department").value("정통"))
                 .andExpect(jsonPath("data.phone").value("010-2424-2424"))
                 .andExpect(jsonPath("data.introduce").value("안녕"));
+    }
+
+    /**
+     * <a href="https://www.examplefiles.net/cs/458143"><b>Reference</b></a>
+     */
+    @Test
+    @DisplayName("회원 이미지 변경 API: 성공")
+    void updateImage_success() throws Exception {
+        // given
+        final MockMultipartFile multipartFile = new MockMultipartFile("name", "name.png", "png", new FileInputStream("src/test/resources/static/image.jpg"));
+        MemberImageUpdateResponse response = new MemberImageUpdateResponse(Status.SUCCESS, "new url");
+        doReturn(response).when(memberService).updateMemberImage(any(MultipartFile.class));
+        
+        // when
+        final ResultActions perform = mockMvc.perform(
+                multipart("/members/image").file(multipartFile)
+                        .with(request -> {
+                            request.setMethod("PATCH");
+                            return request;
+                        }).with(csrf())
+        );
+
+        // then
+        perform
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("code").value(UPDATE_MEMBER_IMAGE_SUCCESS.getCode()))
+                .andExpect(jsonPath("message").value(UPDATE_MEMBER_IMAGE_SUCCESS.getMessage()));
     }
 }

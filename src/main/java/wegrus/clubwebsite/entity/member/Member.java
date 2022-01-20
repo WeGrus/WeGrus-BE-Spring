@@ -11,6 +11,7 @@ import wegrus.clubwebsite.entity.board.Board;
 import wegrus.clubwebsite.entity.board.CommentLike;
 import wegrus.clubwebsite.entity.board.PostLike;
 import wegrus.clubwebsite.entity.board.View;
+import wegrus.clubwebsite.vo.Image;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -18,6 +19,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+
+import static wegrus.clubwebsite.util.ImageUtil.MEMBER_BASIC_IMAGE_URL;
 
 @Entity
 @Getter
@@ -76,8 +79,14 @@ public class Member {
     @Column(name = "member_introduce")
     private String introduce = "";
 
-    @Column(name = "member_image_url")
-    private String imageUrl;
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "url", column = @Column(name = "member_image_url")),
+            @AttributeOverride(name = "type", column = @Column(name = "member_image_type")),
+            @AttributeOverride(name = "name", column = @Column(name = "member_image_name")),
+            @AttributeOverride(name = "uuid", column = @Column(name = "member_image_uuid"))
+    })
+    private Image image;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "member_academic_status", nullable = false)
@@ -93,6 +102,7 @@ public class Member {
         this.grade = grade;
         this.phone = phone;
         this.academicStatus = academicStatus;
+        this.image = Image.builder().url(MEMBER_BASIC_IMAGE_URL).build();
     }
 
     public void update(MemberInfoUpdateRequest request) {
@@ -102,5 +112,9 @@ public class Member {
         this.department = request.getDepartment();
         this.academicStatus = request.getAcademicStatus();
         this.introduce = request.getIntroduce();
+    }
+
+    public void updateImage(Image image) {
+        this.image = image;
     }
 }

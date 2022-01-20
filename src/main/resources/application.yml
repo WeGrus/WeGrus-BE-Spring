@@ -1,0 +1,5 @@
+spring:
+  profiles:
+    group:
+      local: local, aws
+      prod: prod, aws
