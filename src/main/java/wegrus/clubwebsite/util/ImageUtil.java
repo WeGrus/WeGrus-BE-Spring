@@ -13,7 +13,7 @@ import java.util.UUID;
 @Component
 public class ImageUtil {
 
-    public final static String MEMBER_BASIC_IMAGE_URL = "https://igrus-webservice-bucket.s3.ap-northeast-2.amazonaws.com/basic.jpeg";
+    public static String MEMBER_BASIC_IMAGE_URL = "https://igrus-webservice-bucket.s3.ap-northeast-2.amazonaws.com/basic.jpeg";
 
     public Image convertMultipartFile(MultipartFile multipartFile) {
         String originalName = multipartFile.getOriginalFilename();
