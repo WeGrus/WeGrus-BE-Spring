@@ -5,10 +5,12 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import wegrus.clubwebsite.dto.Status;
 import wegrus.clubwebsite.dto.VerificationResponse;
 import wegrus.clubwebsite.dto.member.*;
@@ -21,6 +23,8 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+
+import java.io.IOException;
 
 import static wegrus.clubwebsite.dto.result.ResultCode.*;
 
@@ -138,5 +142,14 @@ public class MemberController {
         final MemberInfoUpdateResponse response = memberService.updateMemberInfo(request);
 
         return ResponseEntity.ok(ResultResponse.of(UPDATE_MEMBER_INFO_SUCCESS, response));
+    }
+
+    @ApiOperation(value = "회원 이미지 변경")
+    @ApiImplicitParam(name = "multipartFile", value = "회원 이미지")
+    @PatchMapping(value = "/members/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ResultResponse> updateImage(@RequestPart(required = false) MultipartFile image) throws IOException {
+        final MemberImageUpdateResponse response = memberService.updateMemberImage(image);
+
+        return ResponseEntity.ok(ResultResponse.of(UPDATE_MEMBER_IMAGE_SUCCESS, response));
     }
 }

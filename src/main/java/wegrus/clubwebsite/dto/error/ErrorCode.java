@@ -19,6 +19,7 @@ public enum ErrorCode {
     METHOD_NOT_ALLOWED(405, "C007", "허용되지 않은 HTTP method입니다."),
     INVALID_TYPE_VALUE(400, "C008", "입력 타입이 유효하지 않습니다."),
     INSUFFICIENT_AUTHORITY(403, "C009", "접근 권한이 부족합니다."),
+    MULTIPARTFILE_CONVERT_FAIL(400, "C010", "MultipartFile을 File로 변환하는 데 실패하였습니다."),
 
     // Board
     BOARD_NOT_FOUND(400, "B000", "존재하지 않는 게시물입니다."),
@@ -29,6 +30,10 @@ public enum ErrorCode {
     EMAIL_ALREADY_EXIST(400, "M002", "이미 존재하는 이메일입니다."),
     INVALID_EMAIL(400, "M003", "인하대학교 이메일 형식만 가능합니다."),
     MEMBER_ROLE_NOT_FOUND(400, "M004", "존재하지 않는 회원 등급입니다."),
+    MEMBER_IMAGE_ALREADY_BASIC(400, "M005", "회원 이미지가 이미 기본 이미지입니다."),
+
+    // File
+    NOT_SUPPORTED_IMAGE_TYPE(400, "F000", "이미지 타입은 JPG, PNG, GIF만 지원합니다."),
     ;
 
     private int status;
