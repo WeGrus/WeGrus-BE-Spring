@@ -4,11 +4,14 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import wegrus.clubwebsite.dto.board.*;
 import wegrus.clubwebsite.dto.result.ResultResponse;
 import wegrus.clubwebsite.service.BoardService;
 import wegrus.clubwebsite.service.ReplyService;
+
+import javax.validation.constraints.NotNull;
 
 import static wegrus.clubwebsite.dto.result.ResultCode.*;
 
@@ -22,7 +25,7 @@ public class BoardController {
 
     @ApiOperation(value = "게시물 등록")
     @PostMapping("/posts")
-    public ResponseEntity<ResultResponse> createBoard(@RequestBody BoardCreateRequest request){
+    public ResponseEntity<ResultResponse> createBoard(@Validated @RequestBody BoardCreateRequest request){
         final Long boardId = boardService.create(request);
         final BoardCreateResponse response = new BoardCreateResponse(boardId);
 
@@ -31,7 +34,9 @@ public class BoardController {
 
     @ApiOperation(value = "게시물 수정")
     @PutMapping("/posts")
-    public ResponseEntity<ResultResponse> updateBoard(@RequestParam Long postId, @RequestBody BoardUpdateRequest request){
+    public ResponseEntity<ResultResponse> updateBoard(
+            @Validated @NotNull(message = "게시물 id는 필수입니다.") @RequestParam Long postId,
+            @Validated @RequestBody BoardUpdateRequest request){
         final Long boardId = boardService.update(postId, request);
         final BoardUpdateResponse response = new BoardUpdateResponse(boardId);
 
@@ -40,7 +45,8 @@ public class BoardController {
 
     @ApiOperation(value = "게시물 삭제")
     @DeleteMapping("/posts")
-    public ResponseEntity<ResultResponse> deleteBoard(@RequestParam Long postId){
+    public ResponseEntity<ResultResponse> deleteBoard(
+            @Validated @NotNull(message = "게시물 id는 필수입니다.")@RequestParam Long postId){
         boardService.delete(postId);
 
         return ResponseEntity.ok(ResultResponse.of(DELETE_BOARD_SUCCESS, null));
@@ -48,7 +54,7 @@ public class BoardController {
 
     @ApiOperation(value = "댓글 등록")
     @PostMapping("/comments")
-    public ResponseEntity<ResultResponse> createComment(@RequestBody ReplyCreateRequest request){
+    public ResponseEntity<ResultResponse> createComment(@Validated @RequestBody ReplyCreateRequest request){
         final Long replyId = replyService.create(request);
         final ReplyCreateResponse response = new ReplyCreateResponse(replyId);
 
@@ -57,7 +63,8 @@ public class BoardController {
 
     @ApiOperation(value = "댓글 삭제")
     @DeleteMapping("/comments")
-    public ResponseEntity<ResultResponse> deleteComment(@RequestParam Long commentId){
+    public ResponseEntity<ResultResponse> deleteComment(
+            @Validated @NotNull(message = "댓글 id는 필수입니다.")@RequestParam Long commentId){
         replyService.delete(commentId);
 
         return ResponseEntity.ok(ResultResponse.of(DELETE_REPLY_SUCCESS, null));
