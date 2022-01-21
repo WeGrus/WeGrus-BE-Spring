@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import wegrus.clubwebsite.dto.board.BoardUpdateRequest;
 import wegrus.clubwebsite.entity.member.Member;
 
 import javax.persistence.*;
@@ -55,11 +56,11 @@ public class Board {
     private String content;
 
     @CreatedDate
-    @Column(name = "board_create_date", nullable = false)
+    @Column(name = "board_create_date")
     private LocalDateTime createdDate;
 
     @LastModifiedDate
-    @Column(name = "board_update_date", nullable = false)
+    @Column(name = "board_update_date")
     private LocalDateTime updatedDate;
 
     @Column(name = "board_secret_flag", nullable = false)
@@ -78,5 +79,11 @@ public class Board {
         this.content = content;
         this.secretFlag = secretFlag;
         this.state = state;
+    }
+
+    public void update(BoardUpdateRequest request){
+        this.title = request.getTitle();
+        this.content = request.getContent();
+        this.secretFlag = request.isSecretFlag();
     }
 }

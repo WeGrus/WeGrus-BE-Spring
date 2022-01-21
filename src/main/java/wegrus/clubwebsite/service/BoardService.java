@@ -5,9 +5,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import wegrus.clubwebsite.dto.board.BoardCreateRequest;
+import wegrus.clubwebsite.dto.board.BoardUpdateRequest;
 import wegrus.clubwebsite.entity.board.Board;
 import wegrus.clubwebsite.entity.board.BoardState;
 import wegrus.clubwebsite.entity.member.Member;
+import wegrus.clubwebsite.exception.BoardMemberNotMatchException;
+import wegrus.clubwebsite.exception.BoardNotFoundException;
 import wegrus.clubwebsite.exception.MemberNotFoundException;
 import wegrus.clubwebsite.repository.BoardRepository;
 import wegrus.clubwebsite.repository.MemberRepository;
@@ -35,5 +38,34 @@ public class BoardService {
                 .build();
 
         return boardRepository.save(board).getId();
+    }
+
+    @Transactional
+    public Long update(Long postId, BoardUpdateRequest request){
+        String memberId = SecurityContextHolder.getContext().getAuthentication().getName();
+        final Member member = memberRepository.findById(Long.valueOf(memberId)).orElseThrow(MemberNotFoundException::new);
+
+        final Board board = boardRepository.findById(postId).orElseThrow(BoardNotFoundException::new);
+
+        if(!member.getId().equals(board.getMember().getId())){
+            throw new BoardMemberNotMatchException();
+        }
+
+        board.update(request);
+        return board.getId();
+    }
+
+    @Transactional
+    public void delete(Long postId){
+        String memberId = SecurityContextHolder.getContext().getAuthentication().getName();
+        final Member member = memberRepository.findById(Long.valueOf(memberId)).orElseThrow(MemberNotFoundException::new);
+
+        final Board board = boardRepository.findById(postId).orElseThrow(BoardNotFoundException::new);
+
+        if(!member.getId().equals(board.getMember().getId())){
+            throw new BoardMemberNotMatchException();
+        }
+
+        boardRepository.deleteById(postId);
     }
 }
