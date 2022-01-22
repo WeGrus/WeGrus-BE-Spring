@@ -62,6 +62,15 @@ public class BoardController {
 
     }
 
+    @ApiOperation(value = "게시물 추천 해제")
+    @DeleteMapping("/posts/like")
+    public ResponseEntity<ResultResponse> dislikeBoard(
+            @Validated @NotNull(message = "게시물 id는 필수입니다.")@RequestParam Long postId){
+        boardService.dislike(postId);
+
+        return ResponseEntity.ok(ResultResponse.of(DELETE_POST_LIKE_SUCCESS, null));
+    }
+
     @ApiOperation(value = "댓글 등록")
     @PostMapping("/comments")
     public ResponseEntity<ResultResponse> createComment(

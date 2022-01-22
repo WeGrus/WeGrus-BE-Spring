@@ -10,10 +10,7 @@ import wegrus.clubwebsite.entity.board.Board;
 import wegrus.clubwebsite.entity.board.BoardState;
 import wegrus.clubwebsite.entity.board.PostLike;
 import wegrus.clubwebsite.entity.member.Member;
-import wegrus.clubwebsite.exception.BoardMemberNotMatchException;
-import wegrus.clubwebsite.exception.BoardNotFoundException;
-import wegrus.clubwebsite.exception.MemberNotFoundException;
-import wegrus.clubwebsite.exception.PostLikeAlreadyExistException;
+import wegrus.clubwebsite.exception.*;
 import wegrus.clubwebsite.repository.BoardRepository;
 import wegrus.clubwebsite.repository.MemberRepository;
 import wegrus.clubwebsite.repository.PostLikeRepository;
@@ -103,5 +100,17 @@ public class BoardService {
         postLikeRepository.save(postLike);
 
         return postLike.getId();
+    }
+
+    @Transactional
+    public void dislike(Long postId){
+        String memberId = SecurityContextHolder.getContext().getAuthentication().getName();
+        final Member member = memberRepository.findById(Long.valueOf(memberId)).orElseThrow(MemberNotFoundException::new);
+
+        final Board board = boardRepository.findById(postId).orElseThrow(BoardNotFoundException::new);
+
+        final PostLike postLike = postLikeRepository.findByMemberAndBoard(member, board).orElseThrow(PostLikeNotFoundException::new);
+
+        postLikeRepository.deleteById(postLike.getId());
     }
 }
