@@ -145,10 +145,10 @@ public class MemberControllerTest {
     void signup_success() throws Exception {
         // given
         final String verificationKey = UUID.randomUUID().toString();
-        final Member member = new Member(123456789L, "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING);
+        final Member member = new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING);
         final MemberSignupResponse response = new MemberSignupResponse(new MemberDto(member), verificationKey);
         doReturn(response).when(memberService).validateAndSendVerificationMailAndSaveMember(any(MemberSignupRequest.class));
-        final MemberSignupRequest request = new MemberSignupRequest("12161111@inha.edu", 123456789L, "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.SENIOR);
+        final MemberSignupRequest request = new MemberSignupRequest("12161111@inha.edu", "123456789L", "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.SENIOR, "token");
 
         // when
         final ResultActions perform = mockMvc.perform(
@@ -168,9 +168,9 @@ public class MemberControllerTest {
     @DisplayName("회원 가입 API: 바인딩 예외")
     void signup_bindEx() throws Exception {
         // given
-        final MemberSignupRequest request = new MemberSignupRequest("12161111@inha.edu", 123456789L, "홍길동", " ", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.SENIOR);
-        final MemberSignupRequest request2 = new MemberSignupRequest("12161111@gmail.com", 123456789L, "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.SENIOR);
-        final MemberSignupRequest request3 = new MemberSignupRequest("12161111@inha.edu", 123456789L, "홍길동", "컴퓨터공학과", "01012341234", MemberAcademicStatus.ATTENDING, MemberGrade.SENIOR);
+        final MemberSignupRequest request = new MemberSignupRequest("12161111@inha.edu", "123456789L", "홍길동", " ", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.SENIOR, "token");
+        final MemberSignupRequest request2 = new MemberSignupRequest("12161111@gmail.com", "123456789L", "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.SENIOR, "token");
+        final MemberSignupRequest request3 = new MemberSignupRequest("12161111@inha.edu", "123456789L", "홍길동", "컴퓨터공학과", "01012341234", MemberAcademicStatus.ATTENDING, MemberGrade.SENIOR, "token");
 
         // when
         final ResultActions perform = mockMvc.perform(
@@ -218,18 +218,18 @@ public class MemberControllerTest {
     @DisplayName("로그인 API: 성공")
     void login_success() throws Exception {
         // given
-        final Member member = new Member(123456789L, "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING);
+        final Member member = new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING);
         final String accessToken = "accessToken";
         final String refreshToken = "refreshToken";
         final MemberAndJwtDto dto = new MemberAndJwtDto(new MemberDto(member), accessToken, refreshToken);
 
-        doReturn(dto).when(memberService).findMemberAndGenerateJwt(any(Long.class));
+        doReturn(dto).when(memberService).findMemberAndGenerateJwt(any(String.class));
 
         // when
         final ResultActions perform = mockMvc.perform(
                 post("/signin").with(csrf())
                         .contentType(APPLICATION_FORM_URLENCODED)
-                        .param("kakaoId", "123456789")
+                        .param("authorizationCode", "123456789L")
         );
 
         // then
@@ -248,13 +248,13 @@ public class MemberControllerTest {
     @DisplayName("로그인 API: 실패")
     void login_fail() throws Exception {
         // given
-        doThrow(MemberNotFoundException.class).when(memberService).findMemberAndGenerateJwt(any(Long.class));
+        doThrow(MemberNotFoundException.class).when(memberService).findMemberAndGenerateJwt(any(String.class));
 
         // when
         final ResultActions perform = mockMvc.perform(
                 post("/signin").with(csrf())
                         .contentType(APPLICATION_FORM_URLENCODED)
-                        .param("kakaoId", "123456789")
+                        .param("authorizationCode", "123456789")
         );
 
         // then
@@ -269,13 +269,13 @@ public class MemberControllerTest {
     @DisplayName("로그인 API: 바인딩 예외")
     void login_bindEx() throws Exception {
         // given
-        final Long kakaoId = null;
+        final String authorizationCode = "";
 
         // when
         final ResultActions perform = mockMvc.perform(
                 post("/signin").with(csrf())
                         .contentType(APPLICATION_FORM_URLENCODED)
-                        .param("kakaoId", String.valueOf(kakaoId))
+                        .param("authorizationCode", authorizationCode)
         );
 
         // then
@@ -403,7 +403,7 @@ public class MemberControllerTest {
     @DisplayName("회원 정보 조회 API: 성공")
     void getInfo_success() throws Exception {
         // given
-        final Member member = new Member(123456789L, "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING);
+        final Member member = new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING);
         final MemberInfoResponse response = new MemberInfoResponse(Status.SUCCESS, new MemberDto(member));
         final MemberInfoResponse response2 = new MemberInfoResponse(Status.SUCCESS, new MemberSimpleDto(member));
         doReturn(response).when(memberService).getMemberInfo(1L);

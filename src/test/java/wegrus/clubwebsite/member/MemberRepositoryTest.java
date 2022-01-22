@@ -28,7 +28,7 @@ public class MemberRepositoryTest {
                     .department("컴퓨터공학과")
                     .academicStatus(i % 2 == 1 ? MemberAcademicStatus.ATTENDING : MemberAcademicStatus.ABSENCE)
                     .phone("010-1234-567" + i)
-                    .kakaoId((long) (1234567 + i))
+                    .userId("1234567" + i)
                     .grade(MemberGrade.FRESHMAN)
                     .build();
 
@@ -40,14 +40,14 @@ public class MemberRepositoryTest {
     @DisplayName("회원 조회: 카카오 회원 번호 or 이메일")
     void findByKakaoIdOrEmail() throws Exception {
         // given
-        final long realKakaoId = 1234568L;
+        final String realUserId = "1234568L";
         final String fakeEmail = "에베베";
-        final long fakeKakaoId = 1L;
+        final String fakeUserId = "1L";
         final String realEmail = "12161541@inha.edu";
 
         // when
-        final Member findMemberByKakaoId = memberRepository.findByKakaoIdOrEmail(realKakaoId, fakeEmail).orElseThrow(MemberNotFoundException::new);
-        final Member findMemberByEmail = memberRepository.findByKakaoIdOrEmail(fakeKakaoId, realEmail).orElseThrow(MemberNotFoundException::new);
+        final Member findMemberByKakaoId = memberRepository.findByUserIdOrEmail(realUserId, fakeEmail).orElseThrow(MemberNotFoundException::new);
+        final Member findMemberByEmail = memberRepository.findByUserIdOrEmail(fakeUserId, realEmail).orElseThrow(MemberNotFoundException::new);
 
         // then
         assertThat(findMemberByEmail).isEqualTo(findMemberByKakaoId);
@@ -57,13 +57,13 @@ public class MemberRepositoryTest {
     @DisplayName("회원 조회: 카카오 회원 번호")
     void findByKakaoId() throws Exception {
         // given
-        final long kakaoId = 1234568L;
+        final String userId = "1234568L";
 
         // when
-        final Member findMemberByKakaoId = memberRepository.findByKakaoId(kakaoId).orElseThrow(MemberNotFoundException::new);
+        final Member findMemberByKakaoId = memberRepository.findByUserId(userId).orElseThrow(MemberNotFoundException::new);
 
         // then
-        assertThat(findMemberByKakaoId.getKakaoId()).isEqualTo(kakaoId);
+        assertThat(findMemberByKakaoId.getUserId()).isEqualTo(userId);
     }
 
     @Test

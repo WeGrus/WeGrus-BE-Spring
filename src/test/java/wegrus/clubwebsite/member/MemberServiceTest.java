@@ -20,10 +20,7 @@ import wegrus.clubwebsite.dto.Status;
 import wegrus.clubwebsite.dto.VerificationResponse;
 import wegrus.clubwebsite.dto.member.*;
 import wegrus.clubwebsite.entity.member.*;
-import wegrus.clubwebsite.exception.MemberAlreadyExistException;
-import wegrus.clubwebsite.exception.MemberImageAlreadyBasicException;
-import wegrus.clubwebsite.exception.MemberNotFoundException;
-import wegrus.clubwebsite.exception.RefreshTokenExpiredException;
+import wegrus.clubwebsite.exception.*;
 import wegrus.clubwebsite.repository.MemberRepository;
 import wegrus.clubwebsite.repository.MemberRoleRepository;
 import wegrus.clubwebsite.repository.RoleRepository;
@@ -70,6 +67,9 @@ public class MemberServiceTest {
     @Mock
     private ImageUtil imageUtil;
 
+    @Mock
+    private KakaoUtil kakaoUtil;
+
     @InjectMocks
     private MemberService memberService;
 
@@ -94,7 +94,7 @@ public class MemberServiceTest {
         doReturn(email).when(redisUtil).get(any(String.class));
         doReturn(true).when(redisUtil).delete(any(String.class));
         doReturn(Optional.of(new Role(MemberRoles.ROLE_CERTIFIED.name()))).when(roleRepository).findByName(any(String.class));
-        final Optional<Member> member = Optional.of(new Member(123456789L, "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
+        final Optional<Member> member = Optional.of(new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
         doReturn(member).when(memberRepository).findByEmail(any(String.class));
 
         // when
@@ -121,13 +121,16 @@ public class MemberServiceTest {
     @DisplayName("회원가입 데이터 검증 & 인증메일 전송 & 회원 저장: 성공")
     void validateAndSendVerificationMailAndSaveMember_success() throws Exception {
         // given
-        final MemberSignupRequest request = new MemberSignupRequest("12161111@inha.edu", 123456789L, "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.SENIOR);
-        doReturn(Optional.empty()).when(memberRepository).findByKakaoIdOrEmail(any(Long.class), any(String.class));
-        final Optional<Member> member = Optional.of(new Member(123456789L, "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
+        final MemberSignupRequest request = new MemberSignupRequest("12161111@inha.edu", "123456789L", "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.SENIOR, "token");
+        doReturn(Optional.empty()).when(memberRepository).findByUserIdOrEmail(any(String.class), any(String.class));
+        final Optional<Member> member = Optional.of(new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
         doReturn(member.get()).when(memberRepository).save(any(Member.class));
         doNothing().when(mailService).sendSchoolMailVerification(any(String.class), any(String.class));
         doNothing().when(redisUtil).set(any(String.class), any(Object.class), any(Integer.class));
+        doReturn("12161111@inha.edu").when(redisUtil).get(any(String.class));
         doReturn(Optional.of(new Role(MemberRoles.ROLE_GUEST.name()))).when(roleRepository).findByName(any(String.class));
+        doReturn("token").when(kakaoUtil).getAccessTokenFromKakaoAPI(any(String.class));
+        doReturn("123456789L").when(kakaoUtil).getUserIdFromKakaoAPI(any(String.class));
 
         // when
         final MemberSignupResponse response = memberService.validateAndSendVerificationMailAndSaveMember(request);
@@ -140,9 +143,13 @@ public class MemberServiceTest {
     @DisplayName("회원가입 데이터 검증 & 인증메일 전송 & 회원 저장: 실패")
     void validateAndSendVerificationMailAndSaveMember_fail() throws Exception {
         // given
-        final MemberSignupRequest request = new MemberSignupRequest("12161111@inha.edu", 123456789L, "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.SENIOR);
-        final Optional<Member> member = Optional.of(new Member(123456789L, "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
-        doReturn(member).when(memberRepository).findByKakaoIdOrEmail(any(Long.class), any(String.class));
+        final MemberSignupRequest request = new MemberSignupRequest("12161111@inha.edu", "123456789L", "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.SENIOR, "token");
+        final Optional<Member> member = Optional.of(new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
+        doReturn(member).when(memberRepository).findByUserIdOrEmail(any(String.class), any(String.class));
+        doReturn("12161111@inha.edu").when(redisUtil).get(any(String.class));
+        doReturn(true).when(redisUtil).delete(any(String.class));
+        doReturn("token").when(kakaoUtil).getAccessTokenFromKakaoAPI(any(String.class));
+        doReturn("123456789L").when(kakaoUtil).getUserIdFromKakaoAPI(any(String.class));
 
         // when
         final Executable executable = () -> memberService.validateAndSendVerificationMailAndSaveMember(request);
@@ -152,11 +159,27 @@ public class MemberServiceTest {
     }
 
     @Test
+    @DisplayName("회원가입 데이터 검증 & 인증메일 전송 & 회원 저장: 실패2")
+    void validateAndSendVerificationMailAndSaveMember_fail2() throws Exception {
+        // given
+        final MemberSignupRequest request = new MemberSignupRequest("12161111@inha.edu", "123456789L", "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.SENIOR, "token");
+        doReturn(null).when(redisUtil).get(any(String.class));
+
+        // when
+        final Executable executable = () -> memberService.validateAndSendVerificationMailAndSaveMember(request);
+
+        // then
+        assertThrows(EmailCertificationInvalidTokenException.class, executable);
+    }
+
+    @Test
     @DisplayName("회원 조회 & JWT 생성: 성공")
     void findMemberAndGenerateJwt_success() throws Exception {
         // given
-        final Optional<Member> member = Optional.of(new Member(123456789L, "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
-        doReturn(member).when(memberRepository).findByKakaoId(any(Long.class));
+        doReturn("token").when(kakaoUtil).getAccessTokenFromKakaoAPI(any(String.class));
+        doReturn("123456789L").when(kakaoUtil).getUserIdFromKakaoAPI(any(String.class));
+        final Optional<Member> member = Optional.of(new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
+        doReturn(member).when(memberRepository).findByUserId(any(String.class));
 
         List<GrantedAuthority> authorities = new ArrayList<>();
         final User user = new User(String.valueOf(member.get().getId()), UUID.randomUUID().toString(), new ArrayList<>(authorities));
@@ -168,7 +191,7 @@ public class MemberServiceTest {
         doNothing().when(redisUtil).set(any(String.class), any(Long.class), any(Integer.class));
 
         // when
-        final MemberAndJwtDto memberAndJwtDto = memberService.findMemberAndGenerateJwt(123456789L);
+        final MemberAndJwtDto memberAndJwtDto = memberService.findMemberAndGenerateJwt("123456789L");
 
         // then
         assertThat(memberAndJwtDto.getMember().getEmail()).isEqualTo(member.get().getEmail());
@@ -178,10 +201,12 @@ public class MemberServiceTest {
     @DisplayName("회원 조회 & JWT 생성: 실패")
     void findMemberAndGenerateJwt_fail() throws Exception {
         // given
-        doReturn(Optional.empty()).when(memberRepository).findByKakaoId(any(Long.class));
+        doReturn(Optional.empty()).when(memberRepository).findByUserId(any(String.class));
+        doReturn("token").when(kakaoUtil).getAccessTokenFromKakaoAPI(any(String.class));
+        doReturn("123456789L").when(kakaoUtil).getUserIdFromKakaoAPI(any(String.class));
 
         // when
-        final Executable executable = () -> memberService.findMemberAndGenerateJwt(123456789L);
+        final Executable executable = () -> memberService.findMemberAndGenerateJwt("123456789L");
 
         // then
         assertThrows(MemberNotFoundException.class, executable);
@@ -238,7 +263,7 @@ public class MemberServiceTest {
     @DisplayName("이메일 검증: 실패")
     void checkEmail_fail() throws Exception {
         // given
-        final Optional<Member> member = Optional.of(new Member(123456789L, "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
+        final Optional<Member> member = Optional.of(new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
         doReturn(member).when(memberRepository).findByEmail(any(String.class));
 
         // when
@@ -252,9 +277,9 @@ public class MemberServiceTest {
     @DisplayName("회원 정보 조회: 성공")
     void getMemberInfo_success() throws Exception {
         // given
-        final Optional<Member> me = Optional.of(new Member(123456789L, "12161111@inha.edu", "username", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
+        final Optional<Member> me = Optional.of(new Member("123456789L", "12161111@inha.edu", "username", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
         ReflectionTestUtils.setField(me.get(), "id", 1L);
-        final Optional<Member> someone = Optional.of(new Member(123456789L, "12161111@inha.edu", "asdfasdf", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
+        final Optional<Member> someone = Optional.of(new Member("123456789L", "12161111@inha.edu", "asdfasdf", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
         ReflectionTestUtils.setField(someone.get(), "id", 2L);
         doReturn(me).when(memberRepository).findById(1L);
         doReturn(someone).when(memberRepository).findById(2L);
@@ -287,7 +312,7 @@ public class MemberServiceTest {
     @DisplayName("회원 정보 수정: 성공")
     void updateMemberInfo_success() throws Exception {
         // given
-        final Optional<Member> member = Optional.of(new Member(123456789L, "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
+        final Optional<Member> member = Optional.of(new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
         ReflectionTestUtils.setField(member.get(), "id", 1L);
         final MemberInfoUpdateRequest request = new MemberInfoUpdateRequest("만두", "정통", "010-3333-1234", MemberAcademicStatus.ATTENDING, MemberGrade.SENIOR, "안녕");
         doReturn(member).when(memberRepository).findById(any(Long.class));
@@ -307,7 +332,7 @@ public class MemberServiceTest {
     @DisplayName("회원 이미지 변경: 성공(새 이미지)")
     void updateMemberImage_success() throws Exception {
         // given
-        final Optional<Member> member = Optional.of(new Member(123456789L, "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
+        final Optional<Member> member = Optional.of(new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
         member.get().updateImage(Image.builder().url("다른 이미지 url").build());
         doReturn(member).when(memberRepository).findById(any(Long.class));
 
@@ -330,7 +355,7 @@ public class MemberServiceTest {
     @DisplayName("회원 이미지 변경: 성공(기본 이미지)")
     void updateMemberImage_success2() throws Exception {
         // given
-        final Optional<Member> member = Optional.of(new Member(123456789L, "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
+        final Optional<Member> member = Optional.of(new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
         member.get().updateImage(Image.builder().url("다른 이미지 url").build());
         doReturn(member).when(memberRepository).findById(any(Long.class));
 
@@ -349,7 +374,7 @@ public class MemberServiceTest {
     @DisplayName("회원 이미지 변경: 실패")
     void updateMemberImage_fail() throws Exception {
         // given
-        final Optional<Member> member = Optional.of(new Member(123456789L, "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
+        final Optional<Member> member = Optional.of(new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
         member.get().updateImage(Image.builder().url("구 이미지 저장소 url").build());
         doReturn(member).when(memberRepository).findById(any(Long.class));
 
