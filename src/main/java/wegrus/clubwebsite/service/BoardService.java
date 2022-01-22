@@ -79,7 +79,7 @@ public class BoardService {
         // 게시물 추천 기록 삭제
         postLikeRepository.deletePostLikesByBoard(board);
 
-        boardRepository.deleteById(postId);
+        boardRepository.delete(board);
     }
 
     @Transactional
@@ -115,6 +115,6 @@ public class BoardService {
 
         final PostLike postLike = postLikeRepository.findByMemberAndBoard(member, board).orElseThrow(PostLikeNotFoundException::new);
 
-        postLikeRepository.deleteById(postLike.getId());
+        postLikeRepository.delete(postLike);
     }
 }

@@ -59,7 +59,7 @@ public class ReplyService {
         // 댓글 추천수 제거
         commentLikeRepository.deleteCommentLikesByReply(reply);
 
-        replyRepository.deleteById(commentId);
+        replyRepository.delete(reply);
     }
 
     @Transactional
@@ -94,6 +94,6 @@ public class ReplyService {
 
         final CommentLike commentLike = commentLikeRepository.findByMemberAndReply(member, reply).orElseThrow(CommentLikeNotFoundException::new);
 
-        commentLikeRepository.deleteById(commentLike.getId());
+        commentLikeRepository.delete(commentLike);
     }
 }
