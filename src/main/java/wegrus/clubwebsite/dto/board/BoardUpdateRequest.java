@@ -15,6 +15,7 @@ import javax.validation.constraints.NotNull;
 @AllArgsConstructor
 public class BoardUpdateRequest {
     @ApiModelProperty(value = "게시물 id", example = "1", required = true)
+    @NotNull(message = "게시물 id는 필수입니다.")
     private Long boardId;
 
     @ApiModelProperty(value = "게시물 제목", example = "게시판 제목 1", required = true)
