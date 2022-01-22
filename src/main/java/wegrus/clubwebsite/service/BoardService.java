@@ -75,6 +75,9 @@ public class BoardService {
         // 댓글 삭제
         replyRepository.deleteRepliesByBoard(board);
 
+        // 게시물 추천 기록 삭제
+        postLikeRepository.deletePostLikesByBoard(board);
+
         boardRepository.deleteById(postId);
     }
 
