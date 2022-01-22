@@ -49,7 +49,6 @@ public class JwtTokenUtil {
         return Jwts.parser().setSigningKey(ACCESS_TOKEN_SECRET).parseClaimsJws(token).getBody();
     }
 
-
     private Claims getAllClaimsFromRefreshToken(String token) {
         return Jwts.parser().setSigningKey(REFRESH_TOKEN_SECRET).parseClaimsJws(token).getBody();
     }
