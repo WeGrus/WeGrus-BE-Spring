@@ -25,11 +25,11 @@ public class ReplyService {
     private final ReplyRepository replyRepository;
 
     @Transactional
-    public Long create(ReplyCreateRequest request){
+    public Long create(Long postId, ReplyCreateRequest request){
         String memberId = SecurityContextHolder.getContext().getAuthentication().getName();
         final Member member = memberRepository.findById(Long.valueOf(memberId)).orElseThrow(MemberNotFoundException::new);
 
-        final Board board = boardRepository.findById(request.getBoardId()).orElseThrow(BoardNotFoundException::new);
+        final Board board = boardRepository.findById(postId).orElseThrow(BoardNotFoundException::new);
 
         ReplyState replyState = ReplyState.ACTIVATE;
 

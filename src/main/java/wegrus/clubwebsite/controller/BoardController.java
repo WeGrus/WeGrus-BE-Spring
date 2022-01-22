@@ -54,8 +54,10 @@ public class BoardController {
 
     @ApiOperation(value = "댓글 등록")
     @PostMapping("/comments")
-    public ResponseEntity<ResultResponse> createComment(@Validated @RequestBody ReplyCreateRequest request){
-        final Long replyId = replyService.create(request);
+    public ResponseEntity<ResultResponse> createComment(
+            @Validated @NotNull(message = "게시물 id는 필수입니다.") @RequestParam Long postId,
+            @Validated @RequestBody ReplyCreateRequest request){
+        final Long replyId = replyService.create(postId, request);
         final ReplyCreateResponse response = new ReplyCreateResponse(replyId);
 
         return ResponseEntity.ok(ResultResponse.of(CREATE_REPLY_SUCCESS, response));
