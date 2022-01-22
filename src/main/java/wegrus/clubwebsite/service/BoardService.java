@@ -8,23 +8,19 @@ import wegrus.clubwebsite.dto.board.BoardCreateRequest;
 import wegrus.clubwebsite.dto.board.BoardUpdateRequest;
 import wegrus.clubwebsite.entity.board.Board;
 import wegrus.clubwebsite.entity.board.BoardState;
-import wegrus.clubwebsite.entity.board.Reply;
 import wegrus.clubwebsite.entity.member.Member;
 import wegrus.clubwebsite.exception.BoardMemberNotMatchException;
 import wegrus.clubwebsite.exception.BoardNotFoundException;
 import wegrus.clubwebsite.exception.MemberNotFoundException;
 import wegrus.clubwebsite.repository.BoardRepository;
 import wegrus.clubwebsite.repository.MemberRepository;
-import wegrus.clubwebsite.repository.ReplyRepository;
 
-import java.util.List;
 
 @RequiredArgsConstructor
 @Service
 public class BoardService {
     private final BoardRepository boardRepository;
     private final MemberRepository memberRepository;
-    private final ReplyRepository replyRepository;
 
     @Transactional
     public Long create(BoardCreateRequest request){
