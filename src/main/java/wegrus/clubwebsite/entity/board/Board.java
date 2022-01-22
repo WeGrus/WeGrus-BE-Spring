@@ -31,7 +31,7 @@ public class Board {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    @OneToMany(mappedBy = "board")
+    @OneToMany(mappedBy = "board", orphanRemoval = true)
     private List<Reply> replies = new ArrayList<>();
 
     @OneToMany(mappedBy = "board")

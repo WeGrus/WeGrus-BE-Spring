@@ -71,12 +71,6 @@ public class BoardService {
             throw new BoardMemberNotMatchException();
         }
 
-        // 해당 게시글의 댓글 모두 삭제
-        List<Reply> replyList = board.getReplies();
-        for(Reply i : replyList){
-            replyRepository.deleteById(i.getId());
-        }
-
         boardRepository.deleteById(postId);
     }
 }
