@@ -21,6 +21,12 @@ public enum ErrorCode {
     INSUFFICIENT_AUTHORITY(403, "C009", "접근 권한이 부족합니다."),
     MULTIPARTFILE_CONVERT_FAIL(400, "C010", "MultipartFile을 File로 변환하는 데 실패하였습니다."),
 
+    // Board
+    BOARD_NOT_FOUND(400, "B000", "존재하지 않는 게시물입니다."),
+    BOARD_MEMBER_NOT_MATCH(400, "B001", "게시물의 작성자와 일치하지 않습니다."),
+    REPLY_NOT_FOUND(400, "B002", "존재하지 않는 댓글입니다."),
+    REPLY_MEMBER_NOT_MATCH(400, "B003", "댓글의 작성자와 일치하지 않습니다."),
+
     // Member
     MEMBER_NOT_FOUND(400, "M000", "존재하지 않는 회원입니다."),
     KAKAOID_ALREADY_EXIST(400, "M001", "이미 존재하는 카카오 회원 번호입니다."),
@@ -32,7 +38,6 @@ public enum ErrorCode {
     // File
     NOT_SUPPORTED_IMAGE_TYPE(400, "F000", "이미지 타입은 JPG, PNG, GIF만 지원합니다."),
     ;
-
     private int status;
     private final String code;
     private final String message;
