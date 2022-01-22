@@ -29,6 +29,7 @@ public enum ErrorCode {
     POST_LIKE_ALREADY_EXIST(400, "B004", "이미 존재하는 게시물 추천입니다."),
     POST_LIKE_NOT_FOUND(400, "B005", "게시물 추천이 존재하지 않습니다."),
     COMMENT_LIKE_ALREADY_EXIST(400, "B006", "이미 존재하는 댓글 추천입니다."),
+    COMMENT_LIKE_NOT_FOUND(400, "B007", "댓글 추천이 존재하지 않습니다."),
 
     // Member
     MEMBER_NOT_FOUND(400, "M000", "존재하지 않는 회원입니다."),

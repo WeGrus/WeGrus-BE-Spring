@@ -81,4 +81,16 @@ public class ReplyService {
         commentLikeRepository.save(commentLike);
         return commentLike.getId();
     }
+
+    @Transactional
+    public void dislike(Long commentId){
+        String memberId = SecurityContextHolder.getContext().getAuthentication().getName();
+        final Member member = memberRepository.findById(Long.valueOf(memberId)).orElseThrow(MemberNotFoundException::new);
+
+        final Reply reply = replyRepository.findById(commentId).orElseThrow(ReplyNotFoundException::new);
+
+        final CommentLike commentLike = commentLikeRepository.findByMemberAndReply(member, reply).orElseThrow(CommentLikeNotFoundException::new);
+
+        commentLikeRepository.deleteById(commentLike.getId());
+    }
 }
