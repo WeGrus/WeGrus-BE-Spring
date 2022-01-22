@@ -18,7 +18,7 @@ public interface CommentLikeRepository extends JpaRepository<CommentLike, Long> 
     void deleteCommentLikesByReply(@Param("reply") Reply reply);
 
     @Modifying
-    @Query(value = "DELETE FROM a " +
+    @Query(value = "DELETE FROM b " +
             "USING replies AS a " +
             "INNER JOIN comment_likes AS b " +
             "ON a.reply_id = b.reply_id " +
