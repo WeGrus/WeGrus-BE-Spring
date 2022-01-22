@@ -35,9 +35,8 @@ public class BoardController {
     @ApiOperation(value = "게시물 수정")
     @PutMapping("/posts")
     public ResponseEntity<ResultResponse> updateBoard(
-            @Validated @NotNull(message = "게시물 id는 필수입니다.") @RequestParam Long postId,
             @Validated @RequestBody BoardUpdateRequest request){
-        final Long boardId = boardService.update(postId, request);
+        final Long boardId = boardService.update(request);
         final BoardUpdateResponse response = new BoardUpdateResponse(boardId);
 
         return ResponseEntity.ok(ResultResponse.of(UPDATE_BOARD_SUCCESS, response));
@@ -55,9 +54,8 @@ public class BoardController {
     @ApiOperation(value = "댓글 등록")
     @PostMapping("/comments")
     public ResponseEntity<ResultResponse> createComment(
-            @Validated @NotNull(message = "게시물 id는 필수입니다.") @RequestParam Long postId,
             @Validated @RequestBody ReplyCreateRequest request){
-        final Long replyId = replyService.create(postId, request);
+        final Long replyId = replyService.create(request);
         final ReplyCreateResponse response = new ReplyCreateResponse(replyId);
 
         return ResponseEntity.ok(ResultResponse.of(CREATE_REPLY_SUCCESS, response));

@@ -46,11 +46,11 @@ public class BoardService {
     }
 
     @Transactional
-    public Long update(Long postId, BoardUpdateRequest request){
+    public Long update(BoardUpdateRequest request){
         String memberId = SecurityContextHolder.getContext().getAuthentication().getName();
         final Member member = memberRepository.findById(Long.valueOf(memberId)).orElseThrow(MemberNotFoundException::new);
 
-        final Board board = boardRepository.findById(postId).orElseThrow(BoardNotFoundException::new);
+        final Board board = boardRepository.findById(request.getBoardId()).orElseThrow(BoardNotFoundException::new);
 
         if(!member.getId().equals(board.getMember().getId())){
             throw new BoardMemberNotMatchException();

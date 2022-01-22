@@ -13,6 +13,8 @@ import javax.validation.constraints.NotBlank;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReplyCreateRequest {
+    @ApiModelProperty(value = "게시물 Id", example = "1", required = true)
+    private Long boardId;
 
     @ApiModelProperty(value = "댓글 내용", example = "댓글 내용입니다.", required = true)
     @NotBlank(message = "댓글 내용은 필수입니다.")
