@@ -89,4 +89,14 @@ public class BoardController {
 
         return ResponseEntity.ok(ResultResponse.of(DELETE_REPLY_SUCCESS, null));
     }
+
+    @ApiOperation(value = "댓글 추천")
+    @PostMapping("/comments/like")
+    public ResponseEntity<ResultResponse> likeComment(
+            @Validated @NotNull(message = "댓글 id는 필수입니다.")@RequestParam Long commentId){
+        final Long commentLikeId = replyService.like(commentId);
+        final CommentLikeCreateResponse response = new CommentLikeCreateResponse(commentLikeId);
+
+        return ResponseEntity.ok(ResultResponse.of(CREATE_COMMENT_LIKE_SUCCESS, response));
+    }
 }

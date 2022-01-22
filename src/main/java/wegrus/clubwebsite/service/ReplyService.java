@@ -6,16 +6,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import wegrus.clubwebsite.dto.board.ReplyCreateRequest;
 import wegrus.clubwebsite.entity.board.Board;
+import wegrus.clubwebsite.entity.board.CommentLike;
 import wegrus.clubwebsite.entity.board.Reply;
 import wegrus.clubwebsite.entity.board.ReplyState;
 import wegrus.clubwebsite.entity.member.Member;
-import wegrus.clubwebsite.exception.BoardNotFoundException;
-import wegrus.clubwebsite.exception.MemberNotFoundException;
-import wegrus.clubwebsite.exception.ReplyMemberNotMatchException;
-import wegrus.clubwebsite.exception.ReplyNotFoundException;
+import wegrus.clubwebsite.exception.*;
 import wegrus.clubwebsite.repository.BoardRepository;
+import wegrus.clubwebsite.repository.CommentLikeRepository;
 import wegrus.clubwebsite.repository.MemberRepository;
 import wegrus.clubwebsite.repository.ReplyRepository;
+
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -23,6 +24,7 @@ public class ReplyService {
     private final BoardRepository boardRepository;
     private final MemberRepository memberRepository;
     private final ReplyRepository replyRepository;
+    private final CommentLikeRepository commentLikeRepository;
 
     @Transactional
     public Long create(ReplyCreateRequest request){
@@ -55,5 +57,28 @@ public class ReplyService {
         }
 
         replyRepository.deleteById(commentId);
+    }
+
+    @Transactional
+    public Long like(Long commentId){
+        String memberId = SecurityContextHolder.getContext().getAuthentication().getName();
+        final Member member = memberRepository.findById(Long.valueOf(memberId)).orElseThrow(MemberNotFoundException::new);
+
+        final Reply reply = replyRepository.findById(commentId).orElseThrow(ReplyNotFoundException::new);
+
+        Optional<CommentLike> commentLikes = commentLikeRepository.findByMemberAndReply(member, reply);
+
+        // 이미 추천이 있다면
+        if(commentLikes.isPresent()){
+            throw new CommentLikeAlreadyExistException();
+        }
+
+        CommentLike commentLike = CommentLike.builder()
+                .member(member)
+                .reply(reply)
+                .build();
+
+        commentLikeRepository.save(commentLike);
+        return commentLike.getId();
     }
 }
