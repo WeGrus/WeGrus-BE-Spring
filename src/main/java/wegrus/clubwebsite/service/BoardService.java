@@ -11,10 +11,7 @@ import wegrus.clubwebsite.entity.board.BoardState;
 import wegrus.clubwebsite.entity.board.PostLike;
 import wegrus.clubwebsite.entity.member.Member;
 import wegrus.clubwebsite.exception.*;
-import wegrus.clubwebsite.repository.BoardRepository;
-import wegrus.clubwebsite.repository.MemberRepository;
-import wegrus.clubwebsite.repository.PostLikeRepository;
-import wegrus.clubwebsite.repository.ReplyRepository;
+import wegrus.clubwebsite.repository.*;
 
 import java.util.Optional;
 
@@ -26,6 +23,7 @@ public class BoardService {
     private final MemberRepository memberRepository;
     private final ReplyRepository replyRepository;
     private final PostLikeRepository postLikeRepository;
+    private final CommentLikeRepository commentLikeRepository;
 
     @Transactional
     public Long create(BoardCreateRequest request){
@@ -71,6 +69,9 @@ public class BoardService {
         if(!member.getId().equals(board.getMember().getId())){
             throw new BoardMemberNotMatchException();
         }
+
+        // 게시물 댓글 추천 삭제
+        commentLikeRepository.deleteCommentLikesByBoard(postId);
 
         // 댓글 삭제
         replyRepository.deleteRepliesByBoard(board);

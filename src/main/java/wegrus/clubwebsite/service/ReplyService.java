@@ -56,6 +56,9 @@ public class ReplyService {
             throw new ReplyMemberNotMatchException();
         }
 
+        // 댓글 추천수 제거
+        commentLikeRepository.deleteCommentLikesByReply(reply);
+
         replyRepository.deleteById(commentId);
     }
 
