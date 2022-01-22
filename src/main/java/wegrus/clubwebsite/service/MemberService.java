@@ -11,29 +11,20 @@ import wegrus.clubwebsite.dto.Status;
 import wegrus.clubwebsite.dto.member.*;
 import wegrus.clubwebsite.entity.member.MemberRole;
 import wegrus.clubwebsite.entity.member.MemberRoles;
-import wegrus.clubwebsite.exception.MemberImageAlreadyBasicException;
-import wegrus.clubwebsite.exception.MemberRoleNotFoundException;
+import wegrus.clubwebsite.exception.*;
 import wegrus.clubwebsite.repository.MemberRoleRepository;
 import wegrus.clubwebsite.repository.RoleRepository;
-import wegrus.clubwebsite.util.AmazonS3Util;
-import wegrus.clubwebsite.util.JwtTokenUtil;
+import wegrus.clubwebsite.util.*;
 import wegrus.clubwebsite.dto.VerificationResponse;
 import wegrus.clubwebsite.dto.error.ErrorResponse;
 import wegrus.clubwebsite.entity.member.Member;
 import wegrus.clubwebsite.entity.member.Role;
-import wegrus.clubwebsite.exception.MemberAlreadyExistException;
-import wegrus.clubwebsite.exception.MemberNotFoundException;
 import wegrus.clubwebsite.repository.MemberRepository;
-import wegrus.clubwebsite.util.JwtUserDetailsUtil;
-import wegrus.clubwebsite.util.RedisUtil;
 import wegrus.clubwebsite.vo.Image;
 
 import javax.mail.MessagingException;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import static wegrus.clubwebsite.dto.error.ErrorCode.*;
@@ -53,6 +44,7 @@ public class MemberService {
     private final JwtTokenUtil jwtTokenUtil;
     private final JwtUserDetailsUtil jwtUserDetailsUtil;
     private final AmazonS3Util amazonS3Util;
+    private final KakaoUtil kakaoUtil;
 
     @Value("${valid-time.verification-key}")
     private Integer VERIFICATION_KEY_VALID_TIME;
@@ -76,10 +68,15 @@ public class MemberService {
 
     @Transactional
     public MemberSignupResponse validateAndSendVerificationMailAndSaveMember(MemberSignupRequest request) throws MessagingException {
-        validateDuplication(request.getEmail(), request.getKakaoId());
+        final String email = (String) redisUtil.get(request.getToken());
+        if (email == null || !email.equals(request.getEmail()))
+            throw new EmailCertificationInvalidTokenException();
+        redisUtil.delete(request.getToken());
+        final String userId = kakaoUtil.getUserIdFromKakaoAPI(kakaoUtil.getAccessTokenFromKakaoAPI(request.getAuthorizationCode()));
+        validateDuplication(request.getEmail(), userId);
 
         final Member member = Member.builder()
-                .kakaoId(request.getKakaoId())
+                .userId(userId)
                 .email(request.getEmail())
                 .academicStatus(request.getAcademicStatus())
                 .department(request.getDepartment())
@@ -97,14 +94,14 @@ public class MemberService {
         return new MemberSignupResponse(new MemberDto(member), verificationKey);
     }
 
-    private void validateDuplication(String email, Long kakaoId) {
-        final Optional<Member> findMember = memberRepository.findByKakaoIdOrEmail(kakaoId, email);
+    private void validateDuplication(String email, String userId) {
+        final Optional<Member> findMember = memberRepository.findByUserIdOrEmail(userId, email);
         if (findMember.isPresent()) {
             List<ErrorResponse.FieldError> errors = new ArrayList<>();
             if (findMember.get().getEmail().equals(email))
                 errors.add(new ErrorResponse.FieldError("email", email, EMAIL_ALREADY_EXIST.getMessage()));
-            if (findMember.get().getKakaoId().equals(kakaoId))
-                errors.add(new ErrorResponse.FieldError("kakaoId", String.valueOf(kakaoId), KAKAOID_ALREADY_EXIST.getMessage()));
+            if (findMember.get().getUserId().equals(userId))
+                errors.add(new ErrorResponse.FieldError("userId", userId, USERID_ALREADY_EXIST.getMessage()));
 
             if (!errors.isEmpty())
                 throw new MemberAlreadyExistException(INVALID_INPUT_VALUE, errors);
@@ -119,8 +116,10 @@ public class MemberService {
         return verificationKey;
     }
 
-    public MemberAndJwtDto findMemberAndGenerateJwt(Long kakaoId) {
-        final Member member = memberRepository.findByKakaoId(kakaoId).orElseThrow(MemberNotFoundException::new);
+    public MemberAndJwtDto findMemberAndGenerateJwt(String authorizationCode) {
+        final String userId = kakaoUtil.getUserIdFromKakaoAPI(kakaoUtil.getAccessTokenFromKakaoAPI(authorizationCode));
+
+        final Member member = memberRepository.findByUserId(userId).orElseThrow(MemberNotFoundException::new);
         UserDetails userDetails = jwtUserDetailsUtil.loadUserByUsername(String.valueOf(member.getId()));
         final String accessToken = jwtTokenUtil.generateAccessToken(userDetails);
         final String refreshToken = jwtTokenUtil.generateRefreshToken(userDetails);
@@ -150,7 +149,9 @@ public class MemberService {
             return new EmailCheckResponse(Status.FAILURE, EMAIL_ALREADY_EXIST.getMessage());
         else if (!Pattern.matches("^[0-9]{8}@(inha.edu|inha.ac.kr)$", email))
             return new EmailCheckResponse(Status.FAILURE, INVALID_EMAIL.getMessage());
-        return new EmailCheckResponse(Status.SUCCESS, VALID_EMAIL.getMessage());
+        final String token = UUID.randomUUID().toString();
+        redisUtil.set(token, email, 30);
+        return new EmailCheckResponse(Status.SUCCESS, VALID_EMAIL.getMessage(), token);
     }
 
     public MemberInfoResponse getMemberInfo(Long memberId) {

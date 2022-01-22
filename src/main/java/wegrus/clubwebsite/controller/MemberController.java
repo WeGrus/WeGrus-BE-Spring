@@ -48,7 +48,7 @@ public class MemberController {
         return ResponseEntity.ok(ResultResponse.of(REQUEST_VERIFY_SUCCESS, response));
     }
 
-    @ApiOperation(value = "회원 가입")
+    @ApiOperation(value = "회원 가입", notes = "이메일 검증 API에서 받은 토큰과 함께 요청해주세요.")
     @ApiImplicitParam(name = "Authorization", value = "불필요", example = " ")
     @PostMapping("/signup")
     public ResponseEntity<ResultResponse> signup(@Validated @RequestBody MemberSignupRequest request) throws MessagingException {
@@ -60,14 +60,14 @@ public class MemberController {
     @ApiOperation(value = "로그인")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "Authorization", value = "불필요", example = " "),
-            @ApiImplicitParam(name = "kakaoId", value = "카카오 회원 번호", required = true, example = "123456789")
+            @ApiImplicitParam(name = "authorizationCode", value = "카카오 인증 코드", required = true, example = "ASKDJASIN12231KNsakdasdl1210SSALadk5234")
     })
     @PostMapping("/signin")
     public ResponseEntity<ResultResponse> signin(
-            @Validated @NotNull(message = "카카오 회원 번호는 필수입니다.") @RequestParam Long kakaoId,
+            @Validated @NotBlank(message = "카카오 인증 코드는 필수입니다.") @RequestParam String authorizationCode,
             HttpServletResponse httpServletResponse) {
         try {
-            final MemberAndJwtDto dto = memberService.findMemberAndGenerateJwt(kakaoId);
+            final MemberAndJwtDto dto = memberService.findMemberAndGenerateJwt(authorizationCode);
             final MemberSigninSuccessResponse response = new MemberSigninSuccessResponse(Status.SUCCESS, dto.getMember(), dto.getAccessToken());
             putRefreshTokenToCookie(httpServletResponse, dto.getRefreshToken());
 
@@ -115,7 +115,7 @@ public class MemberController {
         return ResponseEntity.ok(ResultResponse.of(REISSUE_SUCCESS, response));
     }
 
-    @ApiOperation(value = "이메일 검증")
+    @ApiOperation(value = "이메일 검증", notes = "이메일 중복 체크와 검증에 성공하면 토큰을 획득하며, 유효시간은 30분입니다.")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "Authorization", value = "불필요", example = " "),
             @ApiImplicitParam(name = "email", value = "이메일", required = true, example = "12161542@inha.edu")
@@ -147,7 +147,7 @@ public class MemberController {
     @ApiOperation(value = "회원 이미지 변경")
     @ApiImplicitParam(name = "multipartFile", value = "회원 이미지")
     @PatchMapping(value = "/members/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ResultResponse> updateImage(@RequestPart(required = false) MultipartFile image) throws IOException {
+    public ResponseEntity<ResultResponse> updateImage(@RequestPart(required = false, name = "image") MultipartFile image) throws IOException {
         final MemberImageUpdateResponse response = memberService.updateMemberImage(image);
 
         return ResponseEntity.ok(ResultResponse.of(UPDATE_MEMBER_IMAGE_SUCCESS, response));

@@ -22,9 +22,9 @@ public class MemberSignupRequest {
     @Pattern(regexp = "^[0-9]{8}@(inha.edu|inha.ac.kr)$", message = "인하대학교 이메일 형식만 가능합니다.")
     private String email;
 
-    @ApiModelProperty(value = "카카오 회원 번호", example = "123456789", required = true)
-    @NotNull(message = "카카오 회원 번호는 필수입니다.")
-    private Long kakaoId;
+    @ApiModelProperty(value = "카카오 인증 코드", example = "ASKDJASIN12231KNsakdasdl1210SSALadk5234", required = true)
+    @NotBlank(message = "카카오 인증 코드는 필수입니다.")
+    private String authorizationCode;
 
     @ApiModelProperty(value = "회원 실명", example = "홍길동", required = true)
     @NotBlank(message = "회원 실명은 필수입니다.")
@@ -45,4 +45,8 @@ public class MemberSignupRequest {
     @ApiModelProperty(value = "회원 학년", example = "FRESHMAN", required = true)
     @NotNull(message = "회원 학년은 필수입니다.")
     private MemberGrade grade;
+    
+    @ApiModelProperty(value = "이메일 검증 토큰", example = "1231-24SDF-WER321123", required = true)
+    @NotBlank(message = "이메일 검증 토큰은 필수입니다.")
+    private String token;
 }

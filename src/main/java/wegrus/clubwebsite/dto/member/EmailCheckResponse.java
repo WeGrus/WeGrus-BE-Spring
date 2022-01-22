@@ -11,4 +11,10 @@ public class EmailCheckResponse {
 
     private String status;
     private String reason;
+    private String token = "";
+
+    public EmailCheckResponse(String status, String reason) {
+        this.status = status;
+        this.reason = reason;
+    }
 }
