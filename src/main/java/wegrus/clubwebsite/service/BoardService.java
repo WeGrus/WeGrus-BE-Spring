@@ -14,6 +14,7 @@ import wegrus.clubwebsite.exception.BoardNotFoundException;
 import wegrus.clubwebsite.exception.MemberNotFoundException;
 import wegrus.clubwebsite.repository.BoardRepository;
 import wegrus.clubwebsite.repository.MemberRepository;
+import wegrus.clubwebsite.repository.ReplyRepository;
 
 
 @RequiredArgsConstructor
@@ -21,6 +22,7 @@ import wegrus.clubwebsite.repository.MemberRepository;
 public class BoardService {
     private final BoardRepository boardRepository;
     private final MemberRepository memberRepository;
+    private final ReplyRepository replyRepository;
 
     @Transactional
     public Long create(BoardCreateRequest request){
@@ -66,6 +68,9 @@ public class BoardService {
         if(!member.getId().equals(board.getMember().getId())){
             throw new BoardMemberNotMatchException();
         }
+
+        // 댓글 삭제
+        replyRepository.deleteRepliesByBoard(board);
 
         boardRepository.deleteById(postId);
     }
