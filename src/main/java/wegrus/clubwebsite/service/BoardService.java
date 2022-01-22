@@ -8,13 +8,18 @@ import wegrus.clubwebsite.dto.board.BoardCreateRequest;
 import wegrus.clubwebsite.dto.board.BoardUpdateRequest;
 import wegrus.clubwebsite.entity.board.Board;
 import wegrus.clubwebsite.entity.board.BoardState;
+import wegrus.clubwebsite.entity.board.PostLike;
 import wegrus.clubwebsite.entity.member.Member;
 import wegrus.clubwebsite.exception.BoardMemberNotMatchException;
 import wegrus.clubwebsite.exception.BoardNotFoundException;
 import wegrus.clubwebsite.exception.MemberNotFoundException;
+import wegrus.clubwebsite.exception.PostLikeAlreadyExistException;
 import wegrus.clubwebsite.repository.BoardRepository;
 import wegrus.clubwebsite.repository.MemberRepository;
+import wegrus.clubwebsite.repository.PostLikeRepository;
 import wegrus.clubwebsite.repository.ReplyRepository;
+
+import java.util.Optional;
 
 
 @RequiredArgsConstructor
@@ -23,6 +28,7 @@ public class BoardService {
     private final BoardRepository boardRepository;
     private final MemberRepository memberRepository;
     private final ReplyRepository replyRepository;
+    private final PostLikeRepository postLikeRepository;
 
     @Transactional
     public Long create(BoardCreateRequest request){
@@ -73,5 +79,29 @@ public class BoardService {
         replyRepository.deleteRepliesByBoard(board);
 
         boardRepository.deleteById(postId);
+    }
+
+    @Transactional
+    public Long like(Long postId){
+        String memberId = SecurityContextHolder.getContext().getAuthentication().getName();
+        final Member member = memberRepository.findById(Long.valueOf(memberId)).orElseThrow(MemberNotFoundException::new);
+
+        final Board board = boardRepository.findById(postId).orElseThrow(BoardNotFoundException::new);
+
+        Optional<PostLike> postLikes = postLikeRepository.findByMemberAndBoard(member, board);
+
+        // 추천 기록이 있다면
+        if(postLikes.isPresent()){
+            throw new PostLikeAlreadyExistException();
+        }
+
+        PostLike postLike = PostLike.builder()
+                .board(board)
+                .member(member)
+                .build();
+
+        postLikeRepository.save(postLike);
+
+        return postLike.getId();
     }
 }

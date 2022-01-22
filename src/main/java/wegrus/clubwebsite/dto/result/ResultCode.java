@@ -26,6 +26,7 @@ public enum ResultCode {
     VIEW_BOARD_SUCCESS(200, "B103", "게시물 조회에 성공하였습니다."),
     CREATE_REPLY_SUCCESS(200, "B104", "댓글 등록에 성공하였습니다."),
     DELETE_REPLY_SUCCESS(200, "B105", "댓글 삭제에 성공하였습니다."),
+    CREATE_POST_LIKE_SUCCESS(200, "B106", "게시물 추천에 성공하였습니다."),
 
     // Verification
     REQUEST_VERIFY_SUCCESS(200, "V100", "인증 키 검증 요청에 성공하였습니다."),
