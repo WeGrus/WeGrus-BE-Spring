@@ -18,11 +18,11 @@ import javax.validation.constraints.NotNull;
 public class BoardCreateRequest {
 
     @ApiModelProperty(value = "게시판 종류", example = "BOARD", required = true)
-    @NotBlank(message = "게시판 종류는 필수입니다.")
+    @NotNull(message = "게시판 종류는 필수입니다.")
     private BoardCategory boardCategory;
 
     @ApiModelProperty(value = "게시물 종류", example = "FREE", required = true)
-    @NotBlank(message = "게시물 종류는 필수입니다.")
+    @NotNull(message = "게시물 종류는 필수입니다.")
     private BoardType boardType;
 
     @ApiModelProperty(value = "게시물 제목", example = "게시판 제목 1", required = true)
