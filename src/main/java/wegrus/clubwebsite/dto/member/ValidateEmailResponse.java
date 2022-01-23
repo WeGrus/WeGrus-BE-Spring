@@ -5,9 +5,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
-@AllArgsConstructor
 @NoArgsConstructor
-public class MemberSignupResponse {
+@AllArgsConstructor
+public class ValidateEmailResponse {
 
-    private MemberDto member;
+    private String status;
+    private String reason;
 }

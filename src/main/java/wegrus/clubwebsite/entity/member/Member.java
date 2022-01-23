@@ -46,8 +46,8 @@ public class Member {
     @OneToMany(mappedBy = "member")
     private List<CommentLike> commentLikes = new ArrayList<>();
 
-    @Column(name = "member_kakao_id", unique = true, nullable = false)
-    private Long kakaoId;
+    @Column(name = "member_user_id", unique = true, nullable = false)
+    private String userId;
 
     @Column(name = "member_email", unique = true, nullable = false)
     private String email;
@@ -93,8 +93,8 @@ public class Member {
     private MemberAcademicStatus academicStatus;
 
     @Builder
-    public Member(Long kakaoId, String email, String name, String department, MemberGrade grade, String phone, MemberAcademicStatus academicStatus) {
-        this.kakaoId = kakaoId;
+    public Member(String userId, String email, String name, String department, MemberGrade grade, String phone, MemberAcademicStatus academicStatus) {
+        this.userId = userId;
         this.email = email;
         this.name = name;
         this.studentId = email.substring(0, 8);
