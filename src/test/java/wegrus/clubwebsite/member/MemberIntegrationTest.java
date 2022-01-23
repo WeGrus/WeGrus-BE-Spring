@@ -162,6 +162,18 @@ public class MemberIntegrationTest {
         return objectMapper.convertValue(responseEntity.getBody().getData(), ValidateEmailResponse.class);
     }
 
+    public RequestAuthorityResponse requestAuthorityAPI(String accessToken, MemberRoles memberRoles) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        MultiValueMap<String, MemberRoles> map = new LinkedMultiValueMap<>();
+        map.add("role", memberRoles);
+
+        final HttpEntity<MultiValueMap<String, MemberRoles>> requestEntity = new HttpEntity<>(map, headers);
+        final ResponseEntity<ResultResponse> responseEntity = restTemplate.exchange("/members/authority", HttpMethod.POST, requestEntity, ResultResponse.class);
+        return objectMapper.convertValue(responseEntity.getBody().getData(), RequestAuthorityResponse.class);
+    }
+
     @Test
     @DisplayName("이메일 검증")
     void checkEmail() throws Exception {
@@ -358,5 +370,26 @@ public class MemberIntegrationTest {
         // then
         assertThat(response.getImageUrl()).isEqualTo("new url");
         assertThat(response.getStatus()).isEqualTo(Status.SUCCESS);
+    }
+
+    @Test
+    @DisplayName("회원 권한 요청")
+    void requestAuthority() throws Exception {
+        // given
+        final String email = "33339911@inha.edu";
+        final String userId = "122351124940";
+        doReturn(userId).when(kakaoUtil).getUserIdFromKakaoAPI(any(String.class));
+        signupAPI(email, "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.FRESHMAN, userId);
+        final ResponseEntity<ResultResponse> responseEntity = signinAPI("authorizationCode");
+        final MemberSigninSuccessResponse memberSigninSuccessResponse = objectMapper.convertValue(responseEntity.getBody().getData(), MemberSigninSuccessResponse.class);
+        final String accessToken = memberSigninSuccessResponse.getAccessToken();
+        final MemberRoles memberRoles = MemberRoles.ROLE_MEMBER;
+
+        // when
+        final RequestAuthorityResponse response = requestAuthorityAPI(accessToken, memberRoles);
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(Status.SUCCESS);
+        assertThat(response.getRole()).isEqualTo(memberRoles);
     }
 }

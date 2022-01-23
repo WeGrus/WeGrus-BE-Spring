@@ -394,4 +394,49 @@ public class MemberServiceTest {
         assertThat(response.getStatus()).isEqualTo(Status.FAILURE);
         assertThat(response.getReason()).isEqualTo(EMAIL_NOT_VERIFIED.getMessage());
     }
+
+    @Test
+    @DisplayName("권한 요청: 성공")
+    void requestAuthority_success() throws Exception {
+        // given
+        final MemberRoles memberRoles = MemberRoles.ROLE_MEMBER;
+        final Optional<Role> role = Optional.of(new Role(memberRoles.name()));
+        ReflectionTestUtils.setField(role.get(), "id", 1L);
+        doReturn(role).when(roleRepository).findByName(any(String.class));
+
+        final Optional<Member> member = Optional.of(new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
+        doReturn(member).when(memberRepository).findById(any(Long.class));
+
+        doReturn(Optional.empty()).when(memberRoleRepository).findByMemberIdAndRoleId(any(Long.class), any(Long.class));
+        doReturn(null).when(memberRoleRepository).save(any(MemberRole.class));
+
+        // when
+        final RequestAuthorityResponse response = memberService.requestAuthority(memberRoles);
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(Status.SUCCESS);
+        assertThat(response.getRole()).isEqualTo(memberRoles);
+    }
+
+    @Test
+    @DisplayName("권한 요청: 실패")
+    void requestAuthority_fail() throws Exception {
+        // given
+        final MemberRoles memberRoles = MemberRoles.ROLE_MEMBER;
+        final Optional<Role> role = Optional.of(new Role(memberRoles.name()));
+        ReflectionTestUtils.setField(role.get(), "id", 1L);
+        doReturn(role).when(roleRepository).findByName(any(String.class));
+
+        final Optional<Member> member = Optional.of(new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
+        doReturn(member).when(memberRepository).findById(any(Long.class));
+
+        final MemberRole memberRole = new MemberRole(member.get(), role.get());
+        doReturn(Optional.of(memberRole)).when(memberRoleRepository).findByMemberIdAndRoleId(any(Long.class), any(Long.class));
+
+        // when
+        final Executable executable = () -> memberService.requestAuthority(memberRoles);
+
+        // then
+        assertThrows(MemberAlreadyHasRoleException.class, executable);
+    }
 }

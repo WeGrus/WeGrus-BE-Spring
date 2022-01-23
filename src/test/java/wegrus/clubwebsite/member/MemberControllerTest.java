@@ -27,6 +27,7 @@ import wegrus.clubwebsite.dto.member.*;
 import wegrus.clubwebsite.entity.member.Member;
 import wegrus.clubwebsite.entity.member.MemberAcademicStatus;
 import wegrus.clubwebsite.entity.member.MemberGrade;
+import wegrus.clubwebsite.entity.member.MemberRoles;
 import wegrus.clubwebsite.exception.MemberNotFoundException;
 import wegrus.clubwebsite.service.MemberService;
 import wegrus.clubwebsite.util.RedisUtil;
@@ -549,5 +550,27 @@ public class MemberControllerTest {
                 .andExpect(jsonPath("message").value(VALIDATE_EMAIL_SUCCESS.getMessage()))
                 .andExpect(jsonPath("data.status").value(Status.FAILURE))
                 .andExpect(jsonPath("data.reason").value(EMAIL_NOT_VERIFIED.getMessage()));
+    }
+
+    @Test
+    @DisplayName("회원 권한 요청 API: 성공")
+    void requestAuthority_success() throws Exception {
+        // given
+        final RequestAuthorityResponse requestAuthorityResponse = new RequestAuthorityResponse(Status.SUCCESS, MemberRoles.ROLE_MEMBER);
+        doReturn(requestAuthorityResponse).when(memberService).requestAuthority(any(MemberRoles.class));
+
+        // when
+        final ResultActions perform = mockMvc.perform(
+                post("/members/authority").with(csrf())
+                        .contentType(APPLICATION_FORM_URLENCODED)
+                        .param("role", MemberRoles.ROLE_MEMBER.name())
+        );
+
+        // then
+        perform
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("code").value(REQUEST_AUTHORITY_SUCCESS.getCode()))
+                .andExpect(jsonPath("message").value(REQUEST_AUTHORITY_SUCCESS.getMessage()))
+                .andExpect(jsonPath("data.role").value(MemberRoles.ROLE_MEMBER.name()));
     }
 }
