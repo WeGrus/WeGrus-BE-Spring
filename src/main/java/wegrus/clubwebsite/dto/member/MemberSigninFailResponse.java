@@ -10,4 +10,5 @@ import lombok.NoArgsConstructor;
 public class MemberSigninFailResponse {
 
     private String status;
+    private String userId;
 }

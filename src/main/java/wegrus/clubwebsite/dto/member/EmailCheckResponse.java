@@ -11,7 +11,7 @@ public class EmailCheckResponse {
 
     private String status;
     private String reason;
-    private String token = "";
+    private String verificationKey = "";
 
     public EmailCheckResponse(String status, String reason) {
         this.status = status;

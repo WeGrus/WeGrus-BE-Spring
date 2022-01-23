@@ -58,25 +58,17 @@ public class MemberService {
         if (email == null)
             return new VerificationResponse(false, EXPIRED_VERIFICATION_KEY.getMessage());
         redisUtil.delete(verificationKey);
-        final Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
-        final Role role = roleRepository.findByName(MemberRoles.ROLE_CERTIFIED.name()).orElseThrow(MemberRoleNotFoundException::new);
-        memberRoleRepository.save(new MemberRole(member, role));
-        // TODO: 회원가입 축하 이메일 전송 -> 내용 논의
+        redisUtil.set(email, email, 30);
 
         return new VerificationResponse(true, VERIFY_EMAIL_SUCCESS.getMessage());
     }
 
     @Transactional
-    public MemberSignupResponse validateAndSendVerificationMailAndSaveMember(MemberSignupRequest request) throws MessagingException {
-        final String email = (String) redisUtil.get(request.getToken());
-        if (email == null || !email.equals(request.getEmail()))
-            throw new EmailCertificationInvalidTokenException();
-        redisUtil.delete(request.getToken());
-        final String userId = kakaoUtil.getUserIdFromKakaoAPI(kakaoUtil.getAccessTokenFromKakaoAPI(request.getAuthorizationCode()));
-        validateDuplication(request.getEmail(), userId);
+    public MemberSignupResponse validateAndSaveMember(MemberSignupRequest request) {
+        validateDuplication(request.getEmail(), request.getUserId());
 
         final Member member = Member.builder()
-                .userId(userId)
+                .userId(request.getUserId())
                 .email(request.getEmail())
                 .academicStatus(request.getAcademicStatus())
                 .department(request.getDepartment())
@@ -89,9 +81,9 @@ public class MemberService {
 
         final Role role = roleRepository.findByName(MemberRoles.ROLE_GUEST.name()).orElseThrow(MemberRoleNotFoundException::new);
         memberRoleRepository.save(new MemberRole(member, role));
+        // TODO: 회원가입 축하 이메일 전송 -> 내용 논의
 
-        final String verificationKey = sendVerificationMail(request.getEmail());
-        return new MemberSignupResponse(new MemberDto(member), verificationKey);
+        return new MemberSignupResponse(new MemberDto(member));
     }
 
     private void validateDuplication(String email, String userId) {
@@ -119,7 +111,10 @@ public class MemberService {
     public MemberAndJwtDto findMemberAndGenerateJwt(String authorizationCode) {
         final String userId = kakaoUtil.getUserIdFromKakaoAPI(kakaoUtil.getAccessTokenFromKakaoAPI(authorizationCode));
 
+        redisUtil.set(authorizationCode, userId, 1);
         final Member member = memberRepository.findByUserId(userId).orElseThrow(MemberNotFoundException::new);
+        redisUtil.delete(authorizationCode);
+
         UserDetails userDetails = jwtUserDetailsUtil.loadUserByUsername(String.valueOf(member.getId()));
         final String accessToken = jwtTokenUtil.generateAccessToken(userDetails);
         final String refreshToken = jwtTokenUtil.generateRefreshToken(userDetails);
@@ -144,14 +139,13 @@ public class MemberService {
         return new JwtDto(newAccessToken, newRefreshToken);
     }
 
-    public EmailCheckResponse checkEmail(String email) {
+    public EmailCheckResponse checkEmailAndSendMail(String email) throws MessagingException {
         if (memberRepository.findByEmail(email).isPresent())
             return new EmailCheckResponse(Status.FAILURE, EMAIL_ALREADY_EXIST.getMessage());
         else if (!Pattern.matches("^[0-9]{8}@(inha.edu|inha.ac.kr)$", email))
             return new EmailCheckResponse(Status.FAILURE, INVALID_EMAIL.getMessage());
-        final String token = UUID.randomUUID().toString();
-        redisUtil.set(token, email, 30);
-        return new EmailCheckResponse(Status.SUCCESS, VALID_EMAIL.getMessage(), token);
+        final String verificationKey = sendVerificationMail(email);
+        return new EmailCheckResponse(Status.SUCCESS, VALID_EMAIL.getMessage(), verificationKey);
     }
 
     public MemberInfoResponse getMemberInfo(Long memberId) {
@@ -189,5 +183,13 @@ public class MemberService {
         }
 
         return new MemberImageUpdateResponse(Status.SUCCESS, member.getImage().getUrl());
+    }
+
+    public ValidateEmailResponse validateEmail(String email) {
+        final String result = (String) redisUtil.get(email);
+        if (result == null)
+            return new ValidateEmailResponse(Status.FAILURE, EMAIL_NOT_VERIFIED.getMessage());
+        redisUtil.delete(email);
+        return new ValidateEmailResponse(Status.SUCCESS, EMAIL_IS_VERIFIED.getMessage());
     }
 }

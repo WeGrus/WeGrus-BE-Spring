@@ -17,6 +17,7 @@ import wegrus.clubwebsite.dto.member.*;
 import wegrus.clubwebsite.dto.result.ResultResponse;
 import wegrus.clubwebsite.exception.MemberNotFoundException;
 import wegrus.clubwebsite.service.MemberService;
+import wegrus.clubwebsite.util.RedisUtil;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.Cookie;
@@ -35,8 +36,9 @@ import static wegrus.clubwebsite.dto.result.ResultCode.*;
 public class MemberController {
 
     private final MemberService memberService;
+    private final RedisUtil redisUtil;
 
-    @ApiOperation(value = "본인 이메일 인증")
+    @ApiOperation(value = "본인 이메일 인증", notes = "인증된 이메일은 30분간 유효하며, 만료 시 다시 이메일 인증을 받아야 합니다.")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "Authorization", value = "불필요", example = " "),
             @ApiImplicitParam(name = "verificationKey", value = "인증키", required = true, example = "5ecc3d01-bd92-4f1a-bdf2-9a5a777871ae")
@@ -51,8 +53,8 @@ public class MemberController {
     @ApiOperation(value = "회원 가입", notes = "이메일 검증 API에서 받은 토큰과 함께 요청해주세요.")
     @ApiImplicitParam(name = "Authorization", value = "불필요", example = " ")
     @PostMapping("/signup")
-    public ResponseEntity<ResultResponse> signup(@Validated @RequestBody MemberSignupRequest request) throws MessagingException {
-        final MemberSignupResponse response = memberService.validateAndSendVerificationMailAndSaveMember(request);
+    public ResponseEntity<ResultResponse> signup(@Validated @RequestBody MemberSignupRequest request) {
+        final MemberSignupResponse response = memberService.validateAndSaveMember(request);
 
         return ResponseEntity.ok(ResultResponse.of(SIGNUP_SUCCESS, response));
     }
@@ -73,7 +75,9 @@ public class MemberController {
 
             return ResponseEntity.ok(ResultResponse.of(SIGNIN_SUCCESS, response));
         } catch (MemberNotFoundException e) {
-            final MemberSigninFailResponse response = new MemberSigninFailResponse(Status.FAILURE);
+            final String userId = (String) redisUtil.get(authorizationCode);
+            final MemberSigninFailResponse response = new MemberSigninFailResponse(Status.FAILURE, userId);
+            redisUtil.delete(authorizationCode);
 
             return ResponseEntity.ok(ResultResponse.of(SIGNIN_FAILURE, response));
         }
@@ -115,14 +119,14 @@ public class MemberController {
         return ResponseEntity.ok(ResultResponse.of(REISSUE_SUCCESS, response));
     }
 
-    @ApiOperation(value = "이메일 검증", notes = "이메일 중복 체크와 검증에 성공하면 토큰을 획득하며, 유효시간은 30분입니다.")
+    @ApiOperation(value = "이메일 검증", notes = "이메일 중복 체크와 검증에 성공하면, 해당 이메일로 인증메일을 전송합니다.")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "Authorization", value = "불필요", example = " "),
             @ApiImplicitParam(name = "email", value = "이메일", required = true, example = "12161542@inha.edu")
     })
     @PostMapping("/signup/check/email")
-    public ResponseEntity<ResultResponse> checkEmail(@RequestParam String email) {
-        final EmailCheckResponse response = memberService.checkEmail(email);
+    public ResponseEntity<ResultResponse> checkEmail(@RequestParam String email) throws MessagingException {
+        final EmailCheckResponse response = memberService.checkEmailAndSendMail(email);
 
         return ResponseEntity.ok(ResultResponse.of(CHECK_EMAIL_SUCCESS, response));
     }
@@ -151,5 +155,17 @@ public class MemberController {
         final MemberImageUpdateResponse response = memberService.updateMemberImage(image);
 
         return ResponseEntity.ok(ResultResponse.of(UPDATE_MEMBER_IMAGE_SUCCESS, response));
+    }
+
+    @ApiOperation(value = "이메일 인증 여부 확인")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "불필요", example = " "),
+            @ApiImplicitParam(name = "email", value = "이메일", required = true, example = "12161542@inha.edu")
+    })
+    @GetMapping("/signup/validate/email")
+    public ResponseEntity<ResultResponse> validateEmail(@RequestParam String email) {
+        final ValidateEmailResponse response = memberService.validateEmail(email);
+
+        return ResponseEntity.ok(ResultResponse.of(VALIDATE_EMAIL_SUCCESS, response));
     }
 }

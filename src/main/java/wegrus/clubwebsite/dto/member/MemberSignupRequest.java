@@ -45,8 +45,8 @@ public class MemberSignupRequest {
     @ApiModelProperty(value = "회원 학년", example = "FRESHMAN", required = true)
     @NotNull(message = "회원 학년은 필수입니다.")
     private MemberGrade grade;
-    
-    @ApiModelProperty(value = "이메일 검증 토큰", example = "1231-24SDF-WER321123", required = true)
-    @NotBlank(message = "이메일 검증 토큰은 필수입니다.")
-    private String token;
+
+    @ApiModelProperty(value = "회원 아이디", example = "kakao_124125124124", required = true)
+    @NotBlank(message = "회원 아이디는 필수입니다.")
+    private String userId;
 }
