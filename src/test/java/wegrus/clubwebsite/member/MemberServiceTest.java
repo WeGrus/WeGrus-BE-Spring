@@ -36,6 +36,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static wegrus.clubwebsite.dto.result.ResultCode.EMAIL_IS_VERIFIED;
+import static wegrus.clubwebsite.dto.result.ResultCode.EMAIL_NOT_VERIFIED;
 
 @ExtendWith(MockitoExtension.class)
 public class MemberServiceTest {
@@ -93,9 +95,7 @@ public class MemberServiceTest {
         final String email = "12161111@inha.edu";
         doReturn(email).when(redisUtil).get(any(String.class));
         doReturn(true).when(redisUtil).delete(any(String.class));
-        doReturn(Optional.of(new Role(MemberRoles.ROLE_CERTIFIED.name()))).when(roleRepository).findByName(any(String.class));
-        final Optional<Member> member = Optional.of(new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
-        doReturn(member).when(memberRepository).findByEmail(any(String.class));
+        doNothing().when(redisUtil).set(any(String.class), any(Object.class), any(Integer.class));
 
         // when
         final VerificationResponse response = memberService.checkVerificationKey(UUID.randomUUID().toString());
@@ -118,58 +118,36 @@ public class MemberServiceTest {
     }
 
     @Test
-    @DisplayName("회원가입 데이터 검증 & 인증메일 전송 & 회원 저장: 성공")
-    void validateAndSendVerificationMailAndSaveMember_success() throws Exception {
+    @DisplayName("회원가입: 성공")
+    void validateAndSaveMember_success() throws Exception {
         // given
-        final MemberSignupRequest request = new MemberSignupRequest("12161111@inha.edu", "123456789L", "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.SENIOR, "token");
+        final MemberSignupRequest request = new MemberSignupRequest("12161111@inha.edu", "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.SENIOR, "token");
         doReturn(Optional.empty()).when(memberRepository).findByUserIdOrEmail(any(String.class), any(String.class));
         final Optional<Member> member = Optional.of(new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
         doReturn(member.get()).when(memberRepository).save(any(Member.class));
-        doNothing().when(mailService).sendSchoolMailVerification(any(String.class), any(String.class));
-        doNothing().when(redisUtil).set(any(String.class), any(Object.class), any(Integer.class));
-        doReturn("12161111@inha.edu").when(redisUtil).get(any(String.class));
         doReturn(Optional.of(new Role(MemberRoles.ROLE_GUEST.name()))).when(roleRepository).findByName(any(String.class));
-        doReturn("token").when(kakaoUtil).getAccessTokenFromKakaoAPI(any(String.class));
-        doReturn("123456789L").when(kakaoUtil).getUserIdFromKakaoAPI(any(String.class));
+        doNothing().when(amazonS3Util).createDirectory(any(String.class));
 
         // when
-        final MemberSignupResponse response = memberService.validateAndSendVerificationMailAndSaveMember(request);
+        final MemberSignupResponse response = memberService.validateAndSaveMember(request);
 
         // then
-        assertThat(response.getVerificationKey()).isNotBlank();
+        assertThat(response.getMember()).isNotNull();
     }
 
     @Test
-    @DisplayName("회원가입 데이터 검증 & 인증메일 전송 & 회원 저장: 실패")
-    void validateAndSendVerificationMailAndSaveMember_fail() throws Exception {
+    @DisplayName("회원가입: 실패")
+    void validateAndSaveMember_fail() throws Exception {
         // given
-        final MemberSignupRequest request = new MemberSignupRequest("12161111@inha.edu", "123456789L", "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.SENIOR, "token");
+        final MemberSignupRequest request = new MemberSignupRequest("12161111@inha.edu", "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.SENIOR, "token");
         final Optional<Member> member = Optional.of(new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
         doReturn(member).when(memberRepository).findByUserIdOrEmail(any(String.class), any(String.class));
-        doReturn("12161111@inha.edu").when(redisUtil).get(any(String.class));
-        doReturn(true).when(redisUtil).delete(any(String.class));
-        doReturn("token").when(kakaoUtil).getAccessTokenFromKakaoAPI(any(String.class));
-        doReturn("123456789L").when(kakaoUtil).getUserIdFromKakaoAPI(any(String.class));
 
         // when
-        final Executable executable = () -> memberService.validateAndSendVerificationMailAndSaveMember(request);
+        final Executable executable = () -> memberService.validateAndSaveMember(request);
 
         // then
         assertThrows(MemberAlreadyExistException.class, executable);
-    }
-
-    @Test
-    @DisplayName("회원가입 데이터 검증 & 인증메일 전송 & 회원 저장: 실패2")
-    void validateAndSendVerificationMailAndSaveMember_fail2() throws Exception {
-        // given
-        final MemberSignupRequest request = new MemberSignupRequest("12161111@inha.edu", "123456789L", "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.SENIOR, "token");
-        doReturn(null).when(redisUtil).get(any(String.class));
-
-        // when
-        final Executable executable = () -> memberService.validateAndSendVerificationMailAndSaveMember(request);
-
-        // then
-        assertThrows(EmailCertificationInvalidTokenException.class, executable);
     }
 
     @Test
@@ -188,6 +166,7 @@ public class MemberServiceTest {
         ReflectionTestUtils.setField(member.get(), "id", 1L);
         doReturn("accessToken").when(jwtTokenUtil).generateAccessToken(any(UserDetails.class));
         doReturn("refreshToken").when(jwtTokenUtil).generateRefreshToken(any(UserDetails.class));
+        doNothing().when(redisUtil).set(any(String.class), any(String.class), any(Integer.class));
         doNothing().when(redisUtil).set(any(String.class), any(Long.class), any(Integer.class));
 
         // when
@@ -248,12 +227,12 @@ public class MemberServiceTest {
 
     @Test
     @DisplayName("이메일 검증: 성공")
-    void checkEmail_success() throws Exception {
+    void checkEmailAndSendMail_success() throws Exception {
         // given
         doReturn(Optional.empty()).when(memberRepository).findByEmail(any(String.class));
 
         // when
-        final EmailCheckResponse response = memberService.checkEmail("12161111@inha.edu");
+        final EmailCheckResponse response = memberService.checkEmailAndSendMail("12161111@inha.edu");
 
         // then
         assertThat(response.getStatus()).isEqualTo(Status.SUCCESS);
@@ -261,13 +240,13 @@ public class MemberServiceTest {
 
     @Test
     @DisplayName("이메일 검증: 실패")
-    void checkEmail_fail() throws Exception {
+    void checkEmailAndSendMail_fail() throws Exception {
         // given
         final Optional<Member> member = Optional.of(new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
         doReturn(member).when(memberRepository).findByEmail(any(String.class));
 
         // when
-        final EmailCheckResponse response = memberService.checkEmail("12161111@inha.edu");
+        final EmailCheckResponse response = memberService.checkEmailAndSendMail("12161111@inha.edu");
 
         // then
         assertThat(response.getStatus()).isEqualTo(Status.FAILURE);
@@ -385,5 +364,34 @@ public class MemberServiceTest {
 
         // then
         assertThrows(MemberImageAlreadyBasicException.class, executable);
+    }
+
+    @Test
+    @DisplayName("이메일 인증 여부 확인: 성공")
+    void validateEmail_success() throws Exception {
+        // given
+        doReturn("true").when(redisUtil).get(any(String.class));
+        doReturn(true).when(redisUtil).delete(any(String.class));
+
+        // when
+        final ValidateEmailResponse response = memberService.validateEmail("11111111@inha.edu");
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(Status.SUCCESS);
+        assertThat(response.getReason()).isEqualTo(EMAIL_IS_VERIFIED.getMessage());
+    }
+
+    @Test
+    @DisplayName("이메일 인증 여부 확인: 실패")
+    void validateEmail_fail() throws Exception {
+        // given
+        doReturn(null).when(redisUtil).get(any(String.class));
+
+        // when
+        final ValidateEmailResponse response = memberService.validateEmail("11111111@inha.edu");
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(Status.FAILURE);
+        assertThat(response.getReason()).isEqualTo(EMAIL_NOT_VERIFIED.getMessage());
     }
 }

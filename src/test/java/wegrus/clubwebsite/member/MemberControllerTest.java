@@ -29,6 +29,7 @@ import wegrus.clubwebsite.entity.member.MemberAcademicStatus;
 import wegrus.clubwebsite.entity.member.MemberGrade;
 import wegrus.clubwebsite.exception.MemberNotFoundException;
 import wegrus.clubwebsite.service.MemberService;
+import wegrus.clubwebsite.util.RedisUtil;
 
 import javax.servlet.http.Cookie;
 import java.io.FileInputStream;
@@ -59,6 +60,9 @@ public class MemberControllerTest {
 
     @MockBean
     private MemberService memberService;
+
+    @MockBean
+    private RedisUtil redisUtil;
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -144,11 +148,10 @@ public class MemberControllerTest {
     @DisplayName("회원 가입 API: 성공")
     void signup_success() throws Exception {
         // given
-        final String verificationKey = UUID.randomUUID().toString();
         final Member member = new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING);
-        final MemberSignupResponse response = new MemberSignupResponse(new MemberDto(member), verificationKey);
-        doReturn(response).when(memberService).validateAndSendVerificationMailAndSaveMember(any(MemberSignupRequest.class));
-        final MemberSignupRequest request = new MemberSignupRequest("12161111@inha.edu", "123456789L", "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.SENIOR, "token");
+        final MemberSignupResponse response = new MemberSignupResponse(new MemberDto(member));
+        doReturn(response).when(memberService).validateAndSaveMember(any(MemberSignupRequest.class));
+        final MemberSignupRequest request = new MemberSignupRequest("12161111@inha.edu", "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.SENIOR, "123456789L");
 
         // when
         final ResultActions perform = mockMvc.perform(
@@ -160,17 +163,16 @@ public class MemberControllerTest {
         // then
         perform
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("code").value(SIGNUP_SUCCESS.getCode()))
-                .andExpect(jsonPath("data.verificationKey").value(verificationKey));
+                .andExpect(jsonPath("code").value(SIGNUP_SUCCESS.getCode()));
     }
 
     @Test
     @DisplayName("회원 가입 API: 바인딩 예외")
     void signup_bindEx() throws Exception {
         // given
-        final MemberSignupRequest request = new MemberSignupRequest("12161111@inha.edu", "123456789L", "홍길동", " ", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.SENIOR, "token");
-        final MemberSignupRequest request2 = new MemberSignupRequest("12161111@gmail.com", "123456789L", "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.SENIOR, "token");
-        final MemberSignupRequest request3 = new MemberSignupRequest("12161111@inha.edu", "123456789L", "홍길동", "컴퓨터공학과", "01012341234", MemberAcademicStatus.ATTENDING, MemberGrade.SENIOR, "token");
+        final MemberSignupRequest request = new MemberSignupRequest("12161111@inha.edu", "홍길동", " ", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.SENIOR, "token");
+        final MemberSignupRequest request2 = new MemberSignupRequest("12161111@gmail.com", "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.SENIOR, "token");
+        final MemberSignupRequest request3 = new MemberSignupRequest("12161111@inha.edu", "홍길동", "컴퓨터공학과", "01012341234", MemberAcademicStatus.ATTENDING, MemberGrade.SENIOR, "token");
 
         // when
         final ResultActions perform = mockMvc.perform(
@@ -249,6 +251,8 @@ public class MemberControllerTest {
     void login_fail() throws Exception {
         // given
         doThrow(MemberNotFoundException.class).when(memberService).findMemberAndGenerateJwt(any(String.class));
+        doReturn("userId").when(redisUtil).get(any(String.class));
+        doReturn(true).when(redisUtil).delete(any(String.class));
 
         // when
         final ResultActions perform = mockMvc.perform(
@@ -342,7 +346,7 @@ public class MemberControllerTest {
         final String email = "12161111@inha.edu";
         final EmailCheckResponse response = new EmailCheckResponse(Status.SUCCESS, VALID_EMAIL.getMessage());
 
-        doReturn(response).when(memberService).checkEmail(any(String.class));
+        doReturn(response).when(memberService).checkEmailAndSendMail(any(String.class));
 
         // when
         final ResultActions perform = mockMvc.perform(
@@ -369,8 +373,8 @@ public class MemberControllerTest {
         final EmailCheckResponse response = new EmailCheckResponse(Status.FAILURE, EMAIL_ALREADY_EXIST.getMessage());
         final EmailCheckResponse response2 = new EmailCheckResponse(Status.FAILURE, INVALID_EMAIL.getMessage());
 
-        doReturn(response).when(memberService).checkEmail(email);
-        doReturn(response2).when(memberService).checkEmail(invalidEmail);
+        doReturn(response).when(memberService).checkEmailAndSendMail(email);
+        doReturn(response2).when(memberService).checkEmailAndSendMail(invalidEmail);
 
         // when
         final ResultActions perform = mockMvc.perform(
@@ -499,5 +503,51 @@ public class MemberControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("code").value(UPDATE_MEMBER_IMAGE_SUCCESS.getCode()))
                 .andExpect(jsonPath("message").value(UPDATE_MEMBER_IMAGE_SUCCESS.getMessage()));
+    }
+
+    @Test
+    @DisplayName("이메일 인증 여부 확인 API: 성공")
+    void validateEmail_success() throws Exception {
+        // given
+        final ValidateEmailResponse validateEmailResponse = new ValidateEmailResponse(Status.SUCCESS, EMAIL_IS_VERIFIED.getMessage());
+        doReturn(validateEmailResponse).when(memberService).validateEmail(any(String.class));
+
+        // when
+        final ResultActions perform = mockMvc.perform(
+                get("/signup/validate/email").with(csrf())
+                        .contentType(APPLICATION_FORM_URLENCODED)
+                        .param("email", "12161542@inha.edu")
+        );
+
+        // then
+        perform
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("code").value(VALIDATE_EMAIL_SUCCESS.getCode()))
+                .andExpect(jsonPath("message").value(VALIDATE_EMAIL_SUCCESS.getMessage()))
+                .andExpect(jsonPath("data.status").value(Status.SUCCESS))
+                .andExpect(jsonPath("data.reason").value(EMAIL_IS_VERIFIED.getMessage()));
+    }
+
+    @Test
+    @DisplayName("이메일 인증 여부 확인 API: 실패")
+    void validateEmail_fail() throws Exception {
+        // given
+        final ValidateEmailResponse validateEmailResponse = new ValidateEmailResponse(Status.FAILURE, EMAIL_NOT_VERIFIED.getMessage());
+        doReturn(validateEmailResponse).when(memberService).validateEmail(any(String.class));
+
+        // when
+        final ResultActions perform = mockMvc.perform(
+                get("/signup/validate/email").with(csrf())
+                        .contentType(APPLICATION_FORM_URLENCODED)
+                        .param("email", "12161542@inha.edu")
+        );
+
+        // then
+        perform
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("code").value(VALIDATE_EMAIL_SUCCESS.getCode()))
+                .andExpect(jsonPath("message").value(VALIDATE_EMAIL_SUCCESS.getMessage()))
+                .andExpect(jsonPath("data.status").value(Status.FAILURE))
+                .andExpect(jsonPath("data.reason").value(EMAIL_NOT_VERIFIED.getMessage()));
     }
 }

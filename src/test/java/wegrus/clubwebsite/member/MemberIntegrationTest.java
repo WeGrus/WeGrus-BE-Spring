@@ -57,7 +57,6 @@ public class MemberIntegrationTest {
 
     @BeforeEach
     void init() throws IOException {
-        doReturn(UUID.randomUUID().toString()).when(kakaoUtil).getUserIdFromKakaoAPI(any(String.class));
         doReturn(UUID.randomUUID().toString()).when(kakaoUtil).getAccessTokenFromKakaoAPI(any(String.class));
         doNothing().when(amazonS3Util).deleteImage(any(Image.class), any(String.class));
         doReturn(Image.builder().url("new url").build()).when(amazonS3Util).uploadImage(any(MultipartFile.class), any(String.class));
@@ -75,8 +74,8 @@ public class MemberIntegrationTest {
         return objectMapper.convertValue(response.getBody().getData(), EmailCheckResponse.class);
     }
 
-    public MemberSignupResponse signupAPI(String email, String userId, String name, String department, String phone, MemberAcademicStatus memberAcademicStatus, MemberGrade memberGrade, String token) {
-        final MemberSignupRequest memberSignupRequest = new MemberSignupRequest(email, userId, name, department, phone, memberAcademicStatus, memberGrade, token);
+    public MemberSignupResponse signupAPI(String email, String name, String department, String phone, MemberAcademicStatus memberAcademicStatus, MemberGrade memberGrade, String userId) {
+        final MemberSignupRequest memberSignupRequest = new MemberSignupRequest(email, name, department, phone, memberAcademicStatus, memberGrade, userId);
 
         final HttpEntity<MemberSignupRequest> request = new HttpEntity<>(memberSignupRequest);
         final ResponseEntity<ResultResponse> response = restTemplate.postForEntity("/signup", request, ResultResponse.class);
@@ -154,6 +153,15 @@ public class MemberIntegrationTest {
         return objectMapper.convertValue(responseEntity.getBody().getData(), MemberImageUpdateResponse.class);
     }
 
+    public ValidateEmailResponse validateEmailAPI(String email){
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        final HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(null, headers);
+        final ResponseEntity<ResultResponse> responseEntity = restTemplate.exchange("/signup/validate/email?email=" + email, HttpMethod.GET, requestEntity, ResultResponse.class);
+        return objectMapper.convertValue(responseEntity.getBody().getData(), ValidateEmailResponse.class);
+    }
+
     @Test
     @DisplayName("이메일 검증")
     void checkEmail() throws Exception {
@@ -172,16 +180,12 @@ public class MemberIntegrationTest {
     void signup() throws Exception {
         // given
         final String email = "12345679@inha.edu";
-        final EmailCheckResponse emailCheckResponse = checkEmailAPI(email);
-        final String token = emailCheckResponse.getToken();
 
         // when
-        final MemberSignupResponse response = signupAPI(email, "123433789L", "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.FRESHMAN, token);
-        final String verificationKey = response.getVerificationKey();
-        redisUtil.delete(verificationKey);
+        final MemberSignupResponse response = signupAPI(email, "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.FRESHMAN, "123433789L");
 
         // then
-        assertThat(response.getVerificationKey()).isNotBlank();
+        assertThat(response.getMember()).isNotNull();
     }
 
     @Test
@@ -190,16 +194,28 @@ public class MemberIntegrationTest {
         // given
         final String email = "12161542@inha.edu";
         final EmailCheckResponse emailCheckResponse = checkEmailAPI(email);
-        final String token = emailCheckResponse.getToken();
-        final MemberSignupResponse memberSignupResponse = signupAPI(email, "123456789L", "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.FRESHMAN, token);
-        final String verificationKey = memberSignupResponse.getVerificationKey();
 
         // when
-        final VerificationResponse response = verifySchoolEmailAPI(verificationKey);
+        final VerificationResponse response = verifySchoolEmailAPI(emailCheckResponse.getVerificationKey());
 
         // then
         assertThat(response.isCertified()).isTrue();
         assertThat(response.getReason()).isEqualTo(VERIFY_EMAIL_SUCCESS.getMessage());
+    }
+
+    @Test
+    @DisplayName("이메일 인증 여부 확인")
+    void validateEmail() throws Exception {
+        // given
+        final String email = "19991332@inha.edu";
+        final EmailCheckResponse emailCheckResponse = checkEmailAPI(email);
+        verifySchoolEmailAPI(emailCheckResponse.getVerificationKey());
+
+        // when
+        final ValidateEmailResponse response = validateEmailAPI(email);
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(Status.SUCCESS);
     }
 
     @Test
@@ -208,14 +224,11 @@ public class MemberIntegrationTest {
         // given
         final String email = "12344279@inha.edu";
         final String userId = "111456789L";
-        final EmailCheckResponse emailCheckResponse = checkEmailAPI(email);
-        final String token = emailCheckResponse.getToken();
-        final MemberSignupResponse memberSignupResponse = signupAPI(email, userId, "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.FRESHMAN, token);
-        final String verificationKey = memberSignupResponse.getVerificationKey();
-        verifySchoolEmailAPI(verificationKey);
+        doReturn(userId).when(kakaoUtil).getUserIdFromKakaoAPI(any(String.class));
+        signupAPI(email, "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.FRESHMAN, userId);
 
         // when
-        final ResponseEntity<ResultResponse> responseEntity = signinAPI(userId);
+        final ResponseEntity<ResultResponse> responseEntity = signinAPI("authorizationCode");
         final MemberSigninSuccessResponse response = objectMapper.convertValue(responseEntity.getBody().getData(), MemberSigninSuccessResponse.class);
 
         // then
@@ -223,7 +236,7 @@ public class MemberIntegrationTest {
         assertThat(responseEntity.getHeaders().get("Set-Cookie").get(0)).isNotBlank();
         assertThat(response.getStatus()).isEqualTo(Status.SUCCESS);
         assertThat(response.getAccessToken()).isNotBlank();
-        assertThat(response.getMember().getRoles().contains(MemberRoles.ROLE_CERTIFIED.name())).isTrue();
+        assertThat(response.getMember().getRoles().contains(MemberRoles.ROLE_GUEST.name())).isTrue();
     }
 
     @Test
@@ -232,12 +245,9 @@ public class MemberIntegrationTest {
         // given
         final String email = "12845679@inha.edu";
         final String userId = "123477789L";
-        final EmailCheckResponse emailCheckResponse = checkEmailAPI(email);
-        final String token = emailCheckResponse.getToken();
-        final MemberSignupResponse memberSignupResponse = signupAPI(email, userId, "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.FRESHMAN, token);
-        final String verificationKey = memberSignupResponse.getVerificationKey();
-        verifySchoolEmailAPI(verificationKey);
-        final ResponseEntity<ResultResponse> resultResponseResponseEntity = signinAPI(userId);
+        doReturn(userId).when(kakaoUtil).getUserIdFromKakaoAPI(any(String.class));
+        signupAPI(email, "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.FRESHMAN, userId);
+        final ResponseEntity<ResultResponse> resultResponseResponseEntity = signinAPI("authorizationCode");
         final String cookie = resultResponseResponseEntity.getHeaders().get("Set-Cookie").get(0);
         final MemberSigninSuccessResponse memberSigninSuccessResponse = objectMapper.convertValue(resultResponseResponseEntity.getBody().getData(), MemberSigninSuccessResponse.class);
         final String accessToken = memberSigninSuccessResponse.getAccessToken();
@@ -258,12 +268,9 @@ public class MemberIntegrationTest {
         // given
         final String email = "44345679@inha.edu";
         final String userId = "123455789L";
-        final EmailCheckResponse emailCheckResponse = checkEmailAPI(email);
-        final String token = emailCheckResponse.getToken();
-        final MemberSignupResponse memberSignupResponse = signupAPI(email, userId, "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.FRESHMAN, token);
-        final String verificationKey = memberSignupResponse.getVerificationKey();
-        verifySchoolEmailAPI(verificationKey);
-        final ResponseEntity<ResultResponse> resultResponseResponseEntity = signinAPI(userId);
+        doReturn(userId).when(kakaoUtil).getUserIdFromKakaoAPI(any(String.class));
+        signupAPI(email, "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.FRESHMAN, userId);
+        final ResponseEntity<ResultResponse> resultResponseResponseEntity = signinAPI("authorizationCode");
         final String cookie = resultResponseResponseEntity.getHeaders().get("Set-Cookie").get(0);
 
         // when
@@ -283,23 +290,18 @@ public class MemberIntegrationTest {
     void getInfo() throws Exception {
         // given
         final String email = "12344379@inha.edu";
-        final EmailCheckResponse emailCheckResponse = checkEmailAPI(email);
-        final String token = emailCheckResponse.getToken();
-        final MemberSignupResponse memberSignupResponse = signupAPI(email, "111456389L", "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.FRESHMAN, token);
-        final String verificationKey = memberSignupResponse.getVerificationKey();
-        verifySchoolEmailAPI(verificationKey);
-        final ResponseEntity<ResultResponse> responseEntity = signinAPI("111456389L");
+        final String userId = "111456389L";
+        doReturn(userId).when(kakaoUtil).getUserIdFromKakaoAPI(any(String.class));
+        signupAPI(email, "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.FRESHMAN, userId);
+        final ResponseEntity<ResultResponse> responseEntity = signinAPI("authorizationCode");
         final MemberSigninSuccessResponse memberSigninSuccessResponse = objectMapper.convertValue(responseEntity.getBody().getData(), MemberSigninSuccessResponse.class);
         final String accessToken = memberSigninSuccessResponse.getAccessToken();
 
-        doReturn(UUID.randomUUID().toString()).when(kakaoUtil).getUserIdFromKakaoAPI(any(String.class));
         final String email2 = "12499300@inha.edu";
-        final EmailCheckResponse emailCheckResponse2 = checkEmailAPI(email2);
-        final String token2 = emailCheckResponse2.getToken();
-        final MemberSignupResponse memberSignupResponse2 = signupAPI(email2, "15523222389L", "홍길동2", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.FRESHMAN, token2);
-        final String verificationKey2 = memberSignupResponse2.getVerificationKey();
-        verifySchoolEmailAPI(verificationKey2);
-        final ResponseEntity<ResultResponse> responseEntity2 = signinAPI("111222389L");
+        final String userId2 = "111222389L";
+        doReturn(userId2).when(kakaoUtil).getUserIdFromKakaoAPI(any(String.class));
+        signupAPI(email2, "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.FRESHMAN, userId2);
+        final ResponseEntity<ResultResponse> responseEntity2 = signinAPI("authorizationCode");
         final MemberSigninSuccessResponse memberSigninSuccessResponse2 = objectMapper.convertValue(responseEntity2.getBody().getData(), MemberSigninSuccessResponse.class);
 
         // when
@@ -319,12 +321,10 @@ public class MemberIntegrationTest {
     void updateInfo() throws Exception {
         // given
         final String email = "24344311@inha.edu";
-        final EmailCheckResponse emailCheckResponse = checkEmailAPI(email);
-        final String token = emailCheckResponse.getToken();
-        final MemberSignupResponse memberSignupResponse = signupAPI(email, "151456339L", "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.FRESHMAN, token);
-        final String verificationKey = memberSignupResponse.getVerificationKey();
-        verifySchoolEmailAPI(verificationKey);
-        final ResponseEntity<ResultResponse> responseEntity = signinAPI("151456339L");
+        final String userId = "151456339L";
+        doReturn(userId).when(kakaoUtil).getUserIdFromKakaoAPI(any(String.class));
+        signupAPI(email, "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.FRESHMAN, userId);
+        final ResponseEntity<ResultResponse> responseEntity = signinAPI("authorizationCode");
         final MemberSigninSuccessResponse memberSigninSuccessResponse = objectMapper.convertValue(responseEntity.getBody().getData(), MemberSigninSuccessResponse.class);
         final String accessToken = memberSigninSuccessResponse.getAccessToken();
         final MemberInfoUpdateRequest request = new MemberInfoUpdateRequest("만두", "정통", "010-1234-1234", MemberAcademicStatus.ABSENCE, MemberGrade.FRESHMAN, "안녕");
@@ -344,12 +344,10 @@ public class MemberIntegrationTest {
     void updateImage() throws Exception {
         // given
         final String email = "24999911@inha.edu";
-        final EmailCheckResponse emailCheckResponse = checkEmailAPI(email);
-        final String token = emailCheckResponse.getToken();
-        final MemberSignupResponse memberSignupResponse = signupAPI(email, "15222339L", "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.FRESHMAN, token);
-        final String verificationKey = memberSignupResponse.getVerificationKey();
-        verifySchoolEmailAPI(verificationKey);
-        final ResponseEntity<ResultResponse> responseEntity = signinAPI("151456339L");
+        final String userId = "12904812940";
+        doReturn(userId).when(kakaoUtil).getUserIdFromKakaoAPI(any(String.class));
+        signupAPI(email, "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.FRESHMAN, userId);
+        final ResponseEntity<ResultResponse> responseEntity = signinAPI("authorizationCode");
         final MemberSigninSuccessResponse memberSigninSuccessResponse = objectMapper.convertValue(responseEntity.getBody().getData(), MemberSigninSuccessResponse.class);
         final String accessToken = memberSigninSuccessResponse.getAccessToken();
         final Resource resource = new FileSystemResource("src/test/resources/static/image.jpg");
