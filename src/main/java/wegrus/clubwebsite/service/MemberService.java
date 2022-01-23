@@ -192,4 +192,16 @@ public class MemberService {
         redisUtil.delete(email);
         return new ValidateEmailResponse(Status.SUCCESS, EMAIL_IS_VERIFIED.getMessage());
     }
+
+    @Transactional
+    public RequestAuthorityResponse requestAuthority(MemberRoles memberRoles) {
+        final Role role = roleRepository.findByName(memberRoles.name()).orElseThrow(MemberRoleNotFoundException::new);
+        final Long memberId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
+        final Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
+
+        if (memberRoleRepository.findByMemberIdAndRoleId(memberId, role.getId()).isPresent())
+            throw new MemberAlreadyHasRoleException();
+        memberRoleRepository.save(new MemberRole(member, role));
+        return new RequestAuthorityResponse(Status.SUCCESS, memberRoles);
+    }
 }

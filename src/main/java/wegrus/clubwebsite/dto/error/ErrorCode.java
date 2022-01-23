@@ -39,6 +39,7 @@ public enum ErrorCode {
     MEMBER_ROLE_NOT_FOUND(400, "M004", "존재하지 않는 회원 등급입니다."),
     MEMBER_IMAGE_ALREADY_BASIC(400, "M005", "회원 이미지가 이미 기본 이미지입니다."),
     EMAIL_CERTIFICATION_TOKEN_INVALID(400, "M006", "이메일 검증 토큰이 유효하지 않습니다."),
+    MEMBER_ALREADY_HAS_ROLE(400, "M007", "이미 해당 권한을 가지고 있는 회원입니다."),
 
     // File
     NOT_SUPPORTED_IMAGE_TYPE(400, "F000", "이미지 타입은 JPG, PNG, GIF만 지원합니다."),

@@ -15,6 +15,7 @@ import wegrus.clubwebsite.dto.Status;
 import wegrus.clubwebsite.dto.VerificationResponse;
 import wegrus.clubwebsite.dto.member.*;
 import wegrus.clubwebsite.dto.result.ResultResponse;
+import wegrus.clubwebsite.entity.member.MemberRoles;
 import wegrus.clubwebsite.exception.MemberNotFoundException;
 import wegrus.clubwebsite.service.MemberService;
 import wegrus.clubwebsite.util.RedisUtil;
@@ -167,5 +168,13 @@ public class MemberController {
         final ValidateEmailResponse response = memberService.validateEmail(email);
 
         return ResponseEntity.ok(ResultResponse.of(VALIDATE_EMAIL_SUCCESS, response));
+    }
+
+    @ApiOperation(value = "회원 권한 요청")
+    @PostMapping("/members/authority")
+    public ResponseEntity<ResultResponse> requestAuthority(@NotNull(message = "요청할 권한은 필수입니다.") @RequestParam(name = "role") MemberRoles role) {
+        final RequestAuthorityResponse response = memberService.requestAuthority(role);
+
+        return ResponseEntity.ok(ResultResponse.of(REQUEST_AUTHORITY_SUCCESS, response));
     }
 }
