@@ -42,7 +42,7 @@ public class BoardRepositoryTest {
                 .name("김철수")
                 .department("컴퓨터공학과")
                 .grade(MemberGrade.JUNIOR)
-                .kakaoId((long) 987654321)
+                .userId("21358921357")
                 .phone("010-1234-5678")
                 .email("test1@naver.com")
                 .academicStatus(MemberAcademicStatus.ATTENDING)
