@@ -37,7 +37,7 @@ public class BoardRepositoryTest {
 
     @Test
     @DisplayName("게시물 관련 엔티티들 등록 및 확인")
-    public void boardSaveLoad(){
+    public void boardSaveLoad() {
         final Member member = Member.builder()
                 .name("김철수")
                 .department("컴퓨터공학과")

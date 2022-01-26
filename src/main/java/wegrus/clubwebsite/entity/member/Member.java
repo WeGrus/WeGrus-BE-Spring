@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import wegrus.clubwebsite.dto.member.MemberInfoUpdateRequest;
+import wegrus.clubwebsite.dto.member.MemberSignupRequest;
 import wegrus.clubwebsite.entity.board.Board;
 import wegrus.clubwebsite.entity.board.CommentLike;
 import wegrus.clubwebsite.entity.board.PostLike;
@@ -116,5 +117,27 @@ public class Member {
 
     public void updateImage(Image image) {
         this.image = image;
+    }
+
+    public void resign() {
+        this.academicStatus = MemberAcademicStatus.ETC;
+        this.grade = MemberGrade.ETC;
+        this.phone = "";
+        this.introduce = "";
+        this.department = "";
+        this.email = "";
+        this.name = "";
+        this.studentId = "";
+        this.image = Image.builder().url(MEMBER_BASIC_IMAGE_URL).build();
+    }
+
+    public void rejoin(MemberSignupRequest request) {
+        this.email = request.getEmail();
+        this.studentId = request.getEmail().substring(0, 8);
+        this.name = request.getName();
+        this.department = request.getDepartment();
+        this.phone = request.getPhone();
+        this.academicStatus = request.getAcademicStatus();
+        this.grade = request.getGrade();
     }
 }

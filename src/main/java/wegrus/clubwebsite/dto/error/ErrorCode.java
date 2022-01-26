@@ -40,6 +40,10 @@ public enum ErrorCode {
     MEMBER_IMAGE_ALREADY_BASIC(400, "M005", "회원 이미지가 이미 기본 이미지입니다."),
     EMAIL_CERTIFICATION_TOKEN_INVALID(400, "M006", "이메일 검증 토큰이 유효하지 않습니다."),
     MEMBER_ALREADY_HAS_ROLE(400, "M007", "이미 해당 권한을 가지고 있는 회원입니다."),
+    MEMBER_CANNOT_RESIGN(400, "M008", "탈퇴를 할 수 없는 회원입니다."),
+    CLUB_PRESIDENT_CANNOT_RESIGN(400, "M009", "동아리 회장은 회원 탈퇴를 할 수 없습니다."),
+    MEMBER_ALREADY_RESIGN(400, "M010", "이미 탈퇴한 회원은 회원 탈퇴를 할 수 없습니다."),
+    MEMBER_ALREADY_BAN(400, "M011", "이미 재가입 불가인 회원 탈퇴를 할 수 없습니다."),
 
     // File
     NOT_SUPPORTED_IMAGE_TYPE(400, "F000", "이미지 타입은 JPG, PNG, GIF만 지원합니다."),

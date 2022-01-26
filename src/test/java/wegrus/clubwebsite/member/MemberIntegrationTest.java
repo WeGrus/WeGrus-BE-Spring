@@ -16,12 +16,15 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
 import wegrus.clubwebsite.dto.Status;
+import wegrus.clubwebsite.dto.StatusResponse;
 import wegrus.clubwebsite.dto.VerificationResponse;
 import wegrus.clubwebsite.dto.member.*;
 import wegrus.clubwebsite.dto.result.ResultResponse;
+import wegrus.clubwebsite.entity.member.Member;
 import wegrus.clubwebsite.entity.member.MemberAcademicStatus;
 import wegrus.clubwebsite.entity.member.MemberGrade;
 import wegrus.clubwebsite.entity.member.MemberRoles;
+import wegrus.clubwebsite.repository.MemberRepository;
 import wegrus.clubwebsite.util.AmazonS3Util;
 import wegrus.clubwebsite.util.KakaoUtil;
 import wegrus.clubwebsite.util.RedisUtil;
@@ -42,6 +45,9 @@ public class MemberIntegrationTest {
 
     @Autowired
     private TestRestTemplate restTemplate;
+
+    @Autowired
+    private MemberRepository memberRepository;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -153,7 +159,7 @@ public class MemberIntegrationTest {
         return objectMapper.convertValue(responseEntity.getBody().getData(), MemberImageUpdateResponse.class);
     }
 
-    public ValidateEmailResponse validateEmailAPI(String email){
+    public ValidateEmailResponse validateEmailAPI(String email) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
@@ -172,6 +178,15 @@ public class MemberIntegrationTest {
         final HttpEntity<MultiValueMap<String, MemberRoles>> requestEntity = new HttpEntity<>(map, headers);
         final ResponseEntity<ResultResponse> responseEntity = restTemplate.exchange("/members/authority", HttpMethod.POST, requestEntity, ResultResponse.class);
         return objectMapper.convertValue(responseEntity.getBody().getData(), RequestAuthorityResponse.class);
+    }
+
+    public StatusResponse resignAPI(String accessToken) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
+
+        final HttpEntity<MultiValueMap<String, MemberRoles>> requestEntity = new HttpEntity<>(null, headers);
+        final ResponseEntity<ResultResponse> responseEntity = restTemplate.exchange("/members/resign", HttpMethod.POST, requestEntity, ResultResponse.class);
+        return objectMapper.convertValue(responseEntity.getBody().getData(), StatusResponse.class);
     }
 
     @Test
@@ -391,5 +406,48 @@ public class MemberIntegrationTest {
         // then
         assertThat(response.getStatus()).isEqualTo(Status.SUCCESS);
         assertThat(response.getRole()).isEqualTo(memberRoles);
+    }
+
+    @Test
+    @DisplayName("회원 탈퇴")
+    void resign() throws Exception {
+        // given
+        final String email = "33339922@inha.edu";
+        final String userId = "1223511210";
+        doReturn(userId).when(kakaoUtil).getUserIdFromKakaoAPI(any(String.class));
+        signupAPI(email, "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.FRESHMAN, userId);
+        final ResponseEntity<ResultResponse> responseEntity = signinAPI("authorizationCode");
+        final MemberSigninSuccessResponse memberSigninSuccessResponse = objectMapper.convertValue(responseEntity.getBody().getData(), MemberSigninSuccessResponse.class);
+        final String accessToken = memberSigninSuccessResponse.getAccessToken();
+
+        // when
+        final StatusResponse response = resignAPI(accessToken);
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(Status.SUCCESS);
+    }
+
+    @Test
+    @DisplayName("회원 재가입")
+    void rejoin() throws Exception {
+        // given
+        final String email = "33355922@inha.edu";
+        final String userId = "1223511210";
+        doReturn(userId).when(kakaoUtil).getUserIdFromKakaoAPI(any(String.class));
+        signupAPI(email, "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.FRESHMAN, userId);
+        final Member member = memberRepository.findByEmail(email).get();
+        final ResponseEntity<ResultResponse> responseEntity = signinAPI("authorizationCode");
+        final MemberSigninSuccessResponse memberSigninSuccessResponse = objectMapper.convertValue(responseEntity.getBody().getData(), MemberSigninSuccessResponse.class);
+        final String accessToken = memberSigninSuccessResponse.getAccessToken();
+        resignAPI(accessToken);
+        final String newEmail = "12341234@inha.edu";
+
+        // when
+        signupAPI(newEmail, "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.FRESHMAN, userId);
+        final Member rejoinMember = memberRepository.findByEmail(newEmail).get();
+
+        // then
+        assertThat(member.getId()).isEqualTo(rejoinMember.getId());
+        assertThat(rejoinMember.getRoles().size()).isEqualTo(1);
     }
 }

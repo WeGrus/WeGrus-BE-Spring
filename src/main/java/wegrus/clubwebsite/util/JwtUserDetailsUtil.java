@@ -34,6 +34,6 @@ public class JwtUserDetailsUtil implements UserDetailsService {
 
         return new User(String.valueOf(findMember.getId()),
                 UUID.randomUUID().toString(),
-                new ArrayList<>(authorities));
+                authorities);
     }
 }
