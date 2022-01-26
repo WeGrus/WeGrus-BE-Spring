@@ -11,12 +11,12 @@ import javax.persistence.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
-@Table(name = "comment_likes")
-public class CommentLike {
+@Table(name = "reply_likes")
+public class ReplyLike {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "comment_like_id", updatable = false)
+    @Column(name = "reply_like_id", updatable = false)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -28,7 +28,7 @@ public class CommentLike {
     private Reply reply;
 
     @Builder
-    public CommentLike(Member member, Reply reply){
+    public ReplyLike(Member member, Reply reply){
         this.member = member;
         this.reply = reply;
     }

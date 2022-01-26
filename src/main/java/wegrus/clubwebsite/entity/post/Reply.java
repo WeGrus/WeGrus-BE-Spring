@@ -39,7 +39,7 @@ public class Reply {
     private Reply parent;
 
     @OneToMany(mappedBy = "reply")
-    private List<CommentLike> commentLikes = new ArrayList<>();
+    private List<ReplyLike> replyLikes = new ArrayList<>();
 
     @OneToMany(mappedBy = "parent")
     private List<Reply> replies = new ArrayList<>();

@@ -94,10 +94,10 @@ public class PostController {
     @PostMapping("/comments/like")
     public ResponseEntity<ResultResponse> likeComment(
             @Validated @NotNull(message = "댓글 id는 필수입니다.")@RequestParam Long commentId){
-        final Long commentLikeId = replyService.like(commentId);
-        final CommentLikeCreateResponse response = new CommentLikeCreateResponse(commentLikeId);
+        final Long replyLikeId = replyService.like(commentId);
+        final ReplyLikeCreateResponse response = new ReplyLikeCreateResponse(replyLikeId);
 
-        return ResponseEntity.ok(ResultResponse.of(CREATE_COMMENT_LIKE_SUCCESS, response));
+        return ResponseEntity.ok(ResultResponse.of(CREATE_REPLY_LIKE_SUCCESS, response));
     }
 
     @ApiOperation(value = "댓글 추천 해제")
@@ -106,6 +106,6 @@ public class PostController {
             @Validated @NotNull(message = "댓글 id는 필수입니다.")@RequestParam Long commentId){
         replyService.dislike(commentId);
 
-        return ResponseEntity.ok(ResultResponse.of(DELETE_COMMENT_LIKE_SUCCESS, null));
+        return ResponseEntity.ok(ResultResponse.of(DELETE_REPLY_LIKE_SUCCESS, null));
     }
 }

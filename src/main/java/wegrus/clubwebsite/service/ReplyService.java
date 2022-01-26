@@ -6,13 +6,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import wegrus.clubwebsite.dto.post.ReplyCreateRequest;
 import wegrus.clubwebsite.entity.post.Post;
-import wegrus.clubwebsite.entity.post.CommentLike;
+import wegrus.clubwebsite.entity.post.ReplyLike;
 import wegrus.clubwebsite.entity.post.Reply;
 import wegrus.clubwebsite.entity.post.ReplyState;
 import wegrus.clubwebsite.entity.member.Member;
 import wegrus.clubwebsite.exception.*;
 import wegrus.clubwebsite.repository.PostRepository;
-import wegrus.clubwebsite.repository.CommentLikeRepository;
+import wegrus.clubwebsite.repository.ReplyLikeRepository;
 import wegrus.clubwebsite.repository.MemberRepository;
 import wegrus.clubwebsite.repository.ReplyRepository;
 
@@ -24,7 +24,7 @@ public class ReplyService {
     private final PostRepository postRepository;
     private final MemberRepository memberRepository;
     private final ReplyRepository replyRepository;
-    private final CommentLikeRepository commentLikeRepository;
+    private final ReplyLikeRepository replyLikeRepository;
 
     @Transactional
     public Long create(ReplyCreateRequest request){
@@ -57,7 +57,7 @@ public class ReplyService {
         }
 
         // 댓글 추천수 제거
-        commentLikeRepository.deleteCommentLikesByReply(reply);
+        replyLikeRepository.deleteReplyLikesByReply(reply);
 
         replyRepository.delete(reply);
     }
@@ -69,20 +69,20 @@ public class ReplyService {
 
         final Reply reply = replyRepository.findById(commentId).orElseThrow(ReplyNotFoundException::new);
 
-        Optional<CommentLike> commentLikes = commentLikeRepository.findByMemberAndReply(member, reply);
+        Optional<ReplyLike> replyLikes = replyLikeRepository.findByMemberAndReply(member, reply);
 
         // 이미 추천이 있다면
-        if(commentLikes.isPresent()){
-            throw new CommentLikeAlreadyExistException();
+        if(replyLikes.isPresent()){
+            throw new ReplyLikeAlreadyExistException();
         }
 
-        CommentLike commentLike = CommentLike.builder()
+        ReplyLike replyLike = ReplyLike.builder()
                 .member(member)
                 .reply(reply)
                 .build();
 
-        commentLikeRepository.save(commentLike);
-        return commentLike.getId();
+        replyLikeRepository.save(replyLike);
+        return replyLike.getId();
     }
 
     @Transactional
@@ -92,8 +92,8 @@ public class ReplyService {
 
         final Reply reply = replyRepository.findById(commentId).orElseThrow(ReplyNotFoundException::new);
 
-        final CommentLike commentLike = commentLikeRepository.findByMemberAndReply(member, reply).orElseThrow(CommentLikeNotFoundException::new);
+        final ReplyLike replyLike = replyLikeRepository.findByMemberAndReply(member, reply).orElseThrow(ReplyLikeNotFoundException::new);
 
-        commentLikeRepository.delete(commentLike);
+        replyLikeRepository.delete(replyLike);
     }
 }

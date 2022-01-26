@@ -25,7 +25,7 @@ public class PostService {
     private final MemberRepository memberRepository;
     private final ReplyRepository replyRepository;
     private final PostLikeRepository postLikeRepository;
-    private final CommentLikeRepository commentLikeRepository;
+    private final ReplyLikeRepository replyLikeRepository;
 
     @Transactional
     public Long create(PostCreateRequest request){
@@ -73,7 +73,7 @@ public class PostService {
         }
 
         // 게시물 댓글 추천 삭제
-        commentLikeRepository.deleteCommentLikesByPost(postId);
+        replyLikeRepository.deleteReplyLikesByPost(postId);
 
         // 댓글 삭제
         replyRepository.deleteRepliesByPost(post);
