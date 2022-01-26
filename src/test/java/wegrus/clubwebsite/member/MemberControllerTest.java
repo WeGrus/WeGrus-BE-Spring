@@ -22,22 +22,28 @@ import wegrus.clubwebsite.config.JwtRequestFilter;
 import wegrus.clubwebsite.config.WebSecurityConfig;
 import wegrus.clubwebsite.controller.MemberController;
 import wegrus.clubwebsite.dto.Status;
+import wegrus.clubwebsite.dto.StatusResponse;
 import wegrus.clubwebsite.dto.VerificationResponse;
+import wegrus.clubwebsite.dto.error.ErrorResponse;
 import wegrus.clubwebsite.dto.member.*;
 import wegrus.clubwebsite.entity.member.Member;
 import wegrus.clubwebsite.entity.member.MemberAcademicStatus;
 import wegrus.clubwebsite.entity.member.MemberGrade;
 import wegrus.clubwebsite.entity.member.MemberRoles;
 import wegrus.clubwebsite.exception.MemberNotFoundException;
+import wegrus.clubwebsite.exception.MemberResignException;
 import wegrus.clubwebsite.service.MemberService;
 import wegrus.clubwebsite.util.RedisUtil;
 
 import javax.servlet.http.Cookie;
 import java.io.FileInputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doThrow;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -572,5 +578,48 @@ public class MemberControllerTest {
                 .andExpect(jsonPath("code").value(REQUEST_AUTHORITY_SUCCESS.getCode()))
                 .andExpect(jsonPath("message").value(REQUEST_AUTHORITY_SUCCESS.getMessage()))
                 .andExpect(jsonPath("data.role").value(MemberRoles.ROLE_MEMBER.name()));
+    }
+    
+    @Test
+    @DisplayName("회원 탈퇴 API: 성공")
+    void resign_success() throws Exception {
+        // given
+        final StatusResponse status = new StatusResponse(Status.SUCCESS);
+        doReturn(status).when(memberService).resign();
+
+        // when
+        final ResultActions perform = mockMvc.perform(
+                post("/members/resign").with(csrf())
+        );
+
+        // then
+        perform
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("code").value(MEMBER_RESIGN_SUCCESS.getCode()))
+                .andExpect(jsonPath("message").value(MEMBER_RESIGN_SUCCESS.getMessage()))
+                .andExpect(jsonPath("data.status").value(Status.SUCCESS));
+    }
+
+    @Test
+    @DisplayName("회원 탈퇴 API: 실패")
+    void resign_fail() throws Exception {
+        // given
+        final List<ErrorResponse.FieldError> errors = new ArrayList<>();
+        errors.add(new ErrorResponse.FieldError("role", MemberRoles.ROLE_CLUB_PRESIDENT.name(), CLUB_PRESIDENT_CANNOT_RESIGN.getMessage()));
+        doThrow(new MemberResignException(errors)).when(memberService).resign();
+
+        // when
+        final ResultActions perform = mockMvc.perform(
+                post("/members/resign").with(csrf())
+        );
+
+        // then
+        perform
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("code").value(MEMBER_CANNOT_RESIGN.getCode()))
+                .andExpect(jsonPath("message").value(MEMBER_CANNOT_RESIGN.getMessage()))
+                .andExpect(jsonPath("errors[0].field").value("role"))
+                .andExpect(jsonPath("errors[0].value").value(MemberRoles.ROLE_CLUB_PRESIDENT.name()))
+                .andExpect(jsonPath("errors[0].reason").value(CLUB_PRESIDENT_CANNOT_RESIGN.getMessage()));
     }
 }

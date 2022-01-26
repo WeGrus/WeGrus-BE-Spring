@@ -11,12 +11,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.multipart.MultipartFile;
 import wegrus.clubwebsite.dto.Status;
+import wegrus.clubwebsite.dto.StatusResponse;
 import wegrus.clubwebsite.dto.VerificationResponse;
 import wegrus.clubwebsite.dto.member.*;
 import wegrus.clubwebsite.entity.member.*;
@@ -83,8 +86,7 @@ public class MemberServiceTest {
         List<GrantedAuthority> authorities = new ArrayList<>();
         authorities.add((GrantedAuthority) () -> "ROLE_GUEST");
         User user = new User("1", "password", authorities);
-        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user,null);
-        auth.setDetails(user);
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user,null, authorities);
         SecurityContextHolder.getContext().setAuthentication(auth);
     }
 
@@ -348,7 +350,7 @@ public class MemberServiceTest {
         assertThat(response.getStatus()).isEqualTo(Status.SUCCESS);
         assertThat(response.getImageUrl()).isEqualTo("구 이미지 저장소 url");
     }
-    
+
     @Test
     @DisplayName("회원 이미지 변경: 실패")
     void updateMemberImage_fail() throws Exception {
@@ -438,5 +440,52 @@ public class MemberServiceTest {
 
         // then
         assertThrows(MemberAlreadyHasRoleException.class, executable);
+    }
+    
+    @Test
+    @DisplayName("회원 탈퇴: 성공")
+    void resign_success() throws Exception {
+        // given
+        final Optional<Member> member = Optional.of(new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
+        doReturn(member).when(memberRepository).findById(any(Long.class));
+
+        final MemberRoles memberRoles = MemberRoles.ROLE_RESIGN;
+        final Optional<Role> role = Optional.of(new Role(memberRoles.name()));
+        ReflectionTestUtils.setField(role.get(), "id", 1L);
+        doReturn(role).when(roleRepository).findByName(any(String.class));
+
+        final MemberRole memberRole = new MemberRole(member.get(), role.get());
+        ReflectionTestUtils.setField(memberRole, "id", 1L);
+        List<MemberRole> memberRoleList = new ArrayList<>();
+        memberRoleList.add(memberRole);
+        doReturn(memberRoleList).when(memberRoleRepository).findAllByMemberId(any(Long.class));
+
+        doNothing().when(memberRoleRepository).deleteAllByIdInBatch(any(Iterable.class));
+        doReturn(null).when(memberRoleRepository).save(any(MemberRole.class));
+
+        // when
+        final StatusResponse response = memberService.resign();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(Status.SUCCESS);
+        assertThat(member.get().getEmail()).isEqualTo("");
+    }
+
+    @WithMockUser(roles = "CLUB_PRESIDENT")
+    @Test
+    @DisplayName("회원 탈퇴: 실패")
+    void resign_fail() throws Exception {
+        // given
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority("ROLE_CLUB_PRESIDENT"));
+        User user = new User("1", "password", authorities);
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user,null, authorities);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        // when
+        final Executable executable = () -> memberService.resign();
+
+        // then
+        assertThrows(MemberResignException.class, executable);
     }
 }
