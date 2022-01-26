@@ -9,9 +9,10 @@ import wegrus.clubwebsite.entity.member.Member;
 import wegrus.clubwebsite.entity.member.MemberAcademicStatus;
 import wegrus.clubwebsite.entity.member.MemberGrade;
 import wegrus.clubwebsite.entity.post.*;
-import wegrus.clubwebsite.exception.BoardNotFoundException;
-import wegrus.clubwebsite.exception.PostNotFoundException;
+import wegrus.clubwebsite.exception.*;
 import wegrus.clubwebsite.repository.*;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -128,27 +129,82 @@ public class PostRepositoryTest {
     @Test
     @DisplayName("게시판 조회: name")
     public void BoardFindByName(){
+        // given
         final String boardName = "FREE";
 
+        // when
         final Board board = boardRepository.findByName(boardName).orElseThrow(BoardNotFoundException::new);
 
+        // then
         assertThat(board.getName()).isEqualTo(boardName);
     }
 
     @Test
     @DisplayName("게시물 조회: id")
     public void PostFindById(){
-        final Long postId = 1L;
+        // given
+        List<Post> postList = postRepository.findAll();
+        final Long postId = postList.get(0).getId();
 
+        // when
         final Post post = postRepository.findById(postId).orElseThrow(PostNotFoundException::new);
 
+        // then
         assertThat(post.getId()).isEqualTo(postId);
+    }
+
+    @Test
+    @DisplayName("게시물 추천 조회: member_id and post_id")
+    public void PostLikeFindByMemberIdAndPostId(){
+        // given
+        List<Member> memberList = memberRepository.findAll();
+        final Long memberId = memberList.get(0).getId();
+        List<Post> postList = postRepository.findAll();
+        final Long postId = postList.get(0).getId();
+
+        // when
+        final Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
+        final Post post = postRepository.findById(postId).orElseThrow(PostNotFoundException::new);
+
+        final PostLike postLike = postLikeRepository.findByMemberAndPost(member, post).orElseThrow(PostLikeNotFoundException::new);
+
+        // then
+        assertThat(postLike.getPost().getId()).isEqualTo(postId);
+        assertThat(postLike.getMember().getId()).isEqualTo(memberId);
     }
 
     @Test
     @DisplayName("댓글 조회: id")
     public void ReplyFindById(){
+        // given
+        List<Reply> replyList = replyRepository.findAll();
+        final Long replyId = replyList.get(0).getId();
 
+        // when
+        final Reply reply = replyRepository.findById(replyId).orElseThrow(ReplyNotFoundException::new);
+
+        // then
+        assertThat(reply.getId()).isEqualTo(replyId);
+    }
+
+    @Test
+    @DisplayName("댓글 추천 조회: member_id and reply_id")
+    public void ReplyLikeFindByMemberIdAndReplyId(){
+        // given
+        List<Member> memberList = memberRepository.findAll();
+        final Long memberId = memberList.get(0).getId();
+        List<Reply> replyList = replyRepository.findAll();
+        final Long replyId = replyList.get(0).getId();
+
+        // when
+        final Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
+        final Reply reply = replyRepository.findById(replyId).orElseThrow(ReplyNotFoundException::new);
+
+        final ReplyLike replyLike = replyLikeRepository.findByMemberAndReply(member, reply).orElseThrow(ReplyLikeNotFoundException::new);
+
+        // then
+        assertThat(replyLike.getReply().getId()).isEqualTo(replyId);
+        assertThat(replyLike.getMember().getId()).isEqualTo(memberId);
     }
 
 
