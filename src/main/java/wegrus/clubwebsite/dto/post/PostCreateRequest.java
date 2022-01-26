@@ -1,12 +1,12 @@
-package wegrus.clubwebsite.dto.board;
+package wegrus.clubwebsite.dto.post;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import wegrus.clubwebsite.entity.board.BoardCategory;
-import wegrus.clubwebsite.entity.board.BoardType;
+import wegrus.clubwebsite.entity.post.BoardCategory;
+import wegrus.clubwebsite.entity.post.BoardType;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;

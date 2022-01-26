@@ -7,10 +7,10 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import wegrus.clubwebsite.dto.member.MemberInfoUpdateRequest;
-import wegrus.clubwebsite.entity.board.Post;
-import wegrus.clubwebsite.entity.board.CommentLike;
-import wegrus.clubwebsite.entity.board.PostLike;
-import wegrus.clubwebsite.entity.board.View;
+import wegrus.clubwebsite.entity.post.Post;
+import wegrus.clubwebsite.entity.post.CommentLike;
+import wegrus.clubwebsite.entity.post.PostLike;
+import wegrus.clubwebsite.entity.post.View;
 import wegrus.clubwebsite.vo.Image;
 
 import javax.persistence.*;

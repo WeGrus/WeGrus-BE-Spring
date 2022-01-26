@@ -1,4 +1,4 @@
-package wegrus.clubwebsite.dto.board;
+package wegrus.clubwebsite.dto.post;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

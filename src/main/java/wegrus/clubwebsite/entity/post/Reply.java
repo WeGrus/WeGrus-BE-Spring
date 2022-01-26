@@ -1,4 +1,4 @@
-package wegrus.clubwebsite.entity.board;
+package wegrus.clubwebsite.entity.post;
 
 import lombok.AccessLevel;
 import lombok.Builder;

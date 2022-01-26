@@ -21,7 +21,7 @@ public enum ErrorCode {
     INSUFFICIENT_AUTHORITY(403, "C009", "접근 권한이 부족합니다."),
     MULTIPARTFILE_CONVERT_FAIL(400, "C010", "MultipartFile을 File로 변환하는 데 실패하였습니다."),
 
-    // Board
+    // Post
     POST_NOT_FOUND(400, "B000", "존재하지 않는 게시물입니다."),
     POST_MEMBER_NOT_MATCH(400, "B001", "게시물의 작성자와 일치하지 않습니다."),
     REPLY_NOT_FOUND(400, "B002", "존재하지 않는 댓글입니다."),

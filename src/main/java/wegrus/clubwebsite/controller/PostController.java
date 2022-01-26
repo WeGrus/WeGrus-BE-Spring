@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import wegrus.clubwebsite.dto.board.*;
+import wegrus.clubwebsite.dto.post.*;
 import wegrus.clubwebsite.dto.result.ResultResponse;
 import wegrus.clubwebsite.service.PostService;
 import wegrus.clubwebsite.service.ReplyService;

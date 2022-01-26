@@ -23,7 +23,7 @@ public enum ResultCode {
     EMAIL_IS_VERIFIED(200, "M112", "인증된 이메일입니다. 회원가입을 계속 진행해 주세요."),
     REQUEST_AUTHORITY_SUCCESS(200, "M113", "권한 요청에 성공하였습니다."),
 
-    // Board
+    // Post
     CREATE_POST_SUCCESS(200, "B100", "게시물 등록에 성공하였습니다."),
     UPDATE_POST_SUCCESS(200, "B101", "게시물 수정에 성공하였습니다."),
     DELETE_POST_SUCCESS(200, "B102", "게시물 삭제에 성공하였습니다."),

@@ -1,4 +1,4 @@
-package wegrus.clubwebsite.entity.board;
+package wegrus.clubwebsite.entity.post;
 
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import wegrus.clubwebsite.dto.board.PostUpdateRequest;
+import wegrus.clubwebsite.dto.post.PostUpdateRequest;
 import wegrus.clubwebsite.entity.member.Member;
 
 import javax.persistence.*;
