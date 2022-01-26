@@ -31,6 +31,10 @@ public class Post {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "board_id", nullable = false)
+    private Board board;
+
     @OneToMany(mappedBy = "post")
     private List<Reply> replies = new ArrayList<>();
 
@@ -39,14 +43,6 @@ public class Post {
 
     @OneToMany(mappedBy = "post")
     private List<View> views = new ArrayList<>();
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "post_category", nullable = false)
-    private BoardCategory category;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "post_type", nullable = false)
-    private BoardType type;
 
     @Column(name = "post_title", nullable = false)
     private String title;
@@ -71,10 +67,9 @@ public class Post {
     private PostState state;
 
     @Builder
-    public Post(Member member, BoardCategory category, BoardType type, String title, String content, boolean secretFlag, PostState state){
+    public Post(Member member, Board board, String title, String content, boolean secretFlag, PostState state){
         this.member = member;
-        this.category = category;
-        this.type = type;
+        this.board = board;
         this.title = title;
         this.content = content;
         this.secretFlag = secretFlag;

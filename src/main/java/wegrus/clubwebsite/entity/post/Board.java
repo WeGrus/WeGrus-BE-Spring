@@ -13,16 +13,21 @@ import java.util.List;
 @EntityListeners(AuditingEntityListener.class)
 @Getter
 @Entity
-@Table(name = "board_categories")
-public class BoardCategory {
+@Table(name = "boards")
+public class Board {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "board_category_id", insertable = false, updatable = false)
+    @Column(name = "board_id", insertable = false, updatable = false)
     private Long id;
 
-    @OneToMany(mappedBy = "boardCategory")
-    private List<Board> boards = new ArrayList<>();
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "board_category_id", nullable = false)
+    private BoardCategory boardCategory;
 
-    @Column(name = "board_category_name", nullable = false)
+    @OneToMany(mappedBy = "board")
+    private List<Post> posts = new ArrayList<>();
+
+    @Column(name = "board_name", nullable = false)
     private String name;
+
 }
