@@ -1,6 +1,7 @@
 package wegrus.clubwebsite.entity.post;
 
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -30,4 +31,9 @@ public class Board {
     @Column(name = "board_name", nullable = false)
     private String name;
 
+    @Builder
+    public Board(BoardCategory boardCategory, String name){
+        this.boardCategory = boardCategory;
+        this.name = name;
+    }
 }
