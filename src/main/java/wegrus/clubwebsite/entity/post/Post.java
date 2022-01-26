@@ -44,6 +44,10 @@ public class Post {
     @OneToMany(mappedBy = "post")
     private List<View> views = new ArrayList<>();
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "post_type")
+    private PostType type;
+
     @Column(name = "post_title", nullable = false)
     private String title;
 
@@ -67,9 +71,10 @@ public class Post {
     private PostState state;
 
     @Builder
-    public Post(Member member, Board board, String title, String content, boolean secretFlag, PostState state){
+    public Post(Member member, Board board, PostType type, String title, String content, boolean secretFlag, PostState state){
         this.member = member;
         this.board = board;
+        this.type = type;
         this.title = title;
         this.content = content;
         this.secretFlag = secretFlag;

@@ -37,6 +37,7 @@ public class PostService {
         Post post = Post.builder()
                 .member(member)
                 .board(board)
+                .type(request.getType())
                 .title(request.getTitle())
                 .content(request.getContent())
                 .secretFlag(request.isSecretFlag())
