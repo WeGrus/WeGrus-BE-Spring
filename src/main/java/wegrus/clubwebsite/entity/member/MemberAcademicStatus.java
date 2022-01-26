@@ -1,5 +1,5 @@
 package wegrus.clubwebsite.entity.member;
 
 public enum MemberAcademicStatus {
-    ATTENDING, ABSENCE, GRADUATED
+    ATTENDING, ABSENCE, GRADUATED, ETC
 }

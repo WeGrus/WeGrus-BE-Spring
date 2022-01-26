@@ -12,10 +12,13 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import wegrus.clubwebsite.dto.Status;
+import wegrus.clubwebsite.dto.StatusResponse;
 import wegrus.clubwebsite.dto.VerificationResponse;
 import wegrus.clubwebsite.dto.member.*;
 import wegrus.clubwebsite.dto.result.ResultResponse;
 import wegrus.clubwebsite.entity.member.MemberRoles;
+import wegrus.clubwebsite.exception.MemberAlreadyBanException;
+import wegrus.clubwebsite.exception.MemberAlreadyResignException;
 import wegrus.clubwebsite.exception.MemberNotFoundException;
 import wegrus.clubwebsite.service.MemberService;
 import wegrus.clubwebsite.util.RedisUtil;
@@ -80,7 +83,19 @@ public class MemberController {
             final MemberSigninFailResponse response = new MemberSigninFailResponse(Status.FAILURE, userId);
             redisUtil.delete(authorizationCode);
 
-            return ResponseEntity.ok(ResultResponse.of(SIGNIN_FAILURE, response));
+            return ResponseEntity.ok(ResultResponse.of(NEED_TO_SIGNUP, response));
+        } catch (MemberAlreadyResignException e) {
+            final String userId = (String) redisUtil.get(authorizationCode);
+            final MemberSigninFailResponse response = new MemberSigninFailResponse(Status.FAILURE, userId);
+            redisUtil.delete(authorizationCode);
+
+            return ResponseEntity.ok(ResultResponse.of(NEED_TO_REJOIN, response));
+        } catch (MemberAlreadyBanException e) {
+            final String userId = (String) redisUtil.get(authorizationCode);
+            final MemberSigninFailResponse response = new MemberSigninFailResponse(Status.FAILURE, userId);
+            redisUtil.delete(authorizationCode);
+
+            return ResponseEntity.ok(ResultResponse.of(BANNED_USER, response));
         }
     }
 
@@ -176,5 +191,13 @@ public class MemberController {
         final RequestAuthorityResponse response = memberService.requestAuthority(role);
 
         return ResponseEntity.ok(ResultResponse.of(REQUEST_AUTHORITY_SUCCESS, response));
+    }
+
+    @ApiOperation(value = "회원 탈퇴")
+    @PostMapping("/members/resign")
+    public ResponseEntity<ResultResponse> resign() {
+        final StatusResponse response = memberService.resign();
+
+        return ResponseEntity.ok(ResultResponse.of(MEMBER_RESIGN_SUCCESS, response));
     }
 }

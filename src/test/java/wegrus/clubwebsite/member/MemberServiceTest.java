@@ -11,12 +11,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.multipart.MultipartFile;
 import wegrus.clubwebsite.dto.Status;
+import wegrus.clubwebsite.dto.StatusResponse;
 import wegrus.clubwebsite.dto.VerificationResponse;
 import wegrus.clubwebsite.dto.member.*;
 import wegrus.clubwebsite.entity.member.*;
@@ -83,8 +85,7 @@ public class MemberServiceTest {
         List<GrantedAuthority> authorities = new ArrayList<>();
         authorities.add((GrantedAuthority) () -> "ROLE_GUEST");
         User user = new User("1", "password", authorities);
-        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user,null);
-        auth.setDetails(user);
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, null, authorities);
         SecurityContextHolder.getContext().setAuthentication(auth);
     }
 
@@ -136,6 +137,39 @@ public class MemberServiceTest {
     }
 
     @Test
+    @DisplayName("회원 재가입: 성공")
+    void validateAndSaveMember_success2() throws Exception {
+        // given
+        final MemberSignupRequest request = new MemberSignupRequest("12161111@inha.edu", "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.SENIOR, "123456789L");
+        final Optional<Member> member = Optional.of(new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
+        ReflectionTestUtils.setField(member.get(), "id", 1L);
+        doReturn(member).when(memberRepository).findByUserId(any(String.class));
+
+        final Role roleResign = new Role(MemberRoles.ROLE_RESIGN.name());
+        ReflectionTestUtils.setField(roleResign, "id", 1L);
+        doReturn(Optional.of(roleResign)).when(roleRepository).findByName(MemberRoles.ROLE_RESIGN.name());
+        final Role roleBan = new Role(MemberRoles.ROLE_BAN.name());
+        ReflectionTestUtils.setField(roleBan, "id", 2L);
+        doReturn(Optional.of(roleBan)).when(roleRepository).findByName(MemberRoles.ROLE_BAN.name());
+
+        final MemberRole memberRole = new MemberRole(member.get(), roleResign);
+        ReflectionTestUtils.setField(memberRole, "id", 1L);
+        doReturn(Optional.of(memberRole)).when(memberRoleRepository).findByMemberIdAndRoleId(any(Long.class), any(Long.class));
+        doNothing().when(memberRoleRepository).deleteById(any(Long.class));
+
+        final Role roleGuest = new Role(MemberRoles.ROLE_GUEST.name());
+        ReflectionTestUtils.setField(roleGuest, "id", 3L);
+        doReturn(Optional.of(roleGuest)).when(roleRepository).findByName(MemberRoles.ROLE_GUEST.name());
+        doReturn(null).when(memberRoleRepository).save(any(MemberRole.class));
+
+        // when
+        final MemberSignupResponse response = memberService.validateAndSaveMember(request);
+
+        // then
+        assertThat(response.getMember()).isNotNull();
+    }
+
+    @Test
     @DisplayName("회원가입: 실패")
     void validateAndSaveMember_fail() throws Exception {
         // given
@@ -150,6 +184,33 @@ public class MemberServiceTest {
         assertThrows(MemberAlreadyExistException.class, executable);
     }
 
+
+    @Test
+    @DisplayName("회원 재가입: 실패")
+    void validateAndSaveMember_fail2() throws Exception {
+        // given
+        final MemberSignupRequest request = new MemberSignupRequest("12161111@inha.edu", "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.SENIOR, "123456789L");
+        final Optional<Member> member = Optional.of(new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
+        ReflectionTestUtils.setField(member.get(), "id", 1L);
+        doReturn(member).when(memberRepository).findByUserId(any(String.class));
+
+        final Role roleResign = new Role(MemberRoles.ROLE_RESIGN.name());
+        ReflectionTestUtils.setField(roleResign, "id", 1L);
+        doReturn(Optional.of(roleResign)).when(roleRepository).findByName(MemberRoles.ROLE_RESIGN.name());
+        final Role roleBan = new Role(MemberRoles.ROLE_BAN.name());
+        ReflectionTestUtils.setField(roleBan, "id", 2L);
+        doReturn(Optional.of(roleBan)).when(roleRepository).findByName(MemberRoles.ROLE_BAN.name());
+
+        doReturn(Optional.empty()).when(memberRoleRepository).findByMemberIdAndRoleId(member.get().getId(), roleResign.getId());
+        doReturn(Optional.of(new MemberRole(member.get(), roleBan))).when(memberRoleRepository).findByMemberIdAndRoleId(member.get().getId(), roleBan.getId());
+
+        // when
+        final Executable executable = () -> memberService.validateAndSaveMember(request);
+
+        // then
+        assertThrows(MemberAlreadyBanException.class, executable);
+    }
+
     @Test
     @DisplayName("회원 조회 & JWT 생성: 성공")
     void findMemberAndGenerateJwt_success() throws Exception {
@@ -159,8 +220,16 @@ public class MemberServiceTest {
         final Optional<Member> member = Optional.of(new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
         doReturn(member).when(memberRepository).findByUserId(any(String.class));
 
+        final Role roleResign = new Role(MemberRoles.ROLE_RESIGN.name());
+        ReflectionTestUtils.setField(roleResign, "id", 1L);
+        doReturn(Optional.of(roleResign)).when(roleRepository).findByName(MemberRoles.ROLE_RESIGN.name());
+        final Role roleBan = new Role(MemberRoles.ROLE_BAN.name());
+        ReflectionTestUtils.setField(roleBan, "id", 2L);
+        doReturn(Optional.of(roleBan)).when(roleRepository).findByName(MemberRoles.ROLE_BAN.name());
+        doReturn(Optional.empty()).when(memberRoleRepository).findByMemberIdAndRoleId(any(Long.class), any(Long.class));
+
         List<GrantedAuthority> authorities = new ArrayList<>();
-        final User user = new User(String.valueOf(member.get().getId()), UUID.randomUUID().toString(), new ArrayList<>(authorities));
+        final User user = new User(String.valueOf(member.get().getId()), UUID.randomUUID().toString(), authorities);
         doReturn(user).when(jwtUserDetailsUtil).loadUserByUsername(any(String.class));
 
         ReflectionTestUtils.setField(member.get(), "id", 1L);
@@ -348,7 +417,7 @@ public class MemberServiceTest {
         assertThat(response.getStatus()).isEqualTo(Status.SUCCESS);
         assertThat(response.getImageUrl()).isEqualTo("구 이미지 저장소 url");
     }
-    
+
     @Test
     @DisplayName("회원 이미지 변경: 실패")
     void updateMemberImage_fail() throws Exception {
@@ -358,7 +427,7 @@ public class MemberServiceTest {
         doReturn(member).when(memberRepository).findById(any(Long.class));
 
         ReflectionTestUtils.setField(imageUtil, "MEMBER_BASIC_IMAGE_URL", "구 이미지 저장소 url");
-        
+
         // when
         final Executable executable = () -> memberService.updateMemberImage(null);
 
@@ -438,5 +507,51 @@ public class MemberServiceTest {
 
         // then
         assertThrows(MemberAlreadyHasRoleException.class, executable);
+    }
+
+    @Test
+    @DisplayName("회원 탈퇴: 성공")
+    void resign_success() throws Exception {
+        // given
+        final Optional<Member> member = Optional.of(new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
+        doReturn(member).when(memberRepository).findById(any(Long.class));
+
+        final MemberRoles memberRoles = MemberRoles.ROLE_RESIGN;
+        final Optional<Role> role = Optional.of(new Role(memberRoles.name()));
+        ReflectionTestUtils.setField(role.get(), "id", 1L);
+        doReturn(role).when(roleRepository).findByName(any(String.class));
+
+        final MemberRole memberRole = new MemberRole(member.get(), role.get());
+        ReflectionTestUtils.setField(memberRole, "id", 1L);
+        List<MemberRole> memberRoleList = new ArrayList<>();
+        memberRoleList.add(memberRole);
+        doReturn(memberRoleList).when(memberRoleRepository).findAllByMemberId(any(Long.class));
+
+        doNothing().when(memberRoleRepository).deleteAllByIdInBatch(any(Iterable.class));
+        doReturn(null).when(memberRoleRepository).save(any(MemberRole.class));
+
+        // when
+        final StatusResponse response = memberService.resign();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(Status.SUCCESS);
+        assertThat(member.get().getEmail()).isEqualTo("");
+    }
+
+    @Test
+    @DisplayName("회원 탈퇴: 실패")
+    void resign_fail() throws Exception {
+        // given
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority("ROLE_CLUB_PRESIDENT"));
+        User user = new User("1", "password", authorities);
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, null, authorities);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        // when
+        final Executable executable = () -> memberService.resign();
+
+        // then
+        assertThrows(MemberResignException.class, executable);
     }
 }

@@ -2,12 +2,15 @@ package wegrus.clubwebsite.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import wegrus.clubwebsite.dto.Status;
+import wegrus.clubwebsite.dto.StatusResponse;
 import wegrus.clubwebsite.dto.member.*;
 import wegrus.clubwebsite.entity.member.MemberRole;
 import wegrus.clubwebsite.entity.member.MemberRoles;
@@ -26,6 +29,7 @@ import javax.mail.MessagingException;
 import java.io.IOException;
 import java.util.*;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static wegrus.clubwebsite.dto.error.ErrorCode.*;
 import static wegrus.clubwebsite.dto.result.ResultCode.*;
@@ -65,6 +69,9 @@ public class MemberService {
 
     @Transactional
     public MemberSignupResponse validateAndSaveMember(MemberSignupRequest request) {
+        MemberSignupResponse response = checkIsResignedMember(request);
+        if (response != null)
+            return response;
         validateDuplication(request.getEmail(), request.getUserId());
 
         final Member member = Member.builder()
@@ -79,11 +86,36 @@ public class MemberService {
         memberRepository.save(member);
         amazonS3Util.createDirectory("members/" + member.getId());
 
-        final Role role = roleRepository.findByName(MemberRoles.ROLE_GUEST.name()).orElseThrow(MemberRoleNotFoundException::new);
+        final Role role = roleRepository.findByName(MemberRoles.ROLE_GUEST.name()).get();
         memberRoleRepository.save(new MemberRole(member, role));
         // TODO: 회원가입 축하 이메일 전송 -> 내용 논의
 
         return new MemberSignupResponse(new MemberDto(member));
+    }
+
+    private MemberSignupResponse checkIsResignedMember(MemberSignupRequest request) {
+        final Optional<Member> findMember = memberRepository.findByUserId(request.getUserId());
+        if (findMember.isPresent()) {
+            final Long memberId = findMember.get().getId();
+            final Long resignId = roleRepository.findByName(MemberRoles.ROLE_RESIGN.name()).get().getId();
+            final Long banId = roleRepository.findByName(MemberRoles.ROLE_BAN.name()).get().getId();
+
+            final Optional<MemberRole> resignRole = memberRoleRepository.findByMemberIdAndRoleId(memberId, resignId);
+            if (resignRole.isPresent()) {
+                final Member member = findMember.get();
+                member.rejoin(request);
+                memberRoleRepository.deleteById(resignRole.get().getId());
+
+                final Role role = roleRepository.findByName(MemberRoles.ROLE_GUEST.name()).get();
+                memberRoleRepository.save(new MemberRole(member, role));
+                // TODO: 회원가입 축하 이메일 전송 -> 내용 논의
+
+                return new MemberSignupResponse(new MemberDto(member));
+            }
+            else if (memberRoleRepository.findByMemberIdAndRoleId(memberId, banId).isPresent())
+                throw new MemberAlreadyBanException();
+        }
+        return null;
     }
 
     private void validateDuplication(String email, String userId) {
@@ -113,6 +145,12 @@ public class MemberService {
 
         redisUtil.set(authorizationCode, userId, 1);
         final Member member = memberRepository.findByUserId(userId).orElseThrow(MemberNotFoundException::new);
+        final Long resignId = roleRepository.findByName(MemberRoles.ROLE_RESIGN.name()).get().getId();
+        final Long banId = roleRepository.findByName(MemberRoles.ROLE_BAN.name()).get().getId();
+        if (memberRoleRepository.findByMemberIdAndRoleId(member.getId(), resignId).isPresent())
+            throw new MemberAlreadyResignException();
+        else if (memberRoleRepository.findByMemberIdAndRoleId(member.getId(), banId).isPresent())
+            throw new MemberAlreadyBanException();
         redisUtil.delete(authorizationCode);
 
         UserDetails userDetails = jwtUserDetailsUtil.loadUserByUsername(String.valueOf(member.getId()));
@@ -203,5 +241,40 @@ public class MemberService {
             throw new MemberAlreadyHasRoleException();
         memberRoleRepository.save(new MemberRole(member, role));
         return new RequestAuthorityResponse(Status.SUCCESS, memberRoles);
+    }
+
+    public StatusResponse resign() {
+        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        validateMemberRole(authentication);
+
+        final Long memberId = Long.valueOf(authentication.getName());
+        final Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
+        final Role role = roleRepository.findByName(MemberRoles.ROLE_RESIGN.name()).orElseThrow(MemberRoleNotFoundException::new);
+        final MemberRole memberRole = new MemberRole(member, role);
+
+        final List<Long> ids = memberRoleRepository.findAllByMemberId(memberId).stream()
+                .map(MemberRole::getId)
+                .collect(Collectors.toList());
+        memberRoleRepository.deleteAllByIdInBatch(ids);
+        memberRoleRepository.save(memberRole);
+        member.resign();
+
+        return new StatusResponse(Status.SUCCESS);
+    }
+
+    private void validateMemberRole(Authentication authentication) {
+        final Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+        final List<ErrorResponse.FieldError> errors = new ArrayList<>();
+        authorities
+                .forEach(o -> {
+                    if (o.getAuthority().equals(MemberRoles.ROLE_CLUB_PRESIDENT.name()))
+                        errors.add(new ErrorResponse.FieldError("role", o.getAuthority(), CLUB_PRESIDENT_CANNOT_RESIGN.getMessage()));
+                    else if (o.getAuthority().equals(MemberRoles.ROLE_RESIGN.name()))
+                        errors.add(new ErrorResponse.FieldError("role", o.getAuthority(), MEMBER_ALREADY_RESIGN.getMessage()));
+                    else if (o.getAuthority().equals(MemberRoles.ROLE_BAN.name()))
+                        errors.add(new ErrorResponse.FieldError("role", o.getAuthority(), MEMBER_ALREADY_BAN.getMessage()));
+                });
+        if (!errors.isEmpty())
+            throw new MemberResignException(errors);
     }
 }
