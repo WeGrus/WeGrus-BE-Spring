@@ -22,6 +22,7 @@ public enum ResultCode {
     EMAIL_NOT_VERIFIED(200, "M111", "인증되지 않은 이메일입니다. 메일 인증을 먼저 해주세요."),
     EMAIL_IS_VERIFIED(200, "M112", "인증된 이메일입니다. 회원가입을 계속 진행해 주세요."),
     REQUEST_AUTHORITY_SUCCESS(200, "M113", "권한 요청에 성공하였습니다."),
+    MEMBER_RESIGN_SUCCESS(200, "M114", "회원 탈퇴에 성공하였습니다."),
 
     // Board
     CREATE_BOARD_SUCCESS(200, "B100", "게시물 등록에 성공하였습니다."),

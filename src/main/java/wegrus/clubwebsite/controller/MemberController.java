@@ -12,6 +12,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import wegrus.clubwebsite.dto.Status;
+import wegrus.clubwebsite.dto.StatusResponse;
 import wegrus.clubwebsite.dto.VerificationResponse;
 import wegrus.clubwebsite.dto.member.*;
 import wegrus.clubwebsite.dto.result.ResultResponse;
@@ -176,5 +177,13 @@ public class MemberController {
         final RequestAuthorityResponse response = memberService.requestAuthority(role);
 
         return ResponseEntity.ok(ResultResponse.of(REQUEST_AUTHORITY_SUCCESS, response));
+    }
+
+    @ApiOperation(value = "회원 탈퇴")
+    @PostMapping("/members/resign")
+    public ResponseEntity<ResultResponse> resign() {
+        final StatusResponse response = memberService.resign();
+
+        return ResponseEntity.ok(ResultResponse.of(MEMBER_RESIGN_SUCCESS, response));
     }
 }

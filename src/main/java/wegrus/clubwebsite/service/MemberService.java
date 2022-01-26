@@ -2,12 +2,15 @@ package wegrus.clubwebsite.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import wegrus.clubwebsite.dto.Status;
+import wegrus.clubwebsite.dto.StatusResponse;
 import wegrus.clubwebsite.dto.member.*;
 import wegrus.clubwebsite.entity.member.MemberRole;
 import wegrus.clubwebsite.entity.member.MemberRoles;
@@ -26,6 +29,7 @@ import javax.mail.MessagingException;
 import java.io.IOException;
 import java.util.*;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static wegrus.clubwebsite.dto.error.ErrorCode.*;
 import static wegrus.clubwebsite.dto.result.ResultCode.*;
@@ -203,5 +207,40 @@ public class MemberService {
             throw new MemberAlreadyHasRoleException();
         memberRoleRepository.save(new MemberRole(member, role));
         return new RequestAuthorityResponse(Status.SUCCESS, memberRoles);
+    }
+
+    public StatusResponse resign() {
+        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        validateMemberRole(authentication);
+
+        final Long memberId = Long.valueOf(authentication.getName());
+        final Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
+        final Role role = roleRepository.findByName(MemberRoles.ROLE_RESIGN.name()).orElseThrow(MemberRoleNotFoundException::new);
+        final MemberRole memberRole = new MemberRole(member, role);
+
+        final List<Long> ids = memberRoleRepository.findAllByMemberId(memberId).stream()
+                .map(MemberRole::getId)
+                .collect(Collectors.toList());
+        memberRoleRepository.deleteAllByIdInBatch(ids);
+        memberRoleRepository.save(memberRole);
+        member.resign();
+
+        return new StatusResponse(Status.SUCCESS);
+    }
+
+    private void validateMemberRole(Authentication authentication) {
+        final Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+        final List<ErrorResponse.FieldError> errors = new ArrayList<>();
+        authorities
+                .forEach(o -> {
+                    if (o.getAuthority().equals(MemberRoles.ROLE_CLUB_PRESIDENT.name()))
+                        errors.add(new ErrorResponse.FieldError("role", o.getAuthority(), CLUB_PRESIDENT_CANNOT_RESIGN.getMessage()));
+                    else if (o.getAuthority().equals(MemberRoles.ROLE_RESIGN.name()))
+                        errors.add(new ErrorResponse.FieldError("role", o.getAuthority(), RESIGNED_MEMBER_CANNOT_RESIGN.getMessage()));
+                    else if (o.getAuthority().equals(MemberRoles.ROLE_BAN.name()))
+                        errors.add(new ErrorResponse.FieldError("role", o.getAuthority(), BANNED_MEMBER_CANNOT_RESIGN.getMessage()));
+                });
+        if (!errors.isEmpty())
+            throw new MemberResignException(errors);
     }
 }

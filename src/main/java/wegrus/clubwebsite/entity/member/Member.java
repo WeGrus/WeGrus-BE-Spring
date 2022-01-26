@@ -117,4 +117,16 @@ public class Member {
     public void updateImage(Image image) {
         this.image = image;
     }
+
+    public void resign() {
+        this.academicStatus = MemberAcademicStatus.ETC;
+        this.grade = MemberGrade.ETC;
+        this.phone = "";
+        this.introduce = "";
+        this.department = "";
+        this.email = "";
+        this.name = "";
+        this.studentId = "";
+        this.image = Image.builder().url(MEMBER_BASIC_IMAGE_URL).build();
+    }
 }
