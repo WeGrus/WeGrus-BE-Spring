@@ -271,8 +271,8 @@ public class MemberControllerTest {
         // then
         perform
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("code").value(SIGNIN_FAILURE.getCode()))
-                .andExpect(jsonPath("message").value(SIGNIN_FAILURE.getMessage()))
+                .andExpect(jsonPath("code").value(NEED_TO_SIGNUP.getCode()))
+                .andExpect(jsonPath("message").value(NEED_TO_SIGNUP.getMessage()))
                 .andExpect(jsonPath("data.status").value(Status.FAILURE));
     }
 
