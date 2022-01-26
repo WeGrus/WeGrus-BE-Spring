@@ -15,7 +15,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.multipart.MultipartFile;
 import wegrus.clubwebsite.dto.Status;
@@ -86,7 +85,7 @@ public class MemberServiceTest {
         List<GrantedAuthority> authorities = new ArrayList<>();
         authorities.add((GrantedAuthority) () -> "ROLE_GUEST");
         User user = new User("1", "password", authorities);
-        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user,null, authorities);
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, null, authorities);
         SecurityContextHolder.getContext().setAuthentication(auth);
     }
 
@@ -428,7 +427,7 @@ public class MemberServiceTest {
         doReturn(member).when(memberRepository).findById(any(Long.class));
 
         ReflectionTestUtils.setField(imageUtil, "MEMBER_BASIC_IMAGE_URL", "구 이미지 저장소 url");
-        
+
         // when
         final Executable executable = () -> memberService.updateMemberImage(null);
 
@@ -509,7 +508,7 @@ public class MemberServiceTest {
         // then
         assertThrows(MemberAlreadyHasRoleException.class, executable);
     }
-    
+
     @Test
     @DisplayName("회원 탈퇴: 성공")
     void resign_success() throws Exception {
@@ -539,7 +538,6 @@ public class MemberServiceTest {
         assertThat(member.get().getEmail()).isEqualTo("");
     }
 
-    @WithMockUser(roles = "CLUB_PRESIDENT")
     @Test
     @DisplayName("회원 탈퇴: 실패")
     void resign_fail() throws Exception {
@@ -547,7 +545,7 @@ public class MemberServiceTest {
         List<GrantedAuthority> authorities = new ArrayList<>();
         authorities.add(new SimpleGrantedAuthority("ROLE_CLUB_PRESIDENT"));
         User user = new User("1", "password", authorities);
-        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user,null, authorities);
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, null, authorities);
         SecurityContextHolder.getContext().setAuthentication(auth);
 
         // when

@@ -495,7 +495,7 @@ public class MemberControllerTest {
         final MockMultipartFile multipartFile = new MockMultipartFile("name", "name.png", "png", new FileInputStream("src/test/resources/static/image.jpg"));
         MemberImageUpdateResponse response = new MemberImageUpdateResponse(Status.SUCCESS, "new url");
         doReturn(response).when(memberService).updateMemberImage(any(MultipartFile.class));
-        
+
         // when
         final ResultActions perform = mockMvc.perform(
                 multipart("/members/image").file(multipartFile)
@@ -579,7 +579,7 @@ public class MemberControllerTest {
                 .andExpect(jsonPath("message").value(REQUEST_AUTHORITY_SUCCESS.getMessage()))
                 .andExpect(jsonPath("data.role").value(MemberRoles.ROLE_MEMBER.name()));
     }
-    
+
     @Test
     @DisplayName("회원 탈퇴 API: 성공")
     void resign_success() throws Exception {

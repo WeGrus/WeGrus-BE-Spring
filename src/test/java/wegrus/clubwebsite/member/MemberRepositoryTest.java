@@ -21,7 +21,7 @@ public class MemberRepositoryTest {
 
     @BeforeEach
     void init() {
-        for(int i = 0; i < 5; i ++) {
+        for (int i = 0; i < 5; i++) {
             final Member member = Member.builder()
                     .name("김만두" + i)
                     .email("1216154" + i + "@inha.edu")

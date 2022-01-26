@@ -159,7 +159,7 @@ public class MemberIntegrationTest {
         return objectMapper.convertValue(responseEntity.getBody().getData(), MemberImageUpdateResponse.class);
     }
 
-    public ValidateEmailResponse validateEmailAPI(String email){
+    public ValidateEmailResponse validateEmailAPI(String email) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 

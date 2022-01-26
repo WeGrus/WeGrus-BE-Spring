@@ -82,7 +82,7 @@ public class MemberRoleRepositoryTest {
         // then
         assertThat(memberRoles.size()).isEqualTo(2);
     }
-    
+
     @Test
     @DisplayName("Batch delete로 MemberRole 엔티티 여러 개 한 번에 삭제하기")
     void deleteAllByIdInBatch() throws Exception {
@@ -108,7 +108,7 @@ public class MemberRoleRepositoryTest {
 
         // when
         memberRoleRepository.deleteAllByIdInBatch(ids);
-        
+
         // then
         assertThat(memberRoleRepository.findAllByMemberId(member.getId()).size()).isEqualTo(0);
     }
