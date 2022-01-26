@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import wegrus.clubwebsite.dto.post.PostCreateRequest;
 import wegrus.clubwebsite.dto.post.PostUpdateRequest;
+import wegrus.clubwebsite.entity.post.Board;
 import wegrus.clubwebsite.entity.post.Post;
 import wegrus.clubwebsite.entity.post.PostState;
 import wegrus.clubwebsite.entity.post.PostLike;
@@ -19,6 +20,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Service
 public class PostService {
+    private final BoardRepository boardRepository;
     private final PostRepository postRepository;
     private final MemberRepository memberRepository;
     private final ReplyRepository replyRepository;
@@ -29,12 +31,12 @@ public class PostService {
     public Long create(PostCreateRequest request){
         String postId = SecurityContextHolder.getContext().getAuthentication().getName();
         final Member member = memberRepository.findById(Long.valueOf(postId)).orElseThrow(MemberNotFoundException::new);
+        final Board board = boardRepository.findByName(request.getBoardName()).orElseThrow(BoardNotFoundException::new);
         PostState state = PostState.ACTIVATE; // 생성되는 게시물은 모두 활성화 되어있는 상태
 
         Post post = Post.builder()
                 .member(member)
-                .category(request.getBoardCategory())
-                .type(request.getBoardType())
+                .board(board)
                 .title(request.getTitle())
                 .content(request.getContent())
                 .secretFlag(request.isSecretFlag())

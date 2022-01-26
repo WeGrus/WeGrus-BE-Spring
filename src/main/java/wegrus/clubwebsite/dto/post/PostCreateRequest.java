@@ -19,10 +19,6 @@ public class PostCreateRequest {
     @NotNull(message = "게시판 종류는 필수입니다.")
     private String boardName;
 
-    @ApiModelProperty(value = "게시물 종류", example = "FREE", required = true)
-    @NotNull(message = "게시물 종류는 필수입니다.")
-    private String boardCategoryName;
-
     @ApiModelProperty(value = "게시물 제목", example = "게시판 제목 1", required = true)
     @NotBlank(message = "게시판 제목은 필수입니다.")
     private String title;
