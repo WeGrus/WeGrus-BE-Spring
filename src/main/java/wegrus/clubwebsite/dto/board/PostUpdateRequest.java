@@ -5,25 +5,18 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import wegrus.clubwebsite.entity.board.BoardCategory;
-import wegrus.clubwebsite.entity.board.BoardType;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
-@ApiModel(description = "게시물 등록 요청 데이터 모델")
+@ApiModel(description = "게시물 수정 요청 데이터 모델")
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class BoardCreateRequest {
-
-    @ApiModelProperty(value = "게시판 종류", example = "BOARD", required = true)
-    @NotNull(message = "게시판 종류는 필수입니다.")
-    private BoardCategory boardCategory;
-
-    @ApiModelProperty(value = "게시물 종류", example = "FREE", required = true)
-    @NotNull(message = "게시물 종류는 필수입니다.")
-    private BoardType boardType;
+public class PostUpdateRequest {
+    @ApiModelProperty(value = "게시물 id", example = "1", required = true)
+    @NotNull(message = "게시물 id는 필수입니다.")
+    private Long postId;
 
     @ApiModelProperty(value = "게시물 제목", example = "게시판 제목 1", required = true)
     @NotBlank(message = "게시판 제목은 필수입니다.")
@@ -35,5 +28,4 @@ public class BoardCreateRequest {
 
     @ApiModelProperty(value = "비밀글 여부", example = "false", required = true)
     private boolean secretFlag;
-
 }

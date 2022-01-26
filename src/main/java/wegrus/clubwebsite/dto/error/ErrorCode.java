@@ -22,8 +22,8 @@ public enum ErrorCode {
     MULTIPARTFILE_CONVERT_FAIL(400, "C010", "MultipartFile을 File로 변환하는 데 실패하였습니다."),
 
     // Board
-    BOARD_NOT_FOUND(400, "B000", "존재하지 않는 게시물입니다."),
-    BOARD_MEMBER_NOT_MATCH(400, "B001", "게시물의 작성자와 일치하지 않습니다."),
+    POST_NOT_FOUND(400, "B000", "존재하지 않는 게시물입니다."),
+    POST_MEMBER_NOT_MATCH(400, "B001", "게시물의 작성자와 일치하지 않습니다."),
     REPLY_NOT_FOUND(400, "B002", "존재하지 않는 댓글입니다."),
     REPLY_MEMBER_NOT_MATCH(400, "B003", "댓글의 작성자와 일치하지 않습니다."),
     POST_LIKE_ALREADY_EXIST(400, "B004", "이미 존재하는 게시물 추천입니다."),

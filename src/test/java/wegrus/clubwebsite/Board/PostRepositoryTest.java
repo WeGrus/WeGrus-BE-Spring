@@ -15,13 +15,13 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-public class BoardRepositoryTest {
+public class PostRepositoryTest {
 
     @Autowired
     MemberRepository memberRepository;
 
     @Autowired
-    BoardRepository boardRepository;
+    PostRepository postRepository;
 
     @Autowired
     ReplyRepository replyRepository;
@@ -55,28 +55,28 @@ public class BoardRepositoryTest {
         String content = "테스트 내용";
         BoardCategory boardCategory = BoardCategory.BOARD;
         BoardType boardType = BoardType.FREE;
-        BoardState boardState = BoardState.ACTIVATE;
+        PostState postState = PostState.ACTIVATE;
 
-        final Board board = Board.builder()
+        final Post post = Post.builder()
                 .member(member)
                 .category(boardCategory)
                 .type(boardType)
                 .title(title)
                 .content(content)
                 .secretFlag(false)
-                .state(boardState)
+                .state(postState)
                 .build();
 
-        boardRepository.save(board);
+        postRepository.save(post);
 
-        List<Board> boardList = boardRepository.findAll();
+        List<Post> postList = postRepository.findAll();
 
-        Board board1 = boardList.get(0);
-        assertThat(board1.getTitle()).isEqualTo(title);
-        assertThat(board1.getContent()).isEqualTo(content);
-        assertThat(board1.getCategory()).isEqualTo(boardCategory);
-        assertThat(board1.getType()).isEqualTo(boardType);
-        assertThat(board1.getState()).isEqualTo(boardState);
+        Post post1 = postList.get(0);
+        assertThat(post1.getTitle()).isEqualTo(title);
+        assertThat(post1.getContent()).isEqualTo(content);
+        assertThat(post1.getCategory()).isEqualTo(boardCategory);
+        assertThat(post1.getType()).isEqualTo(boardType);
+        assertThat(post1.getState()).isEqualTo(postState);
 
 
         // Replies
@@ -84,7 +84,7 @@ public class BoardRepositoryTest {
         ReplyState replyState = ReplyState.ACTIVATE;
         final Reply reply = Reply.builder()
                 .member(member)
-                .board(board)
+                .post(post)
                 .content(replyContent)
                 .state(replyState)
                 .build();
@@ -100,7 +100,7 @@ public class BoardRepositoryTest {
         // Post_Likes
         final PostLike postLike = PostLike.builder()
                 .member(member)
-                .board(board)
+                .post(post)
                 .build();
 
         postLikeRepository.save(postLike);
@@ -109,12 +109,12 @@ public class BoardRepositoryTest {
 
         PostLike postLike1 = postLikeList.get(0);
         assertThat(postLike1.getMember()).isEqualTo(member);
-        assertThat(postLike1.getBoard()).isEqualTo(board);
+        assertThat(postLike1.getPost()).isEqualTo(post);
 
         // Views
         final View view = View.builder()
                 .member(member)
-                .board(board)
+                .post(post)
                 .build();
 
         viewRepository.save(view);
@@ -123,7 +123,7 @@ public class BoardRepositoryTest {
 
         View view1 = viewList.get(0);
         assertThat(view1.getMember()).isEqualTo(member);
-        assertThat(view1.getBoard()).isEqualTo(board);
+        assertThat(view1.getPost()).isEqualTo(post);
 
         // Comment_Likes
         final CommentLike commentLike = CommentLike.builder()

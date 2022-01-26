@@ -22,6 +22,6 @@ public interface CommentLikeRepository extends JpaRepository<CommentLike, Long> 
             "USING replies AS a " +
             "INNER JOIN comment_likes AS b " +
             "ON a.reply_id = b.reply_id " +
-            "WHERE a.board_id = :board", nativeQuery = true)
-    void deleteCommentLikesByBoard(@Param("board") Long boardId);
+            "WHERE a.post_id = :post", nativeQuery = true)
+    void deleteCommentLikesByPost(@Param("post") Long postId);
 }

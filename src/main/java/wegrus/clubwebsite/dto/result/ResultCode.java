@@ -24,10 +24,10 @@ public enum ResultCode {
     REQUEST_AUTHORITY_SUCCESS(200, "M113", "권한 요청에 성공하였습니다."),
 
     // Board
-    CREATE_BOARD_SUCCESS(200, "B100", "게시물 등록에 성공하였습니다."),
-    UPDATE_BOARD_SUCCESS(200, "B101", "게시물 수정에 성공하였습니다."),
-    DELETE_BOARD_SUCCESS(200, "B102", "게시물 삭제에 성공하였습니다."),
-    VIEW_BOARD_SUCCESS(200, "B103", "게시물 조회에 성공하였습니다."),
+    CREATE_POST_SUCCESS(200, "B100", "게시물 등록에 성공하였습니다."),
+    UPDATE_POST_SUCCESS(200, "B101", "게시물 수정에 성공하였습니다."),
+    DELETE_POST_SUCCESS(200, "B102", "게시물 삭제에 성공하였습니다."),
+    VIEW_POST_SUCCESS(200, "B103", "게시물 조회에 성공하였습니다."),
     CREATE_REPLY_SUCCESS(200, "B104", "댓글 등록에 성공하였습니다."),
     DELETE_REPLY_SUCCESS(200, "B105", "댓글 삭제에 성공하였습니다."),
     CREATE_POST_LIKE_SUCCESS(200, "B106", "게시물 추천에 성공하였습니다."),

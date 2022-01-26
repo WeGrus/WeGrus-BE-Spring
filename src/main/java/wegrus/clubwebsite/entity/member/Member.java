@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import wegrus.clubwebsite.dto.member.MemberInfoUpdateRequest;
-import wegrus.clubwebsite.entity.board.Board;
+import wegrus.clubwebsite.entity.board.Post;
 import wegrus.clubwebsite.entity.board.CommentLike;
 import wegrus.clubwebsite.entity.board.PostLike;
 import wegrus.clubwebsite.entity.board.View;
@@ -35,7 +35,7 @@ public class Member {
     private Long id;
 
     @OneToMany(mappedBy = "member")
-    private List<Board> boards = new ArrayList<>();
+    private List<Post> posts = new ArrayList<>();
 
     @OneToMany(mappedBy = "member")
     private List<PostLike> postLikes = new ArrayList<>();

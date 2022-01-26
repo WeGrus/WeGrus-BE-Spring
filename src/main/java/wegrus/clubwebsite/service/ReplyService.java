@@ -5,13 +5,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import wegrus.clubwebsite.dto.board.ReplyCreateRequest;
-import wegrus.clubwebsite.entity.board.Board;
+import wegrus.clubwebsite.entity.board.Post;
 import wegrus.clubwebsite.entity.board.CommentLike;
 import wegrus.clubwebsite.entity.board.Reply;
 import wegrus.clubwebsite.entity.board.ReplyState;
 import wegrus.clubwebsite.entity.member.Member;
 import wegrus.clubwebsite.exception.*;
-import wegrus.clubwebsite.repository.BoardRepository;
+import wegrus.clubwebsite.repository.PostRepository;
 import wegrus.clubwebsite.repository.CommentLikeRepository;
 import wegrus.clubwebsite.repository.MemberRepository;
 import wegrus.clubwebsite.repository.ReplyRepository;
@@ -21,7 +21,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Service
 public class ReplyService {
-    private final BoardRepository boardRepository;
+    private final PostRepository postRepository;
     private final MemberRepository memberRepository;
     private final ReplyRepository replyRepository;
     private final CommentLikeRepository commentLikeRepository;
@@ -31,13 +31,13 @@ public class ReplyService {
         String memberId = SecurityContextHolder.getContext().getAuthentication().getName();
         final Member member = memberRepository.findById(Long.valueOf(memberId)).orElseThrow(MemberNotFoundException::new);
 
-        final Board board = boardRepository.findById(request.getBoardId()).orElseThrow(BoardNotFoundException::new);
+        final Post post = postRepository.findById(request.getPostId()).orElseThrow(PostNotFoundException::new);
 
         ReplyState replyState = ReplyState.ACTIVATE;
 
         Reply reply = Reply.builder()
                 .member(member)
-                .board(board)
+                .post(post)
                 .content(request.getContent())
                 .state(replyState)
                 .build();

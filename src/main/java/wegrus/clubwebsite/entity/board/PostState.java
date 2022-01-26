@@ -1,5 +1,5 @@
 package wegrus.clubwebsite.entity.board;
 
-public enum BoardState {
+public enum PostState {
     ACTIVATE, DEACTIVATE
 }

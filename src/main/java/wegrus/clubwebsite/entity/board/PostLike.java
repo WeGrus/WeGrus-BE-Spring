@@ -4,7 +4,6 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import wegrus.clubwebsite.entity.board.Board;
 import wegrus.clubwebsite.entity.member.Member;
 
 import javax.persistence.*;
@@ -25,12 +24,12 @@ public class PostLike {
     private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "board_id", nullable = false)
-    private Board board;
+    @JoinColumn(name = "post_id", nullable = false)
+    private Post post;
 
     @Builder
-    public PostLike(Member member, Board board){
+    public PostLike(Member member, Post post){
         this.member = member;
-        this.board = board;
+        this.post = post;
     }
 }

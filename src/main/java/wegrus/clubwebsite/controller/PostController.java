@@ -18,28 +18,28 @@ import static wegrus.clubwebsite.dto.result.ResultCode.*;
 @Api(tags = "게시판 API")
 @RequiredArgsConstructor
 @RestController
-public class BoardController {
+public class PostController {
 
     private final BoardService boardService;
     private final ReplyService replyService;
 
     @ApiOperation(value = "게시물 등록")
     @PostMapping("/posts")
-    public ResponseEntity<ResultResponse> createBoard(@Validated @RequestBody BoardCreateRequest request){
-        final Long boardId = boardService.create(request);
-        final BoardCreateResponse response = new BoardCreateResponse(boardId);
+    public ResponseEntity<ResultResponse> createBoard(@Validated @RequestBody PostCreateRequest request){
+        final Long postId = boardService.create(request);
+        final PostCreateResponse response = new PostCreateResponse(postId);
 
-        return ResponseEntity.ok(ResultResponse.of(CREATE_BOARD_SUCCESS, response));
+        return ResponseEntity.ok(ResultResponse.of(CREATE_POST_SUCCESS, response));
     }
 
     @ApiOperation(value = "게시물 수정")
     @PutMapping("/posts")
     public ResponseEntity<ResultResponse> updateBoard(
-            @Validated @RequestBody BoardUpdateRequest request){
-        final Long boardId = boardService.update(request);
-        final BoardUpdateResponse response = new BoardUpdateResponse(boardId);
+            @Validated @RequestBody PostUpdateRequest request){
+        final Long postId = boardService.update(request);
+        final PostUpdateResponse response = new PostUpdateResponse(postId);
 
-        return ResponseEntity.ok(ResultResponse.of(UPDATE_BOARD_SUCCESS, response));
+        return ResponseEntity.ok(ResultResponse.of(UPDATE_POST_SUCCESS, response));
     }
 
     @ApiOperation(value = "게시물 삭제")
@@ -48,7 +48,7 @@ public class BoardController {
             @Validated @NotNull(message = "게시물 id는 필수입니다.")@RequestParam Long postId){
         boardService.delete(postId);
 
-        return ResponseEntity.ok(ResultResponse.of(DELETE_BOARD_SUCCESS, null));
+        return ResponseEntity.ok(ResultResponse.of(DELETE_POST_SUCCESS, null));
     }
 
     @ApiOperation(value = "게시물 추천")

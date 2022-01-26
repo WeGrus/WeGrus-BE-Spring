@@ -5,6 +5,6 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class BoardCreateResponse {
-    private Long boardId;
+public class PostCreateResponse {
+    private Long postId;
 }

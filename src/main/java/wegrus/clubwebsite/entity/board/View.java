@@ -24,12 +24,12 @@ public class View {
     private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "board_id", nullable = false)
-    private Board board;
+    @JoinColumn(name = "post_id", nullable = false)
+    private Post post;
 
     @Builder
-    public View(Member member, Board board){
+    public View(Member member, Post post){
         this.member = member;
-        this.board = board;
+        this.post = post;
     }
 }
