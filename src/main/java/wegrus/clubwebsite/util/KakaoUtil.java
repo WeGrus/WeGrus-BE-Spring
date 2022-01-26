@@ -22,10 +22,14 @@ public class KakaoUtil {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
         headers.set("Authorization", "Bearer " + accessToken);
+
         HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(null, headers);
         final ResponseEntity<Map> responseEntity = restTemplate.exchange("https://kapi.kakao.com/v2/user/me", HttpMethod.GET, requestEntity, Map.class);
         final Map response = responseEntity.getBody();
-        return "kakao_" + response.get("id");
+        final String userId = "kakao_" + response.get("id");
+
+        restTemplate.exchange("https://kapi.kakao.com/v1/user/logout", HttpMethod.POST, requestEntity, Map.class);
+        return userId;
     }
 
     public String getAccessTokenFromKakaoAPI(String authorizationCode) {

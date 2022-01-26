@@ -17,6 +17,8 @@ import wegrus.clubwebsite.dto.VerificationResponse;
 import wegrus.clubwebsite.dto.member.*;
 import wegrus.clubwebsite.dto.result.ResultResponse;
 import wegrus.clubwebsite.entity.member.MemberRoles;
+import wegrus.clubwebsite.exception.MemberAlreadyBanException;
+import wegrus.clubwebsite.exception.MemberAlreadyResignException;
 import wegrus.clubwebsite.exception.MemberNotFoundException;
 import wegrus.clubwebsite.service.MemberService;
 import wegrus.clubwebsite.util.RedisUtil;
@@ -81,7 +83,19 @@ public class MemberController {
             final MemberSigninFailResponse response = new MemberSigninFailResponse(Status.FAILURE, userId);
             redisUtil.delete(authorizationCode);
 
-            return ResponseEntity.ok(ResultResponse.of(SIGNIN_FAILURE, response));
+            return ResponseEntity.ok(ResultResponse.of(NEED_TO_SIGNUP, response));
+        } catch (MemberAlreadyResignException e) {
+            final String userId = (String) redisUtil.get(authorizationCode);
+            final MemberSigninFailResponse response = new MemberSigninFailResponse(Status.FAILURE, userId);
+            redisUtil.delete(authorizationCode);
+
+            return ResponseEntity.ok(ResultResponse.of(NEED_TO_REJOIN, response));
+        } catch (MemberAlreadyBanException e) {
+            final String userId = (String) redisUtil.get(authorizationCode);
+            final MemberSigninFailResponse response = new MemberSigninFailResponse(Status.FAILURE, userId);
+            redisUtil.delete(authorizationCode);
+
+            return ResponseEntity.ok(ResultResponse.of(BANNED_USER, response));
         }
     }
 
