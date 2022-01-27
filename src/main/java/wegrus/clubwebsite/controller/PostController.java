@@ -84,8 +84,8 @@ public class PostController {
     @ApiOperation(value = "댓글 삭제")
     @DeleteMapping("/comments")
     public ResponseEntity<ResultResponse> deleteComment(
-            @Validated @NotNull(message = "댓글 id는 필수입니다.")@RequestParam Long commentId){
-        replyService.delete(commentId);
+            @Validated @NotNull(message = "댓글 id는 필수입니다.")@RequestParam Long replyId){
+        replyService.delete(replyId);
 
         return ResponseEntity.ok(ResultResponse.of(DELETE_REPLY_SUCCESS, null));
     }
@@ -93,8 +93,8 @@ public class PostController {
     @ApiOperation(value = "댓글 추천")
     @PostMapping("/comments/like")
     public ResponseEntity<ResultResponse> likeComment(
-            @Validated @NotNull(message = "댓글 id는 필수입니다.")@RequestParam Long commentId){
-        final Long replyLikeId = replyService.like(commentId);
+            @Validated @NotNull(message = "댓글 id는 필수입니다.")@RequestParam Long replyId){
+        final Long replyLikeId = replyService.like(replyId);
         final ReplyLikeCreateResponse response = new ReplyLikeCreateResponse(replyLikeId);
 
         return ResponseEntity.ok(ResultResponse.of(CREATE_REPLY_LIKE_SUCCESS, response));
@@ -103,8 +103,8 @@ public class PostController {
     @ApiOperation(value = "댓글 추천 해제")
     @DeleteMapping("/comments/like")
     public ResponseEntity<ResultResponse> dislikeComment(
-            @Validated @NotNull(message = "댓글 id는 필수입니다.")@RequestParam Long commentId){
-        replyService.dislike(commentId);
+            @Validated @NotNull(message = "댓글 id는 필수입니다.")@RequestParam Long replyId){
+        replyService.dislike(replyId);
 
         return ResponseEntity.ok(ResultResponse.of(DELETE_REPLY_LIKE_SUCCESS, null));
     }

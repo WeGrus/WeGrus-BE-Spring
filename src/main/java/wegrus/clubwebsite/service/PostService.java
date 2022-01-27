@@ -29,8 +29,8 @@ public class PostService {
 
     @Transactional
     public Long create(PostCreateRequest request){
-        String postId = SecurityContextHolder.getContext().getAuthentication().getName();
-        final Member member = memberRepository.findById(Long.valueOf(postId)).orElseThrow(MemberNotFoundException::new);
+        String memberId = SecurityContextHolder.getContext().getAuthentication().getName();
+        final Member member = memberRepository.findById(Long.valueOf(memberId)).orElseThrow(MemberNotFoundException::new);
         final Board board = boardRepository.findByName(request.getBoardName()).orElseThrow(BoardNotFoundException::new);
         PostState state = PostState.ACTIVATE; // 생성되는 게시물은 모두 활성화 되어있는 상태
 
