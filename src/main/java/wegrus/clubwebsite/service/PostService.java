@@ -4,17 +4,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import wegrus.clubwebsite.dto.post.PostCreateRequest;
-import wegrus.clubwebsite.dto.post.PostUpdateRequest;
-import wegrus.clubwebsite.entity.post.Board;
-import wegrus.clubwebsite.entity.post.Post;
-import wegrus.clubwebsite.entity.post.PostState;
-import wegrus.clubwebsite.entity.post.PostLike;
+import wegrus.clubwebsite.dto.post.*;
+import wegrus.clubwebsite.entity.post.*;
 import wegrus.clubwebsite.entity.member.Member;
 import wegrus.clubwebsite.exception.*;
 import wegrus.clubwebsite.repository.*;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 @RequiredArgsConstructor
@@ -26,6 +24,7 @@ public class PostService {
     private final ReplyRepository replyRepository;
     private final PostLikeRepository postLikeRepository;
     private final ReplyLikeRepository replyLikeRepository;
+    private final ViewRepository viewRepository;
 
     @Transactional
     public Long create(PostCreateRequest request){
@@ -83,6 +82,33 @@ public class PostService {
         postLikeRepository.deletePostLikesByPost(post);
 
         postRepository.delete(post);
+    }
+
+    @Transactional
+    public PostResponse view(Long postId){
+        String memberId = SecurityContextHolder.getContext().getAuthentication().getName();
+        final Member member = memberRepository.findById(Long.valueOf(memberId)).orElseThrow(MemberNotFoundException::new);
+
+        final Post post = postRepository.findById(postId).orElseThrow(PostNotFoundException::new);
+
+        // 조회수 추가
+        Optional<View> views = viewRepository.findByMemberAndPost(member, post);
+
+        if(views.isEmpty()){
+            View view = View.builder()
+                    .member(member)
+                    .post(post)
+                    .build();
+            viewRepository.save(view);
+        }
+
+        // 정보 반환
+        List<ReplyDto> replies = post.getReplies()
+                .stream()
+                .map(ReplyDto::new)
+                .collect(Collectors.toList());
+
+        return new PostResponse(new PostDto(post), replies);
     }
 
     @Transactional

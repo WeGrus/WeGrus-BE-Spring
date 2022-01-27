@@ -1,6 +1,7 @@
 package wegrus.clubwebsite.controller;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -49,6 +50,15 @@ public class PostController {
         postService.delete(postId);
 
         return ResponseEntity.ok(ResultResponse.of(DELETE_POST_SUCCESS, null));
+    }
+
+    @ApiOperation(value = "게시물 조회")
+    @ApiImplicitParam(name = "postId", value = "게시물 순번(PK)", required = true, example = "1")
+    @GetMapping("/posts/{postId}")
+    public ResponseEntity<ResultResponse> viewPost(@NotNull(message = "게시물 id는 필수입니다.") @PathVariable Long postId){
+        final PostResponse response = postService.view(postId);
+
+        return ResponseEntity.ok(ResultResponse.of(VIEW_POST_SUCCESS, response));
     }
 
     @ApiOperation(value = "게시물 추천")
