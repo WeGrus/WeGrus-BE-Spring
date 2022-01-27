@@ -20,7 +20,7 @@ public class PostCreateRequest {
     @NotNull(message = "게시판 종류는 필수입니다.")
     private String boardName;
 
-    @ApiModelProperty(value = "게시물 타입", example = "NOT_NOTICE", required = true)
+    @ApiModelProperty(value = "게시물 타입", example = "NORMAL", required = true)
     @NotNull(message = "게시물 타입(공지사항 여부)은 필수입니다.")
     private PostType type;
 
