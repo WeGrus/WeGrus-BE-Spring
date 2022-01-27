@@ -8,10 +8,10 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import wegrus.clubwebsite.dto.member.MemberInfoUpdateRequest;
 import wegrus.clubwebsite.dto.member.MemberSignupRequest;
-import wegrus.clubwebsite.entity.board.Board;
-import wegrus.clubwebsite.entity.board.CommentLike;
-import wegrus.clubwebsite.entity.board.PostLike;
-import wegrus.clubwebsite.entity.board.View;
+import wegrus.clubwebsite.entity.post.Post;
+import wegrus.clubwebsite.entity.post.ReplyLike;
+import wegrus.clubwebsite.entity.post.PostLike;
+import wegrus.clubwebsite.entity.post.View;
 import wegrus.clubwebsite.vo.Image;
 
 import javax.persistence.*;
@@ -36,7 +36,7 @@ public class Member {
     private Long id;
 
     @OneToMany(mappedBy = "member")
-    private List<Board> boards = new ArrayList<>();
+    private List<Post> posts = new ArrayList<>();
 
     @OneToMany(mappedBy = "member")
     private List<PostLike> postLikes = new ArrayList<>();
@@ -45,7 +45,7 @@ public class Member {
     private List<View> views = new ArrayList<>();
 
     @OneToMany(mappedBy = "member")
-    private List<CommentLike> commentLikes = new ArrayList<>();
+    private List<ReplyLike> replyLikes = new ArrayList<>();
 
     @Column(name = "member_user_id", unique = true, nullable = false)
     private String userId;

@@ -1,4 +1,4 @@
-package wegrus.clubwebsite.entity.board;
+package wegrus.clubwebsite.entity.post;
 
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -11,25 +11,25 @@ import javax.persistence.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
-@Table(name = "views")
-public class View {
+@Table(name = "reply_likes")
+public class ReplyLike {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "view_id", updatable = false)
-    private Long Id;
+    @Column(name = "reply_like_id", updatable = false)
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "board_id", nullable = false)
-    private Board board;
+    @JoinColumn(name = "reply_id", nullable = false)
+    private Reply reply;
 
     @Builder
-    public View(Member member, Board board){
+    public ReplyLike(Member member, Reply reply){
         this.member = member;
-        this.board = board;
+        this.reply = reply;
     }
 }

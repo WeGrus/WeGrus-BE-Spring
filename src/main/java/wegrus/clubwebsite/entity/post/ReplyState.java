@@ -1,4 +1,4 @@
-package wegrus.clubwebsite.entity.board;
+package wegrus.clubwebsite.entity.post;
 
 public enum ReplyState {
     ACTIVATE, DEACTIVATE

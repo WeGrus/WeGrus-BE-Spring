@@ -1,4 +1,4 @@
-package wegrus.clubwebsite.dto.board;
+package wegrus.clubwebsite.dto.post;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -16,7 +16,7 @@ import javax.validation.constraints.NotNull;
 public class ReplyCreateRequest {
     @ApiModelProperty(value = "게시물 id", example = "1", required = true)
     @NotNull(message = "게시물 id는 필수입니다.")
-    private Long boardId;
+    private Long postId;
 
     @ApiModelProperty(value = "댓글 내용", example = "댓글 내용입니다.", required = true)
     @NotBlank(message = "댓글 내용은 필수입니다.")

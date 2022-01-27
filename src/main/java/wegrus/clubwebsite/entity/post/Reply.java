@@ -1,4 +1,4 @@
-package wegrus.clubwebsite.entity.board;
+package wegrus.clubwebsite.entity.post;
 
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -31,15 +31,15 @@ public class Reply {
     private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "board_id", nullable = false)
-    private Board board;
+    @JoinColumn(name = "post_id", nullable = false)
+    private Post post;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reply_parent_id")
     private Reply parent;
 
     @OneToMany(mappedBy = "reply")
-    private List<CommentLike> commentLikes = new ArrayList<>();
+    private List<ReplyLike> replyLikes = new ArrayList<>();
 
     @OneToMany(mappedBy = "parent")
     private List<Reply> replies = new ArrayList<>();
@@ -60,9 +60,9 @@ public class Reply {
     private ReplyState state;
 
     @Builder
-    public Reply(Member member, Board board, Reply parent, String content, ReplyState state){
+    public Reply(Member member, Post post, Reply parent, String content, ReplyState state){
         this.member = member;
-        this.board = board;
+        this.post = post;
         this.parent = parent;
         this.content = content;
         this.state = state;

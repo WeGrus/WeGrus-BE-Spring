@@ -1,4 +1,4 @@
-package wegrus.clubwebsite.entity.board;
+package wegrus.clubwebsite.entity.post;
 
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import wegrus.clubwebsite.dto.board.BoardUpdateRequest;
+import wegrus.clubwebsite.dto.post.PostUpdateRequest;
 import wegrus.clubwebsite.entity.member.Member;
 
 import javax.persistence.*;
@@ -19,61 +19,61 @@ import java.util.List;
 @EntityListeners(AuditingEntityListener.class)
 @Getter
 @Entity
-@Table(name = "boards")
-public class Board {
+@Table(name = "posts")
+public class Post {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "board_id", updatable = false)
+    @Column(name = "post_id", insertable = false, updatable = false)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    @OneToMany(mappedBy = "board")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "board_id", nullable = false)
+    private Board board;
+
+    @OneToMany(mappedBy = "post")
     private List<Reply> replies = new ArrayList<>();
 
-    @OneToMany(mappedBy = "board")
+    @OneToMany(mappedBy = "post")
     private List<PostLike> postLikes = new ArrayList<>();
 
-    @OneToMany(mappedBy = "board")
+    @OneToMany(mappedBy = "post")
     private List<View> views = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "board_category", nullable = false)
-    private BoardCategory category;
+    @Column(name = "post_type")
+    private PostType type;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "board_type", nullable = false)
-    private BoardType type;
-
-    @Column(name = "board_title", nullable = false)
+    @Column(name = "post_title", nullable = false)
     private String title;
 
     @Lob
-    @Column(name = "board_content", nullable = false)
+    @Column(name = "post_content", nullable = false)
     private String content;
 
     @CreatedDate
-    @Column(name = "board_create_date")
+    @Column(name = "post_create_date")
     private LocalDateTime createdDate;
 
     @LastModifiedDate
-    @Column(name = "board_update_date")
+    @Column(name = "post_update_date")
     private LocalDateTime updatedDate;
 
-    @Column(name = "board_secret_flag", nullable = false)
+    @Column(name = "post_secret_flag", nullable = false)
     private boolean secretFlag;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "board_state", nullable = false)
-    private BoardState state;
+    @Column(name = "post_state", nullable = false)
+    private PostState state;
 
     @Builder
-    public Board(Member member, BoardCategory category, BoardType type, String title, String content, boolean secretFlag, BoardState state){
+    public Post(Member member, Board board, PostType type, String title, String content, boolean secretFlag, PostState state){
         this.member = member;
-        this.category = category;
+        this.board = board;
         this.type = type;
         this.title = title;
         this.content = content;
@@ -81,7 +81,7 @@ public class Board {
         this.state = state;
     }
 
-    public void update(BoardUpdateRequest request){
+    public void update(PostUpdateRequest request){
         this.title = request.getTitle();
         this.content = request.getContent();
         this.secretFlag = request.isSecretFlag();
