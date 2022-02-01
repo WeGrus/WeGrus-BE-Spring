@@ -27,7 +27,7 @@ public class PostDto {
     public PostDto(Post post){
         this.postId = post.getId();
         this.memberId = post.getMember().getId();
-        this.memberName = post.getMember().getName();
+        this.memberName = post.getMember().getStudentId().substring(2, 4) + post.getMember().getName();
         this.board = post.getBoard().getName();
         this.boardCategory = post.getBoard().getBoardCategory().getName();
         this.type = post.getType().toString();
