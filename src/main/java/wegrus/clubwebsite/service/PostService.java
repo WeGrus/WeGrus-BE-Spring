@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 @Service
 public class PostService {
     private final BoardRepository boardRepository;
+    private final BoardCategoryRepository boardCategoryRepository;
     private final PostRepository postRepository;
     private final MemberRepository memberRepository;
     private final ReplyRepository replyRepository;
@@ -155,6 +156,18 @@ public class PostService {
                 .collect(Collectors.toList());
 
         return new BoardResponse(boardDtos);
+    }
+
+    @Transactional
+    public Long createBoard(BoardCreateRequest request){
+        final BoardCategory boardCategory = boardCategoryRepository.findById(request.getBoardCategoryId()).orElseThrow(BoardCategoryNotFoundException::new);
+
+        Board board = Board.builder()
+                .name(request.getBoardName())
+                .boardCategory(boardCategory)
+                .build();
+
+        return boardRepository.save(board).getId();
     }
 
 }

@@ -126,4 +126,13 @@ public class PostController {
 
         return ResponseEntity.ok(ResultResponse.of(VIEW_BOARD_SUCCESS, response));
     }
+
+    @ApiOperation(value = "게시판 추가 api")
+    @PostMapping("club/executives/boards")
+    public ResponseEntity<ResultResponse> createBoard(@Validated @RequestBody BoardCreateRequest request) {
+        final Long boardId = postService.createBoard(request);
+        final BoardCreateResponse response = new BoardCreateResponse(boardId);
+
+        return ResponseEntity.ok(ResultResponse.of(CREATE_BOARD_SUCCESS, response));
+    }
 }
