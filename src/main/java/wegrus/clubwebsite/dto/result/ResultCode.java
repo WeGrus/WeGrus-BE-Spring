@@ -39,6 +39,7 @@ public enum ResultCode {
     DELETE_REPLY_LIKE_SUCCESS(200, "B109", "댓글 추천 해제에 성공하였습니다."),
     VIEW_BOARD_SUCCESS(200, "B110", "게시판 목록 조회에 성공하였습니다."),
     CREATE_BOARD_SUCCESS(200, "B111", "게시판 추가에 성공하였습니다."),
+    DELETE_BOARD_SUCCESS(200, "B112", "게시판 삭제에 성공하였습니다."),
 
     // Verification
     REQUEST_VERIFY_SUCCESS(200, "V100", "인증 키 검증 요청에 성공하였습니다."),

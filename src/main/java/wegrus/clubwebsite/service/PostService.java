@@ -170,4 +170,9 @@ public class PostService {
         return boardRepository.save(board).getId();
     }
 
+    @Transactional
+    public void deleteBoard(Long boardId){
+        boardRepository.deleteById(boardId);
+    }
+
 }

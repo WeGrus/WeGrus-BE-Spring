@@ -12,6 +12,7 @@ import wegrus.clubwebsite.dto.result.ResultResponse;
 import wegrus.clubwebsite.service.PostService;
 import wegrus.clubwebsite.service.ReplyService;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import static wegrus.clubwebsite.dto.result.ResultCode.*;
@@ -134,5 +135,13 @@ public class PostController {
         final BoardCreateResponse response = new BoardCreateResponse(boardId);
 
         return ResponseEntity.ok(ResultResponse.of(CREATE_BOARD_SUCCESS, response));
+    }
+
+    @ApiOperation(value = "게시판 삭제")
+    @DeleteMapping("club/executives/boards/{boardId}")
+    public ResponseEntity<ResultResponse> deleteBoard(@NotNull(message = "게시판 id는 필수입니다.") @PathVariable Long boardId){
+        postService.deleteBoard(boardId);
+
+        return ResponseEntity.ok(ResultResponse.of(DELETE_BOARD_SUCCESS, null));
     }
 }
