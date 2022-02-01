@@ -146,4 +146,15 @@ public class PostService {
 
         postLikeRepository.delete(postLike);
     }
+
+    @Transactional
+    public BoardResponse viewBoard(){
+        List<BoardDto> boardDtos = boardRepository.findAll()
+                .stream()
+                .map(BoardDto::new)
+                .collect(Collectors.toList());
+
+        return new BoardResponse(boardDtos);
+    }
+
 }

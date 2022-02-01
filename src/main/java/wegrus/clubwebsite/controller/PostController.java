@@ -118,4 +118,12 @@ public class PostController {
 
         return ResponseEntity.ok(ResultResponse.of(DELETE_REPLY_LIKE_SUCCESS, null));
     }
+
+    @ApiOperation(value = "게시판 조회 api")
+    @GetMapping("club/executives/boards")
+    public ResponseEntity<ResultResponse> viewBoard(){
+        final BoardResponse response = postService.viewBoard();
+
+        return ResponseEntity.ok(ResultResponse.of(VIEW_BOARD_SUCCESS, response));
+    }
 }
