@@ -35,7 +35,7 @@ public class PostDto {
         this.content = post.getContent();
         this.createdDate = post.getCreatedDate();
         this.updatedDate = post.getUpdatedDate();
-        this.postLike = (long) post.getReplies().size();
+        this.postLike = (long) post.getPostLikes().size();
         this.postView = (long) post.getViews().size();
         this.secretFlag = post.isSecretFlag();
     }
