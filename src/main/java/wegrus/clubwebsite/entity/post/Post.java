@@ -70,6 +70,12 @@ public class Post {
     @Column(name = "post_state", nullable = false)
     private PostState state;
 
+    @Column(name = "post_like_num")
+    private Integer postLikeNum;
+
+    @Column(name = "reply_num")
+    private Integer replyNum;
+
     @Builder
     public Post(Member member, Board board, PostType type, String title, String content, boolean secretFlag, PostState state){
         this.member = member;
@@ -79,11 +85,21 @@ public class Post {
         this.content = content;
         this.secretFlag = secretFlag;
         this.state = state;
+        this.postLikeNum = 0;
+        this.replyNum = 0;
     }
 
     public void update(PostUpdateRequest request){
         this.title = request.getTitle();
         this.content = request.getContent();
         this.secretFlag = request.isSecretFlag();
+    }
+
+    public void likeNum(Integer postLikeNum){
+        this.postLikeNum = postLikeNum;
+    }
+
+    public void replyNum(Integer replyNum){
+        this.replyNum = replyNum;
     }
 }

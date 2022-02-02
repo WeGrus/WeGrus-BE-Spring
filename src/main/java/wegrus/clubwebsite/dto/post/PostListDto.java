@@ -8,8 +8,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @NoArgsConstructor
-public class PostDto {
-
+public class PostListDto {
     private Long postId;
     private Long memberId;
     private String memberName;
@@ -17,14 +16,14 @@ public class PostDto {
     private String boardCategory;
     private String type;
     private String title;
-    private String content;
     private LocalDateTime createdDate;
     private LocalDateTime updatedDate;
     private Integer postLike;
     private Integer postView;
+    private Integer postReplies;
     private boolean secretFlag;
 
-    public PostDto(Post post){
+    public PostListDto(Post post){
         this.postId = post.getId();
         this.memberId = post.getMember().getId();
         this.memberName = post.getMember().getStudentId().substring(2, 4) + post.getMember().getName();
@@ -32,11 +31,11 @@ public class PostDto {
         this.boardCategory = post.getBoard().getBoardCategory().getName();
         this.type = post.getType().toString();
         this.title = post.getTitle();
-        this.content = post.getContent();
         this.createdDate = post.getCreatedDate();
         this.updatedDate = post.getUpdatedDate();
         this.postLike = post.getPostLikeNum();
         this.postView = post.getViews().size();
+        this.postReplies = post.getReplyNum();
         this.secretFlag = post.isSecretFlag();
     }
 }
