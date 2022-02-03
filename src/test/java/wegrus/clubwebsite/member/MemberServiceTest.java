@@ -26,6 +26,7 @@ import wegrus.clubwebsite.exception.*;
 import wegrus.clubwebsite.repository.MemberRepository;
 import wegrus.clubwebsite.repository.MemberRoleRepository;
 import wegrus.clubwebsite.repository.RoleRepository;
+import wegrus.clubwebsite.service.CertificationCodeInvalidException;
 import wegrus.clubwebsite.service.MailService;
 import wegrus.clubwebsite.service.MemberService;
 import wegrus.clubwebsite.util.*;
@@ -530,8 +531,12 @@ public class MemberServiceTest {
         doNothing().when(memberRoleRepository).deleteAllByIdInBatch(any(Iterable.class));
         doReturn(null).when(memberRoleRepository).save(any(MemberRole.class));
 
+        final String code = "123123";
+        doReturn(code).when(redisUtil).get(any(String.class));
+        doReturn(true).when(redisUtil).delete(any(String.class));
+
         // when
-        final StatusResponse response = memberService.resign();
+        final StatusResponse response = memberService.resign(code);
 
         // then
         assertThat(response.getStatus()).isEqualTo(Status.SUCCESS);
@@ -539,7 +544,7 @@ public class MemberServiceTest {
     }
 
     @Test
-    @DisplayName("회원 탈퇴: 실패")
+    @DisplayName("회원 탈퇴: 탈퇴할 수 없는 회원")
     void resign_fail() throws Exception {
         // given
         List<GrantedAuthority> authorities = new ArrayList<>();
@@ -549,9 +554,33 @@ public class MemberServiceTest {
         SecurityContextHolder.getContext().setAuthentication(auth);
 
         // when
-        final Executable executable = () -> memberService.resign();
+        final Executable executable = () -> memberService.resign("123123");
 
         // then
         assertThrows(MemberResignException.class, executable);
+    }
+
+    @Test
+    @DisplayName("회원 탈퇴: 인증코드 불일치")
+    void resign_fail2() throws Exception {
+        // given
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority("ROLE_CLUB_GUEST"));
+        User user = new User("1", "password", authorities);
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, null, authorities);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        final Optional<Member> member = Optional.of(new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
+        doReturn(member).when(memberRepository).findById(any(Long.class));
+
+        final String code = "123123";
+        final Object invalidCode = "321321";
+        doReturn(invalidCode).when(redisUtil).get(any(String.class));
+
+        // when
+        final Executable executable = () -> memberService.resign(code);
+
+        // then
+        assertThrows(CertificationCodeInvalidException.class, executable);
     }
 }

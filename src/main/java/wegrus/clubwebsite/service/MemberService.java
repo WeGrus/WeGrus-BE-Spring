@@ -243,21 +243,26 @@ public class MemberService {
         return new RequestAuthorityResponse(Status.SUCCESS, memberRoles);
     }
 
-    public StatusResponse resign() {
+    @Transactional
+    public StatusResponse resign(String certificationCode) {
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        final Long memberId = Long.valueOf(authentication.getName());
         validateMemberRole(authentication);
 
-        final Long memberId = Long.valueOf(authentication.getName());
         final Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
+        final String code = (String) redisUtil.get(member.getEmail());
+        if (code == null || !code.equals(certificationCode))
+            throw new CertificationCodeInvalidException();
+
         final Role role = roleRepository.findByName(MemberRoles.ROLE_RESIGN.name()).orElseThrow(MemberRoleNotFoundException::new);
         final MemberRole memberRole = new MemberRole(member, role);
-
         final List<Long> ids = memberRoleRepository.findAllByMemberId(memberId).stream()
                 .map(MemberRole::getId)
                 .collect(Collectors.toList());
         memberRoleRepository.deleteAllByIdInBatch(ids);
         memberRoleRepository.save(memberRole);
         member.resign();
+        redisUtil.delete(member.getEmail());
 
         return new StatusResponse(Status.SUCCESS);
     }
@@ -276,5 +281,14 @@ public class MemberService {
                 });
         if (!errors.isEmpty())
             throw new MemberResignException(errors);
+    }
+
+    public StatusResponse sendRandomCode() {
+        final Long memberId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
+        final Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
+        final int code = mailService.sendCertificationCode(member.getEmail());
+        redisUtil.set(member.getEmail(), String.valueOf(code), 30);
+
+        return new StatusResponse(Status.SUCCESS);
     }
 }

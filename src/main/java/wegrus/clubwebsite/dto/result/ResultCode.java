@@ -25,6 +25,7 @@ public enum ResultCode {
     MEMBER_RESIGN_SUCCESS(200, "M114", "회원 탈퇴에 성공하였습니다."),
     NEED_TO_REJOIN(200, "M115", "탈퇴한 회원입니다. 회원 가입을 먼저 해주세요."),
     BANNED_USER(200, "M116", "강제 탈퇴된 회원입니다."),
+    SEND_CERTIFICATION_CODE_SUCCESS(200, "M117", "회원의 이메일로 인증 코드 발송에 성공하였습니다."),
 
     // Post
     CREATE_POST_SUCCESS(200, "B100", "게시물 등록에 성공하였습니다."),
