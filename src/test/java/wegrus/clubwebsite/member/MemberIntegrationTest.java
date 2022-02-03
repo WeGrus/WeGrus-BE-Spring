@@ -180,12 +180,24 @@ public class MemberIntegrationTest {
         return objectMapper.convertValue(responseEntity.getBody().getData(), RequestAuthorityResponse.class);
     }
 
-    public StatusResponse resignAPI(String accessToken) {
+    public StatusResponse resignAPI(String accessToken, String certificationCode) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
+        map.add("certificationCode", certificationCode);
+
+        final HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(map, headers);
+        final ResponseEntity<ResultResponse> responseEntity = restTemplate.exchange("/members/resign", HttpMethod.POST, requestEntity, ResultResponse.class);
+        return objectMapper.convertValue(responseEntity.getBody().getData(), StatusResponse.class);
+    }
+
+    public StatusResponse sendCertificationCodeAPI(String accessToken) {
         HttpHeaders headers = new HttpHeaders();
         headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
 
-        final HttpEntity<MultiValueMap<String, MemberRoles>> requestEntity = new HttpEntity<>(null, headers);
-        final ResponseEntity<ResultResponse> responseEntity = restTemplate.exchange("/members/resign", HttpMethod.POST, requestEntity, ResultResponse.class);
+        final HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(null, headers);
+        final ResponseEntity<ResultResponse> responseEntity = restTemplate.exchange("/members/verify", HttpMethod.POST, requestEntity, ResultResponse.class);
         return objectMapper.convertValue(responseEntity.getBody().getData(), StatusResponse.class);
     }
 
@@ -413,15 +425,19 @@ public class MemberIntegrationTest {
     void resign() throws Exception {
         // given
         final String email = "33339922@inha.edu";
-        final String userId = "1223511210";
+        final String userId = "1223511211";
         doReturn(userId).when(kakaoUtil).getUserIdFromKakaoAPI(any(String.class));
         signupAPI(email, "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.FRESHMAN, userId);
+        final Member member = memberRepository.findByEmail(email).get();
         final ResponseEntity<ResultResponse> responseEntity = signinAPI("authorizationCode");
         final MemberSigninSuccessResponse memberSigninSuccessResponse = objectMapper.convertValue(responseEntity.getBody().getData(), MemberSigninSuccessResponse.class);
         final String accessToken = memberSigninSuccessResponse.getAccessToken();
 
+        final String certificationCode = "123124";
+        redisUtil.set(member.getEmail(), certificationCode, 1);
+
         // when
-        final StatusResponse response = resignAPI(accessToken);
+        final StatusResponse response = resignAPI(accessToken, certificationCode);
 
         // then
         assertThat(response.getStatus()).isEqualTo(Status.SUCCESS);
@@ -439,7 +455,10 @@ public class MemberIntegrationTest {
         final ResponseEntity<ResultResponse> responseEntity = signinAPI("authorizationCode");
         final MemberSigninSuccessResponse memberSigninSuccessResponse = objectMapper.convertValue(responseEntity.getBody().getData(), MemberSigninSuccessResponse.class);
         final String accessToken = memberSigninSuccessResponse.getAccessToken();
-        resignAPI(accessToken);
+
+        final String certificationCode = "123123";
+        redisUtil.set(member.getEmail(), certificationCode, 1);
+        resignAPI(accessToken, certificationCode);
         final String newEmail = "12341234@inha.edu";
 
         // when
