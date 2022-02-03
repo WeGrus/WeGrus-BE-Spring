@@ -202,7 +202,7 @@ public class MemberController {
     }
 
     @ApiOperation(value = "이메일 인증 코드 발송", notes = "30분간 유효한 임의의 6자리 난수를 회원의 이메일로 발송합니다.")
-    @PatchMapping("/members/verify")
+    @PostMapping("/members/verify")
     public ResponseEntity<ResultResponse> sendCertificationCode() {
         final StatusResponse response = memberService.sendRandomCode();
 
