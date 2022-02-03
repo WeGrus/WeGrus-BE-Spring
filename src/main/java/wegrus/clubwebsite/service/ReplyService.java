@@ -42,6 +42,8 @@ public class ReplyService {
                 .state(replyState)
                 .build();
 
+        post.replyNum(post.getReplyNum()+1);
+
         return replyRepository.save(reply).getId();
     }
 
@@ -52,9 +54,13 @@ public class ReplyService {
 
         final Reply reply = replyRepository.findById(commentId).orElseThrow(ReplyNotFoundException::new);
 
+        final Post post = reply.getPost();
+
         if(!member.getId().equals(reply.getMember().getId())) {
             throw new ReplyMemberNotMatchException();
         }
+
+        post.replyNum(post.getReplyNum()-1);
 
         // 댓글 추천수 제거
         replyLikeRepository.deleteReplyLikesByReply(reply);

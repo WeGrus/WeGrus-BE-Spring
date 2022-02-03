@@ -9,6 +9,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import wegrus.clubwebsite.dto.post.*;
 import wegrus.clubwebsite.dto.result.ResultResponse;
+import wegrus.clubwebsite.entity.post.PostListType;
 import wegrus.clubwebsite.service.PostService;
 import wegrus.clubwebsite.service.ReplyService;
 
@@ -142,5 +143,17 @@ public class PostController {
         postService.deleteBoard(boardId);
 
         return ResponseEntity.ok(ResultResponse.of(DELETE_BOARD_SUCCESS, null));
+    }
+
+    @ApiOperation(value = "게시물 목록 조회")
+    @GetMapping("boards/{boardId}")
+    public ResponseEntity<ResultResponse> getPostList(
+            @NotNull(message = "게시판 id는 필수입니다.") @PathVariable Long boardId,
+            @Validated @NotNull(message = "페이지 번호는 필수입니다.")@RequestParam Integer page,
+            @Validated @NotNull(message = "페이지 크기는 필수입니다.")@RequestParam Integer pageSize,
+            @Validated @NotNull(message = "타입은 필수입니다.")@RequestParam PostListType type){
+        final PostListResponse response = postService.getList(page, pageSize, boardId, type);
+
+        return ResponseEntity.ok(ResultResponse.of(VIEW_POST_LIST_SUCCESS, response));
     }
 }

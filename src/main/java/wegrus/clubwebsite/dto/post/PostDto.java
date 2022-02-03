@@ -23,8 +23,9 @@ public class PostDto {
     private String content;
     private LocalDateTime createdDate;
     private LocalDateTime updatedDate;
-    private Long postLike;
-    private Long postView;
+    private Integer postLike;
+    private Integer postReplies;
+    private Integer postView;
     private boolean secretFlag;
 
     public PostDto(Post post) {
@@ -39,8 +40,9 @@ public class PostDto {
         this.content = post.getContent();
         this.createdDate = post.getCreatedDate();
         this.updatedDate = post.getUpdatedDate();
-        this.postLike = (long) post.getReplies().size();
-        this.postView = (long) post.getViews().size();
+        this.postLike = post.getPostLikeNum();
+        this.postReplies = post.getReplyNum();
+        this.postView = post.getViews().size();
         this.secretFlag = post.isSecretFlag();
     }
 }

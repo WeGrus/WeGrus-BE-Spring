@@ -1,6 +1,10 @@
 package wegrus.clubwebsite.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -146,6 +150,8 @@ public class PostService {
 
         postLikeRepository.save(postLike);
 
+        post.likeNum(post.getPostLikeNum()+1);
+
         return postLike.getId();
     }
 
@@ -159,6 +165,8 @@ public class PostService {
         final PostLike postLike = postLikeRepository.findByMemberAndPost(member, post).orElseThrow(PostLikeNotFoundException::new);
 
         postLikeRepository.delete(postLike);
+
+        post.likeNum(post.getPostLikeNum()-1);
     }
 
     @Transactional(readOnly = true)
@@ -186,6 +194,43 @@ public class PostService {
     @Transactional
     public void deleteBoard(Long boardId) {
         boardRepository.deleteById(boardId);
+    }
+
+    @Transactional
+    public PostListResponse getList(Integer page, Integer pageSize, Long boardId, PostListType type){
+        Pageable pageable = PageRequest.of(page, pageSize);
+        final Board board = boardRepository.findById(boardId).orElseThrow(BoardNotFoundException::new);
+
+        if(type == PostListType.LASTEST){
+            Page<Post> posts = postRepository.findByBoardOrderByTypeDescIdDesc(board, pageable);
+
+            List<PostListDto> postDtos = posts.stream()
+                    .map(PostListDto::new)
+                    .collect(Collectors.toList());
+
+            return new PostListResponse(new PageImpl<>(postDtos, pageable, posts.getTotalElements()));
+        }
+        else if(type == PostListType.LIKEEST){
+            Page<Post> posts = postRepository.findByBoardOrderByTypeDescPostLikeNumDescIdDesc(board, pageable);
+
+            List<PostListDto> postDtos = posts.stream()
+                    .map(PostListDto::new)
+                    .collect(Collectors.toList());
+
+            return new PostListResponse(new PageImpl<>(postDtos, pageable, posts.getTotalElements()));
+        }
+        else if(type == PostListType.REPLYEST){
+            Page<Post> posts = postRepository.findByBoardOrderByTypeDescReplyNumDescIdDesc(board, pageable);
+
+            List<PostListDto> postDtos = posts.stream()
+                    .map(PostListDto::new)
+                    .collect(Collectors.toList());
+
+            return new PostListResponse(new PageImpl<>(postDtos, pageable, posts.getTotalElements()));
+        }
+        else{
+            throw new PostListTypeNotFoundException();
+        }
     }
 
 }

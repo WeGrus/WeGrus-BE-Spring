@@ -32,6 +32,7 @@ public enum ErrorCode {
     REPLY_LIKE_NOT_FOUND(400, "B007", "댓글 추천이 존재하지 않습니다."),
     BOARD_NOT_FOUND(400, "B008", "존재하지 않는 게시판입니다."),
     BOARD_CATEGORY_NOT_FOUND(400, "B009", "존재하지 않는 게시판 종류입니다."),
+    POST_LIST_NOT_FOUND(400, "B010", "존재하지 않는 게시물 목록입니다."),
 
     // Member
     MEMBER_NOT_FOUND(400, "M000", "존재하지 않는 회원입니다."),
