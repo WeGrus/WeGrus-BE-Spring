@@ -197,7 +197,7 @@ public class PostService {
     }
 
     @Transactional
-    public PostListResponse viewList(Integer page, Integer pageSize, Long boardId, PostListType type){
+    public PostListResponse getList(Integer page, Integer pageSize, Long boardId, PostListType type){
         Pageable pageable = PageRequest.of(page, pageSize);
         final Board board = boardRepository.findById(boardId).orElseThrow(BoardNotFoundException::new);
 

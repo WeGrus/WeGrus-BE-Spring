@@ -147,12 +147,12 @@ public class PostController {
 
     @ApiOperation(value = "게시물 목록 조회")
     @GetMapping("boards/{boardId}")
-    public ResponseEntity<ResultResponse> viewPostList(
+    public ResponseEntity<ResultResponse> getPostList(
             @NotNull(message = "게시판 id는 필수입니다.") @PathVariable Long boardId,
             @Validated @NotNull(message = "페이지 번호는 필수입니다.")@RequestParam Integer page,
             @Validated @NotNull(message = "페이지 크기는 필수입니다.")@RequestParam Integer pageSize,
             @Validated @NotNull(message = "타입은 필수입니다.")@RequestParam PostListType type){
-        final PostListResponse response = postService.viewList(page, pageSize, boardId, type);
+        final PostListResponse response = postService.getList(page, pageSize, boardId, type);
 
         return ResponseEntity.ok(ResultResponse.of(VIEW_POST_LIST_SUCCESS, response));
     }
