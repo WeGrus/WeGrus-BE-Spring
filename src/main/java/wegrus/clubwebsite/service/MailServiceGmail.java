@@ -2,6 +2,7 @@ package wegrus.clubwebsite.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -55,5 +56,18 @@ public class MailServiceGmail implements MailService {
         helper.setText(body, true);
 
         mailSender.send(mimeMessage);
+    }
+
+    @Override
+    public int sendCertificationCode(String receiver) {
+        final int code = (int) (Math.random() * 1000000);
+        final SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(receiver);
+        message.setFrom(SENDER);
+        message.setSubject(VERIFY_CODE);
+        message.setTo(String.valueOf(code));
+
+        mailSender.send(message);
+        return code;
     }
 }
