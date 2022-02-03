@@ -585,11 +585,13 @@ public class MemberControllerTest {
     void resign_success() throws Exception {
         // given
         final StatusResponse status = new StatusResponse(Status.SUCCESS);
-        doReturn(status).when(memberService).resign();
+        doReturn(status).when(memberService).resign("123123");
 
         // when
         final ResultActions perform = mockMvc.perform(
                 post("/members/resign").with(csrf())
+                        .contentType(APPLICATION_FORM_URLENCODED)
+                        .param("certificationCode", "123123")
         );
 
         // then
@@ -606,11 +608,13 @@ public class MemberControllerTest {
         // given
         final List<ErrorResponse.FieldError> errors = new ArrayList<>();
         errors.add(new ErrorResponse.FieldError("role", MemberRoles.ROLE_CLUB_PRESIDENT.name(), CLUB_PRESIDENT_CANNOT_RESIGN.getMessage()));
-        doThrow(new MemberResignException(errors)).when(memberService).resign();
+        doThrow(new MemberResignException(errors)).when(memberService).resign("123123");
 
         // when
         final ResultActions perform = mockMvc.perform(
                 post("/members/resign").with(csrf())
+                        .contentType(APPLICATION_FORM_URLENCODED)
+                        .param("certificationCode", "123123")
         );
 
         // then
