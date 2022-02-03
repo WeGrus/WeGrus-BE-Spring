@@ -28,7 +28,7 @@ public class PostService {
     private final ViewRepository viewRepository;
 
     @Transactional
-    public Long create(PostCreateRequest request){
+    public Long create(PostCreateRequest request) {
         String memberId = SecurityContextHolder.getContext().getAuthentication().getName();
         final Member member = memberRepository.findById(Long.valueOf(memberId)).orElseThrow(MemberNotFoundException::new);
         final Board board = boardRepository.findByName(request.getBoardName()).orElseThrow(BoardNotFoundException::new);
@@ -48,13 +48,13 @@ public class PostService {
     }
 
     @Transactional
-    public Long update(PostUpdateRequest request){
+    public Long update(PostUpdateRequest request) {
         String memberId = SecurityContextHolder.getContext().getAuthentication().getName();
         final Member member = memberRepository.findById(Long.valueOf(memberId)).orElseThrow(MemberNotFoundException::new);
 
         final Post post = postRepository.findById(request.getPostId()).orElseThrow(PostNotFoundException::new);
 
-        if(!member.getId().equals(post.getMember().getId())){
+        if (!member.getId().equals(post.getMember().getId())) {
             throw new PostMemberNotMatchException();
         }
 
@@ -63,13 +63,13 @@ public class PostService {
     }
 
     @Transactional
-    public void delete(Long postId){
+    public void delete(Long postId) {
         String memberId = SecurityContextHolder.getContext().getAuthentication().getName();
         final Member member = memberRepository.findById(Long.valueOf(memberId)).orElseThrow(MemberNotFoundException::new);
 
         final Post post = postRepository.findById(postId).orElseThrow(PostNotFoundException::new);
 
-        if(!member.getId().equals(post.getMember().getId())){
+        if (!member.getId().equals(post.getMember().getId())) {
             throw new PostMemberNotMatchException();
         }
 
@@ -86,7 +86,7 @@ public class PostService {
     }
 
     @Transactional
-    public PostResponse view(Long postId){
+    public PostResponse view(Long postId) {
         String memberId = SecurityContextHolder.getContext().getAuthentication().getName();
         final Member member = memberRepository.findById(Long.valueOf(memberId)).orElseThrow(MemberNotFoundException::new);
 
@@ -95,7 +95,7 @@ public class PostService {
         // 조회수 추가
         Optional<View> views = viewRepository.findByMemberAndPost(member, post);
 
-        if(views.isEmpty()){
+        if (views.isEmpty()) {
             View view = View.builder()
                     .member(member)
                     .post(post)
@@ -113,7 +113,7 @@ public class PostService {
     }
 
     @Transactional
-    public Long like(Long postId){
+    public Long like(Long postId) {
         String memberId = SecurityContextHolder.getContext().getAuthentication().getName();
         final Member member = memberRepository.findById(Long.valueOf(memberId)).orElseThrow(MemberNotFoundException::new);
 
@@ -122,7 +122,7 @@ public class PostService {
         Optional<PostLike> postLikes = postLikeRepository.findByMemberAndPost(member, post);
 
         // 추천 기록이 있다면
-        if(postLikes.isPresent()){
+        if (postLikes.isPresent()) {
             throw new PostLikeAlreadyExistException();
         }
 
@@ -137,7 +137,7 @@ public class PostService {
     }
 
     @Transactional
-    public void dislike(Long postId){
+    public void dislike(Long postId) {
         String memberId = SecurityContextHolder.getContext().getAuthentication().getName();
         final Member member = memberRepository.findById(Long.valueOf(memberId)).orElseThrow(MemberNotFoundException::new);
 
@@ -149,7 +149,7 @@ public class PostService {
     }
 
     @Transactional
-    public BoardResponse viewBoard(){
+    public BoardResponse viewBoard() {
         List<BoardDto> boardDtos = boardRepository.findAll()
                 .stream()
                 .map(BoardDto::new)
@@ -159,7 +159,7 @@ public class PostService {
     }
 
     @Transactional
-    public Long createBoard(BoardCreateRequest request){
+    public Long createBoard(BoardCreateRequest request) {
         final BoardCategory boardCategory = boardCategoryRepository.findById(request.getBoardCategoryId()).orElseThrow(BoardCategoryNotFoundException::new);
 
         Board board = Board.builder()
@@ -171,7 +171,7 @@ public class PostService {
     }
 
     @Transactional
-    public void deleteBoard(Long boardId){
+    public void deleteBoard(Long boardId) {
         boardRepository.deleteById(boardId);
     }
 
