@@ -4,8 +4,8 @@ public enum Boards {
     NOTICE,         // 공지사항
     IXPLOIT,        // 소모임 IXPLOIT
     IGDC,           // 소모임 IGDC
-    ALGROUS,        // 소모임 ALGROUS
-    WEBGROUS,       // 소모임 WEBGROUS
+    ALGORUS,        // 소모임 ALGORUS
+    WEBGRUS,       // 소모임 WEBGRUS
     STUDY,          // 스터디
     INFO,           // 정보 공유 게시판
     PROJECT,        // 프로젝트 모집 게시판
