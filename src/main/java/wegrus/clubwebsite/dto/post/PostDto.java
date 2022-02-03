@@ -3,6 +3,7 @@ package wegrus.clubwebsite.dto.post;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import wegrus.clubwebsite.entity.post.Post;
+import wegrus.clubwebsite.vo.Image;
 import wegrus.clubwebsite.vo.ImageType;
 
 import java.time.LocalDateTime;
@@ -14,10 +15,7 @@ public class PostDto {
     private Long postId;
     private Long memberId;
     private String memberName;
-    private String memberImageUrl;
-    private ImageType memberImageType;
-    private String memberImageName;
-    private String memberImageVvid;
+    private Image image;
     private String board;
     private String boardCategory;
     private String type;
@@ -29,14 +27,11 @@ public class PostDto {
     private Long postView;
     private boolean secretFlag;
 
-    public PostDto(Post post){
+    public PostDto(Post post) {
         this.postId = post.getId();
         this.memberId = post.getMember().getId();
         this.memberName = post.getMember().getStudentId().substring(2, 4) + post.getMember().getName();
-        this.memberImageUrl = post.getMember().getImage().getUrl();
-        this.memberImageType = post.getMember().getImage().getType();
-        this.memberImageName = post.getMember().getImage().getName();
-        this.memberImageVvid = post.getMember().getImage().getUuid();
+        this.image = post.getMember().getImage();
         this.board = post.getBoard().getName();
         this.boardCategory = post.getBoard().getBoardCategory().getName();
         this.type = post.getType().toString();
