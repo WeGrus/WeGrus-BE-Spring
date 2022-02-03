@@ -86,7 +86,7 @@ public class PostService {
     }
 
     @Transactional
-    public PostResponse view(Long postId) {
+    public PostResponse getPost(Long postId) {
         String memberId = SecurityContextHolder.getContext().getAuthentication().getName();
         final Member member = memberRepository.findById(Long.valueOf(memberId)).orElseThrow(MemberNotFoundException::new);
 

@@ -12,7 +12,6 @@ import wegrus.clubwebsite.dto.result.ResultResponse;
 import wegrus.clubwebsite.service.PostService;
 import wegrus.clubwebsite.service.ReplyService;
 
-import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import static wegrus.clubwebsite.dto.result.ResultCode.*;
@@ -57,7 +56,7 @@ public class PostController {
     @ApiImplicitParam(name = "postId", value = "게시물 순번(PK)", required = true, example = "1")
     @GetMapping("/posts/{postId}")
     public ResponseEntity<ResultResponse> viewPost(@NotNull(message = "게시물 id는 필수입니다.") @PathVariable Long postId){
-        final PostResponse response = postService.view(postId);
+        final PostResponse response = postService.getPost(postId);
 
         return ResponseEntity.ok(ResultResponse.of(VIEW_POST_SUCCESS, response));
     }
