@@ -122,8 +122,8 @@ public class PostController {
 
     @ApiOperation(value = "게시판 조회")
     @GetMapping("club/executives/boards")
-    public ResponseEntity<ResultResponse> viewBoard(){
-        final BoardResponse response = postService.viewBoard();
+    public ResponseEntity<ResultResponse> getBoards(){
+        final BoardResponse response = postService.getBoards();
 
         return ResponseEntity.ok(ResultResponse.of(VIEW_BOARD_SUCCESS, response));
     }
