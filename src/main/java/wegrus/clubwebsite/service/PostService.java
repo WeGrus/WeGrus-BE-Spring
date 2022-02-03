@@ -5,6 +5,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import wegrus.clubwebsite.dto.post.*;
+import wegrus.clubwebsite.entity.member.MemberRole;
+import wegrus.clubwebsite.entity.member.MemberRoles;
+import wegrus.clubwebsite.entity.member.Role;
 import wegrus.clubwebsite.entity.post.*;
 import wegrus.clubwebsite.entity.member.Member;
 import wegrus.clubwebsite.exception.*;
@@ -12,6 +15,7 @@ import wegrus.clubwebsite.repository.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 
@@ -22,6 +26,7 @@ public class PostService {
     private final BoardCategoryRepository boardCategoryRepository;
     private final PostRepository postRepository;
     private final MemberRepository memberRepository;
+    private final MemberRoleRepository memberRoleRepository;
     private final ReplyRepository replyRepository;
     private final PostLikeRepository postLikeRepository;
     private final ReplyLikeRepository replyLikeRepository;
@@ -108,6 +113,14 @@ public class PostService {
                 .stream()
                 .map(ReplyDto::new)
                 .collect(Collectors.toList());
+
+        List<MemberRole> memberRoles = memberRoleRepository.findAllByMemberId(post.getMember().getId());
+        List<String> roles = memberRoles.stream()
+                .map(s -> s.getRole().getName())
+                .collect(Collectors.toList());
+
+        if(roles.contains(MemberRoles.ROLE_BAN.name()) || roles.contains(MemberRoles.ROLE_RESIGN.name()))
+            return new PostResponse(new PostUnknownDto(post), replies);
 
         return new PostResponse(new PostDto(post), replies);
     }
