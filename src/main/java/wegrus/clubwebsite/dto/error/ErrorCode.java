@@ -47,6 +47,7 @@ public enum ErrorCode {
     CLUB_PRESIDENT_CANNOT_RESIGN(400, "M009", "동아리 회장은 회원 탈퇴를 할 수 없습니다."),
     MEMBER_ALREADY_RESIGN(400, "M010", "이미 탈퇴한 회원은 회원 탈퇴를 할 수 없습니다."),
     MEMBER_ALREADY_BAN(400, "M011", "이미 재가입 불가인 회원 탈퇴를 할 수 없습니다."),
+    CERTIFICATION_CODE_INVALID(400, "M012", "유효하지 않은 인증 코드입니다."),
 
     // File
     NOT_SUPPORTED_IMAGE_TYPE(400, "F000", "이미지 타입은 JPG, PNG, GIF만 지원합니다."),

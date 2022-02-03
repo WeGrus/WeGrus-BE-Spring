@@ -10,6 +10,17 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PostResponse {
-    private PostDto board;
+    private Object board;
     private List<ReplyDto> replies;
+
+    public PostResponse(PostDto board, List<ReplyDto> replies){
+        this.board = board;
+        this.replies = replies;
+    }
+
+    public PostResponse(PostUnknownDto board, List<ReplyDto> replies){
+        this.board = board;
+        this.replies = replies;
+    }
+
 }

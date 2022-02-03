@@ -195,9 +195,17 @@ public class MemberController {
 
     @ApiOperation(value = "회원 탈퇴")
     @PostMapping("/members/resign")
-    public ResponseEntity<ResultResponse> resign() {
-        final StatusResponse response = memberService.resign();
+    public ResponseEntity<ResultResponse> resign(@RequestParam String certificationCode) {
+        final StatusResponse response = memberService.resign(certificationCode);
 
         return ResponseEntity.ok(ResultResponse.of(MEMBER_RESIGN_SUCCESS, response));
+    }
+
+    @ApiOperation(value = "이메일 인증 코드 발송", notes = "30분간 유효한 임의의 6자리 난수를 회원의 이메일로 발송합니다.")
+    @PostMapping("/members/verify")
+    public ResponseEntity<ResultResponse> sendCertificationCode() {
+        final StatusResponse response = memberService.sendRandomCode();
+
+        return ResponseEntity.ok(ResultResponse.of(SEND_CERTIFICATION_CODE_SUCCESS, response));
     }
 }

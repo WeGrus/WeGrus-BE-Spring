@@ -56,8 +56,8 @@ public class PostController {
     @ApiOperation(value = "게시물 조회")
     @ApiImplicitParam(name = "postId", value = "게시물 순번(PK)", required = true, example = "1")
     @GetMapping("/posts/{postId}")
-    public ResponseEntity<ResultResponse> viewPost(@NotNull(message = "게시물 id는 필수입니다.") @PathVariable Long postId){
-        final PostResponse response = postService.view(postId);
+    public ResponseEntity<ResultResponse> getPost(@NotNull(message = "게시물 id는 필수입니다.") @PathVariable Long postId){
+        final PostResponse response = postService.getPost(postId);
 
         return ResponseEntity.ok(ResultResponse.of(VIEW_POST_SUCCESS, response));
     }
@@ -120,15 +120,15 @@ public class PostController {
         return ResponseEntity.ok(ResultResponse.of(DELETE_REPLY_LIKE_SUCCESS, null));
     }
 
-    @ApiOperation(value = "게시판 조회 api")
+    @ApiOperation(value = "게시판 조회")
     @GetMapping("club/executives/boards")
-    public ResponseEntity<ResultResponse> viewBoard(){
-        final BoardResponse response = postService.viewBoard();
+    public ResponseEntity<ResultResponse> getBoards(){
+        final BoardResponse response = postService.getBoards();
 
         return ResponseEntity.ok(ResultResponse.of(VIEW_BOARD_SUCCESS, response));
     }
 
-    @ApiOperation(value = "게시판 추가 api")
+    @ApiOperation(value = "게시판 추가")
     @PostMapping("club/executives/boards")
     public ResponseEntity<ResultResponse> createBoard(@Validated @RequestBody BoardCreateRequest request) {
         final Long boardId = postService.createBoard(request);
