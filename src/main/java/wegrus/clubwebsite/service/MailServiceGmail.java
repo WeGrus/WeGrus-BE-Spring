@@ -65,7 +65,7 @@ public class MailServiceGmail implements MailService {
         message.setTo(receiver);
         message.setFrom(SENDER);
         message.setSubject(VERIFY_CODE);
-        message.setTo(String.valueOf(code));
+        message.setText(String.valueOf(code));
 
         mailSender.send(message);
         return code;

@@ -287,7 +287,7 @@ public class MemberService {
         final Long memberId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
         final Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
         final int code = mailService.sendCertificationCode(member.getEmail());
-        redisUtil.set(member.getEmail(), code, 30);
+        redisUtil.set(member.getEmail(), String.valueOf(code), 30);
 
         return new StatusResponse(Status.SUCCESS);
     }
