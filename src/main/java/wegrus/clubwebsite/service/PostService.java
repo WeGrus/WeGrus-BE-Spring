@@ -4,31 +4,36 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import wegrus.clubwebsite.dto.post.PostCreateRequest;
-import wegrus.clubwebsite.dto.post.PostUpdateRequest;
-import wegrus.clubwebsite.entity.post.Board;
-import wegrus.clubwebsite.entity.post.Post;
-import wegrus.clubwebsite.entity.post.PostState;
-import wegrus.clubwebsite.entity.post.PostLike;
+import wegrus.clubwebsite.dto.post.*;
+import wegrus.clubwebsite.entity.member.MemberRole;
+import wegrus.clubwebsite.entity.member.MemberRoles;
+import wegrus.clubwebsite.entity.member.Role;
+import wegrus.clubwebsite.entity.post.*;
 import wegrus.clubwebsite.entity.member.Member;
 import wegrus.clubwebsite.exception.*;
 import wegrus.clubwebsite.repository.*;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
 @RequiredArgsConstructor
 @Service
 public class PostService {
     private final BoardRepository boardRepository;
+    private final BoardCategoryRepository boardCategoryRepository;
     private final PostRepository postRepository;
     private final MemberRepository memberRepository;
+    private final MemberRoleRepository memberRoleRepository;
     private final ReplyRepository replyRepository;
     private final PostLikeRepository postLikeRepository;
     private final ReplyLikeRepository replyLikeRepository;
+    private final ViewRepository viewRepository;
 
     @Transactional
-    public Long create(PostCreateRequest request){
+    public Long create(PostCreateRequest request) {
         String memberId = SecurityContextHolder.getContext().getAuthentication().getName();
         final Member member = memberRepository.findById(Long.valueOf(memberId)).orElseThrow(MemberNotFoundException::new);
         final Board board = boardRepository.findByName(request.getBoardName()).orElseThrow(BoardNotFoundException::new);
@@ -48,13 +53,13 @@ public class PostService {
     }
 
     @Transactional
-    public Long update(PostUpdateRequest request){
+    public Long update(PostUpdateRequest request) {
         String memberId = SecurityContextHolder.getContext().getAuthentication().getName();
         final Member member = memberRepository.findById(Long.valueOf(memberId)).orElseThrow(MemberNotFoundException::new);
 
         final Post post = postRepository.findById(request.getPostId()).orElseThrow(PostNotFoundException::new);
 
-        if(!member.getId().equals(post.getMember().getId())){
+        if (!member.getId().equals(post.getMember().getId())) {
             throw new PostMemberNotMatchException();
         }
 
@@ -63,13 +68,13 @@ public class PostService {
     }
 
     @Transactional
-    public void delete(Long postId){
+    public void delete(Long postId) {
         String memberId = SecurityContextHolder.getContext().getAuthentication().getName();
         final Member member = memberRepository.findById(Long.valueOf(memberId)).orElseThrow(MemberNotFoundException::new);
 
         final Post post = postRepository.findById(postId).orElseThrow(PostNotFoundException::new);
 
-        if(!member.getId().equals(post.getMember().getId())){
+        if (!member.getId().equals(post.getMember().getId())) {
             throw new PostMemberNotMatchException();
         }
 
@@ -86,7 +91,42 @@ public class PostService {
     }
 
     @Transactional
-    public Long like(Long postId){
+    public PostResponse getPost(Long postId) {
+        String memberId = SecurityContextHolder.getContext().getAuthentication().getName();
+        final Member member = memberRepository.findById(Long.valueOf(memberId)).orElseThrow(MemberNotFoundException::new);
+
+        final Post post = postRepository.findById(postId).orElseThrow(PostNotFoundException::new);
+
+        // 조회수 추가
+        Optional<View> views = viewRepository.findByMemberAndPost(member, post);
+
+        if (views.isEmpty()) {
+            View view = View.builder()
+                    .member(member)
+                    .post(post)
+                    .build();
+            viewRepository.save(view);
+        }
+
+        // 정보 반환
+        List<ReplyDto> replies = post.getReplies()
+                .stream()
+                .map(ReplyDto::new)
+                .collect(Collectors.toList());
+
+        List<MemberRole> memberRoles = memberRoleRepository.findAllByMemberId(post.getMember().getId());
+        List<String> roles = memberRoles.stream()
+                .map(s -> s.getRole().getName())
+                .collect(Collectors.toList());
+
+        if(roles.contains(MemberRoles.ROLE_BAN.name()) || roles.contains(MemberRoles.ROLE_RESIGN.name()))
+            return new PostResponse(new PostUnknownDto(post), replies);
+
+        return new PostResponse(new PostDto(post), replies);
+    }
+
+    @Transactional
+    public Long like(Long postId) {
         String memberId = SecurityContextHolder.getContext().getAuthentication().getName();
         final Member member = memberRepository.findById(Long.valueOf(memberId)).orElseThrow(MemberNotFoundException::new);
 
@@ -95,7 +135,7 @@ public class PostService {
         Optional<PostLike> postLikes = postLikeRepository.findByMemberAndPost(member, post);
 
         // 추천 기록이 있다면
-        if(postLikes.isPresent()){
+        if (postLikes.isPresent()) {
             throw new PostLikeAlreadyExistException();
         }
 
@@ -110,7 +150,7 @@ public class PostService {
     }
 
     @Transactional
-    public void dislike(Long postId){
+    public void dislike(Long postId) {
         String memberId = SecurityContextHolder.getContext().getAuthentication().getName();
         final Member member = memberRepository.findById(Long.valueOf(memberId)).orElseThrow(MemberNotFoundException::new);
 
@@ -120,4 +160,32 @@ public class PostService {
 
         postLikeRepository.delete(postLike);
     }
+
+    @Transactional(readOnly = true)
+    public BoardResponse getBoards() {
+        List<BoardDto> boardDtos = boardRepository.findAll()
+                .stream()
+                .map(BoardDto::new)
+                .collect(Collectors.toList());
+
+        return new BoardResponse(boardDtos);
+    }
+
+    @Transactional
+    public Long createBoard(BoardCreateRequest request) {
+        final BoardCategory boardCategory = boardCategoryRepository.findById(request.getBoardCategoryId()).orElseThrow(BoardCategoryNotFoundException::new);
+
+        Board board = Board.builder()
+                .name(request.getBoardName())
+                .boardCategory(boardCategory)
+                .build();
+
+        return boardRepository.save(board).getId();
+    }
+
+    @Transactional
+    public void deleteBoard(Long boardId) {
+        boardRepository.deleteById(boardId);
+    }
+
 }

@@ -1,6 +1,7 @@
 package wegrus.clubwebsite.controller;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -49,6 +50,15 @@ public class PostController {
         postService.delete(postId);
 
         return ResponseEntity.ok(ResultResponse.of(DELETE_POST_SUCCESS, null));
+    }
+
+    @ApiOperation(value = "게시물 조회")
+    @ApiImplicitParam(name = "postId", value = "게시물 순번(PK)", required = true, example = "1")
+    @GetMapping("/posts/{postId}")
+    public ResponseEntity<ResultResponse> getPost(@NotNull(message = "게시물 id는 필수입니다.") @PathVariable Long postId){
+        final PostResponse response = postService.getPost(postId);
+
+        return ResponseEntity.ok(ResultResponse.of(VIEW_POST_SUCCESS, response));
     }
 
     @ApiOperation(value = "게시물 추천")
@@ -107,5 +117,30 @@ public class PostController {
         replyService.dislike(replyId);
 
         return ResponseEntity.ok(ResultResponse.of(DELETE_REPLY_LIKE_SUCCESS, null));
+    }
+
+    @ApiOperation(value = "게시판 조회")
+    @GetMapping("club/executives/boards")
+    public ResponseEntity<ResultResponse> getBoards(){
+        final BoardResponse response = postService.getBoards();
+
+        return ResponseEntity.ok(ResultResponse.of(VIEW_BOARD_SUCCESS, response));
+    }
+
+    @ApiOperation(value = "게시판 추가")
+    @PostMapping("club/executives/boards")
+    public ResponseEntity<ResultResponse> createBoard(@Validated @RequestBody BoardCreateRequest request) {
+        final Long boardId = postService.createBoard(request);
+        final BoardCreateResponse response = new BoardCreateResponse(boardId);
+
+        return ResponseEntity.ok(ResultResponse.of(CREATE_BOARD_SUCCESS, response));
+    }
+
+    @ApiOperation(value = "게시판 삭제")
+    @DeleteMapping("club/executives/boards/{boardId}")
+    public ResponseEntity<ResultResponse> deleteBoard(@NotNull(message = "게시판 id는 필수입니다.") @PathVariable Long boardId){
+        postService.deleteBoard(boardId);
+
+        return ResponseEntity.ok(ResultResponse.of(DELETE_BOARD_SUCCESS, null));
     }
 }

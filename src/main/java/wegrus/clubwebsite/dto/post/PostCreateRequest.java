@@ -16,7 +16,7 @@ import javax.validation.constraints.NotNull;
 @AllArgsConstructor
 public class PostCreateRequest {
 
-    @ApiModelProperty(value = "게시판 종류", example = "BOARD", required = true)
+    @ApiModelProperty(value = "게시판 종류", example = "FREE", required = true)
     @NotNull(message = "게시판 종류는 필수입니다.")
     private String boardName;
 
