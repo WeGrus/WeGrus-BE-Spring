@@ -120,7 +120,7 @@ public class PostController {
         return ResponseEntity.ok(ResultResponse.of(DELETE_REPLY_LIKE_SUCCESS, null));
     }
 
-    @ApiOperation(value = "게시판 조회 api")
+    @ApiOperation(value = "게시판 조회")
     @GetMapping("club/executives/boards")
     public ResponseEntity<ResultResponse> viewBoard(){
         final BoardResponse response = postService.viewBoard();
@@ -128,7 +128,7 @@ public class PostController {
         return ResponseEntity.ok(ResultResponse.of(VIEW_BOARD_SUCCESS, response));
     }
 
-    @ApiOperation(value = "게시판 추가 api")
+    @ApiOperation(value = "게시판 추가")
     @PostMapping("club/executives/boards")
     public ResponseEntity<ResultResponse> createBoard(@Validated @RequestBody BoardCreateRequest request) {
         final Long boardId = postService.createBoard(request);
