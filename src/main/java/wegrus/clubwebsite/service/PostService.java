@@ -123,7 +123,7 @@ public class PostService {
                 .map(s -> s.getRole().getName())
                 .collect(Collectors.toList());
 
-        if(roles.contains(MemberRoles.ROLE_BAN.name()) || roles.contains(MemberRoles.ROLE_RESIGN.name()))
+        if (roles.contains(MemberRoles.ROLE_BAN.name()) || roles.contains(MemberRoles.ROLE_RESIGN.name()))
             return new PostResponse(new PostUnknownDto(post), replies);
 
         return new PostResponse(new PostDto(post), replies);
@@ -150,7 +150,7 @@ public class PostService {
 
         postLikeRepository.save(postLike);
 
-        post.likeNum(post.getPostLikeNum()+1);
+        post.likeNum(post.getPostLikeNum() + 1);
 
         return postLike.getId();
     }
@@ -166,7 +166,7 @@ public class PostService {
 
         postLikeRepository.delete(postLike);
 
-        post.likeNum(post.getPostLikeNum()-1);
+        post.likeNum(post.getPostLikeNum() - 1);
     }
 
     @Transactional(readOnly = true)
@@ -197,40 +197,47 @@ public class PostService {
     }
 
     @Transactional
-    public PostListResponse getList(Integer page, Integer pageSize, Long boardId, PostListType type){
+    public PostListResponse getList(Integer page, Integer pageSize, Long boardId, PostListType type) {
         Pageable pageable = PageRequest.of(page, pageSize);
         final Board board = boardRepository.findById(boardId).orElseThrow(BoardNotFoundException::new);
+        Page<Post> posts;
 
-        if(type == PostListType.LASTEST){
-            Page<Post> posts = postRepository.findByBoardOrderByTypeDescIdDesc(board, pageable);
-
-            List<PostListDto> postDtos = posts.stream()
-                    .map(PostListDto::new)
-                    .collect(Collectors.toList());
-
-            return new PostListResponse(new PageImpl<>(postDtos, pageable, posts.getTotalElements()));
-        }
-        else if(type == PostListType.LIKEEST){
-            Page<Post> posts = postRepository.findByBoardOrderByTypeDescPostLikeNumDescIdDesc(board, pageable);
-
-            List<PostListDto> postDtos = posts.stream()
-                    .map(PostListDto::new)
-                    .collect(Collectors.toList());
-
-            return new PostListResponse(new PageImpl<>(postDtos, pageable, posts.getTotalElements()));
-        }
-        else if(type == PostListType.REPLYEST){
-            Page<Post> posts = postRepository.findByBoardOrderByTypeDescReplyNumDescIdDesc(board, pageable);
-
-            List<PostListDto> postDtos = posts.stream()
-                    .map(PostListDto::new)
-                    .collect(Collectors.toList());
-
-            return new PostListResponse(new PageImpl<>(postDtos, pageable, posts.getTotalElements()));
-        }
-        else{
+        if (type == PostListType.LASTEST)
+            posts = postRepository.findByBoardOrderByTypeDescIdDesc(board, pageable);
+        else if (type == PostListType.LIKEEST)
+            posts = postRepository.findByBoardOrderByTypeDescPostLikeNumDescIdDesc(board, pageable);
+        else if (type == PostListType.REPLYEST)
+            posts = postRepository.findByBoardOrderByTypeDescReplyNumDescIdDesc(board, pageable);
+        else
             throw new PostListTypeNotFoundException();
-        }
+
+        List<PostListDto> postDtos = posts.stream()
+                .map(PostListDto::new)
+                .collect(Collectors.toList());
+
+        return new PostListResponse(new PageImpl<>(postDtos, pageable, posts.getTotalElements()));
+    }
+
+    @Transactional
+    public PostListResponse searchByWriter(Integer page, Integer pageSize, Long boardId, PostListType type, String keyword) {
+        Pageable pageable = PageRequest.of(page, pageSize);
+        final Board board = boardRepository.findById(boardId).orElseThrow(BoardNotFoundException::new);
+        Page<Post> posts;
+
+        if (type == PostListType.LASTEST)
+            posts = postRepository.findByBoardAndTitleContainingIgnoreCaseOrderByTypeDescIdDesc(board, keyword, pageable);
+        else if (type == PostListType.LIKEEST)
+            posts = postRepository.findByBoardAndTitleContainingIgnoreCaseOrderByTypeDescPostLikeNumDescIdDesc(board, keyword, pageable);
+        else if (type == PostListType.REPLYEST)
+            posts = postRepository.findByBoardAndTitleContainingIgnoreCaseOrderByTypeDescReplyNumDescIdDesc(board, keyword, pageable);
+        else
+            throw new PostListTypeNotFoundException();
+
+        List<PostListDto> postDtos = posts.stream()
+                .map(PostListDto::new)
+                .collect(Collectors.toList());
+
+        return new PostListResponse(new PageImpl<>(postDtos, pageable, posts.getTotalElements()));
     }
 
 }

@@ -8,7 +8,14 @@ import wegrus.clubwebsite.entity.post.Post;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
     Page<Post> findByBoardOrderByTypeDescIdDesc(Board board, Pageable pageable);
+
     Page<Post> findByBoardOrderByTypeDescPostLikeNumDescIdDesc(Board board, Pageable pageable);
+
     Page<Post> findByBoardOrderByTypeDescReplyNumDescIdDesc(Board board, Pageable pageable);
 
+    Page<Post> findByBoardAndTitleContainingIgnoreCaseOrderByTypeDescIdDesc(Board board, String title, Pageable pageable);
+
+    Page<Post> findByBoardAndTitleContainingIgnoreCaseOrderByTypeDescPostLikeNumDescIdDesc(Board board, String title, Pageable pageable);
+
+    Page<Post> findByBoardAndTitleContainingIgnoreCaseOrderByTypeDescReplyNumDescIdDesc(Board board, String title, Pageable pageable);
 }
