@@ -158,7 +158,7 @@ public class PostController {
     }
 
     @ApiOperation(value = "제목 검색")
-    @GetMapping("search/writer/{boardId}")
+    @GetMapping("search/title/{boardId}")
     public ResponseEntity<ResultResponse> searchByTitle(
             @NotNull(message = "게시판 id는 필수입니다.") @PathVariable Long boardId,
             @Validated @NotNull(message = "페이지 번호는 필수입니다.") @RequestParam Integer page,
@@ -167,6 +167,6 @@ public class PostController {
             @Validated @NotNull(message = "검색어는 필수입니다.") @RequestParam String keyword) {
         final PostListResponse response = postService.searchByTitle(page, pageSize, boardId, type, keyword);
 
-        return ResponseEntity.ok(ResultResponse.of(SEARCH_BY_WRITER_SUCCESS, response));
+        return ResponseEntity.ok(ResultResponse.of(SEARCH_BY_TITLE_SUCCESS, response));
     }
 }
