@@ -219,7 +219,7 @@ public class PostService {
     }
 
     @Transactional
-    public PostListResponse searchByWriter(Integer page, Integer pageSize, Long boardId, PostListType type, String keyword) {
+    public PostListResponse searchByTitle(Integer page, Integer pageSize, Long boardId, PostListType type, String keyword) {
         Pageable pageable = PageRequest.of(page, pageSize);
         final Board board = boardRepository.findById(boardId).orElseThrow(BoardNotFoundException::new);
         Page<Post> posts;
