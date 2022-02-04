@@ -262,4 +262,26 @@ public class PostService {
         return new PostListResponse(new PageImpl<>(postDtos, pageable, posts.getTotalElements()));
     }
 
+    @Transactional
+    public PostListResponse searchByAll(Integer page, Integer pageSize, Long boardId, PostListType type, String keyword) {
+        Pageable pageable = PageRequest.of(page, pageSize);
+        final Board board = boardRepository.findById(boardId).orElseThrow(BoardNotFoundException::new);
+        Page<Post> posts;
+
+        if (type == PostListType.LASTEST)
+            posts = postRepository.findByBoardAndTitleContainingIgnoreCaseOrContentContainingIgnoreCaseOrderByTypeDescIdDesc(board, keyword, keyword, pageable);
+        else if (type == PostListType.LIKEEST)
+            posts = postRepository.findByBoardAndTitleContainingIgnoreCaseOrContentContainingIgnoreCaseOrderByTypeDescPostLikeNumDescIdDesc(board, keyword, keyword, pageable);
+        else if (type == PostListType.REPLYEST)
+            posts = postRepository.findByBoardAndTitleContainingIgnoreCaseOrContentContainingIgnoreCaseOrderByTypeDescReplyNumDescIdDesc(board, keyword, keyword, pageable);
+        else
+            throw new PostListTypeNotFoundException();
+
+        List<PostListDto> postDtos = posts.stream()
+                .map(PostListDto::new)
+                .collect(Collectors.toList());
+
+        return new PostListResponse(new PageImpl<>(postDtos, pageable, posts.getTotalElements()));
+    }
+
 }

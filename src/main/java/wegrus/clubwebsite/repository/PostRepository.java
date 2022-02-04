@@ -24,4 +24,10 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Page<Post> findByBoardAndMemberNameContainingIgnoreCaseOrderByTypeDescPostLikeNumDescIdDesc(Board board, String writer, Pageable pageable);
 
     Page<Post> findByBoardAndMemberNameContainingIgnoreCaseOrderByTypeDescReplyNumDescIdDesc(Board board, String writer, Pageable pageable);
+
+    Page<Post> findByBoardAndTitleContainingIgnoreCaseOrContentContainingIgnoreCaseOrderByTypeDescIdDesc(Board board, String title, String content, Pageable pageable);
+
+    Page<Post> findByBoardAndTitleContainingIgnoreCaseOrContentContainingIgnoreCaseOrderByTypeDescPostLikeNumDescIdDesc(Board board, String title, String content, Pageable pageable);
+
+    Page<Post> findByBoardAndTitleContainingIgnoreCaseOrContentContainingIgnoreCaseOrderByTypeDescReplyNumDescIdDesc(Board board, String title, String content, Pageable pageable);
 }

@@ -44,6 +44,7 @@ public enum ResultCode {
     VIEW_POST_LIST_SUCCESS(200, "B113", "게시판 목록 조회에 성공하였습니다."),
     SEARCH_BY_TITLE_SUCCESS(200, "B114", "제목 검색에 성공하였습니다."),
     SEARCH_BY_WRITER_SUCCESS(200, "B115", "작성자 검색에 성공하였습니다."),
+    SEARCH_BY_ALL_SUCCESS(200, "B116", "제목, 내용 검색에 성공하였습니다."),
 
     // Verification
     REQUEST_VERIFY_SUCCESS(200, "V100", "인증 키 검증 요청에 성공하였습니다."),

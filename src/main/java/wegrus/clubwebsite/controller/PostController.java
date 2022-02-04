@@ -182,4 +182,17 @@ public class PostController {
 
         return ResponseEntity.ok(ResultResponse.of(SEARCH_BY_TITLE_SUCCESS, response));
     }
+
+    @ApiOperation(value = "제목+내용 검색")
+    @GetMapping("search/all/{boardId}")
+    public ResponseEntity<ResultResponse> searchByAll(
+            @NotNull(message = "게시판 id는 필수입니다.") @PathVariable Long boardId,
+            @Validated @NotNull(message = "페이지 번호는 필수입니다.") @RequestParam Integer page,
+            @Validated @NotNull(message = "페이지 크기는 필수입니다.") @RequestParam Integer pageSize,
+            @Validated @NotNull(message = "타입은 필수입니다.") @RequestParam PostListType type,
+            @Validated @NotNull(message = "검색어는 필수입니다.") @RequestParam String keyword) {
+        final PostListResponse response = postService.searchByAll(page, pageSize, boardId, type, keyword);
+
+        return ResponseEntity.ok(ResultResponse.of(SEARCH_BY_ALL_SUCCESS, response));
+    }
 }
