@@ -92,6 +92,15 @@ public class PostController {
         return ResponseEntity.ok(ResultResponse.of(CREATE_BOOKMARK_SUCCESS, response));
     }
 
+    @ApiOperation(value = "게시물 북마크 해제")
+    @DeleteMapping("/members/bookmarks")
+    public ResponseEntity<ResultResponse> deleteBookmark(
+            @Validated @NotNull(message = "게시물 id는 필수입니다.") @RequestParam Long postId) {
+        postService.deleteBookmark(postId);
+
+        return ResponseEntity.ok(ResultResponse.of(DELETE_BOOKMARK_SUCCESS, null));
+    }
+
     @ApiOperation(value = "댓글 등록")
     @PostMapping("/comments")
     public ResponseEntity<ResultResponse> createComment(

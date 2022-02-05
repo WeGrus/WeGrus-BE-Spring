@@ -190,6 +190,18 @@ public class PostService {
         return bookmark.getId();
     }
 
+    @Transactional
+    public void deleteBookmark(Long postId) {
+        String memberId = SecurityContextHolder.getContext().getAuthentication().getName();
+        final Member member = memberRepository.findById(Long.valueOf(memberId)).orElseThrow(MemberNotFoundException::new);
+
+        final Post post = postRepository.findById(postId).orElseThrow(PostNotFoundException::new);
+
+        final Bookmark bookmark = bookmarkRepository.findByMemberAndPost(member, post).orElseThrow(BookmarkNotFoundException::new);
+
+        bookmarkRepository.delete(bookmark);
+    }
+
     @Transactional(readOnly = true)
     public BoardResponse getBoards() {
         List<BoardDto> boardDtos = boardRepository.findAll()
