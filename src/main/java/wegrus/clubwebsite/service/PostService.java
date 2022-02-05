@@ -90,6 +90,12 @@ public class PostService {
         // 게시물 추천 기록 삭제
         postLikeRepository.deletePostLikesByPost(post);
 
+        // 조회수 삭제
+        viewRepository.deleteViewsByPost(post);
+
+        // 북마크 삭제
+        bookmarkRepository.deleteBookmarksByPost(post);
+
         postRepository.delete(post);
     }
 
