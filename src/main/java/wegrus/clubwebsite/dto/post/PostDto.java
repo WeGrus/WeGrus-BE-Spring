@@ -26,6 +26,7 @@ public class PostDto {
     private Integer postLike;
     private Integer postReplies;
     private Integer postView;
+    private Integer postBookmarks;
     private boolean secretFlag;
 
     public PostDto(Post post) {
@@ -43,6 +44,7 @@ public class PostDto {
         this.postLike = post.getPostLikeNum();
         this.postReplies = post.getPostReplyNum();
         this.postView = post.getViews().size();
+        this.postBookmarks = post.getBookmarks().size();
         this.secretFlag = post.isSecretFlag();
     }
 }
