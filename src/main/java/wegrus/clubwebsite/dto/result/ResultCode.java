@@ -45,6 +45,7 @@ public enum ResultCode {
     SEARCH_BY_TITLE_SUCCESS(200, "B114", "제목 검색에 성공하였습니다."),
     SEARCH_BY_WRITER_SUCCESS(200, "B115", "작성자 검색에 성공하였습니다."),
     SEARCH_BY_ALL_SUCCESS(200, "B116", "제목, 내용 검색에 성공하였습니다."),
+    CREATE_BOOKMARK_SUCCESS(200, "B117", "북마크 등록에 성공하였습니다."),
 
     // Verification
     REQUEST_VERIFY_SUCCESS(200, "V100", "인증 키 검증 요청에 성공하였습니다."),

@@ -33,6 +33,7 @@ public class PostService {
     private final PostLikeRepository postLikeRepository;
     private final ReplyLikeRepository replyLikeRepository;
     private final ViewRepository viewRepository;
+    private final BookmarkRepository bookmarkRepository;
 
     @Transactional
     public Long create(PostCreateRequest request) {
@@ -165,6 +166,28 @@ public class PostService {
         postLikeRepository.delete(postLike);
 
         post.likeNum(post.getPostLikeNum() - 1);
+    }
+
+    @Transactional
+    public Long createBookmark(Long postId) {
+        String memberId = SecurityContextHolder.getContext().getAuthentication().getName();
+        final Member member = memberRepository.findById(Long.valueOf(memberId)).orElseThrow(MemberNotFoundException::new);
+
+        final Post post = postRepository.findById(postId).orElseThrow(PostNotFoundException::new);
+
+        Optional<Bookmark> bookmarks = bookmarkRepository.findByMemberAndPost(member, post);
+
+        if (bookmarks.isPresent())
+            throw new BookmarkAlreadyExistException();
+
+        Bookmark bookmark = Bookmark.builder()
+                .post(post)
+                .member(member)
+                .build();
+
+        bookmarkRepository.save(bookmark);
+
+        return bookmark.getId();
     }
 
     @Transactional(readOnly = true)
