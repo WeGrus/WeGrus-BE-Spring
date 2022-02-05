@@ -36,7 +36,7 @@ public class PostUnknownDto {
         this.createdDate = post.getCreatedDate();
         this.updatedDate = post.getUpdatedDate();
         this.postLike = post.getPostLikeNum();
-        this.postReplies = post.getReplyNum();
+        this.postReplies = post.getPostReplyNum();
         this.postView = post.getViews().size();
         this.secretFlag = post.isSecretFlag();
     }

@@ -11,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 import wegrus.clubwebsite.dto.post.*;
 import wegrus.clubwebsite.entity.member.MemberRole;
 import wegrus.clubwebsite.entity.member.MemberRoles;
-import wegrus.clubwebsite.entity.member.Role;
 import wegrus.clubwebsite.entity.post.*;
 import wegrus.clubwebsite.entity.member.Member;
 import wegrus.clubwebsite.exception.*;
@@ -19,7 +18,6 @@ import wegrus.clubwebsite.repository.*;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 
@@ -207,7 +205,7 @@ public class PostService {
         else if (type == PostListType.LIKEEST)
             posts = postRepository.findByBoardOrderByTypeDescPostLikeNumDescIdDesc(board, pageable);
         else if (type == PostListType.REPLYEST)
-            posts = postRepository.findByBoardOrderByTypeDescReplyNumDescIdDesc(board, pageable);
+            posts = postRepository.findByBoardOrderByTypeDescPostReplyNumDescIdDesc(board, pageable);
         else
             throw new PostListTypeNotFoundException();
 
@@ -229,7 +227,7 @@ public class PostService {
         else if (type == PostListType.LIKEEST)
             posts = postRepository.findByBoardAndMemberNameContainingIgnoreCaseOrderByTypeDescPostLikeNumDescIdDesc(board, keyword, pageable);
         else if (type == PostListType.REPLYEST)
-            posts = postRepository.findByBoardAndMemberNameContainingIgnoreCaseOrderByTypeDescReplyNumDescIdDesc(board, keyword, pageable);
+            posts = postRepository.findByBoardAndMemberNameContainingIgnoreCaseOrderByTypeDescPostReplyNumDescIdDesc(board, keyword, pageable);
         else
             throw new PostListTypeNotFoundException();
 
@@ -251,7 +249,7 @@ public class PostService {
         else if (type == PostListType.LIKEEST)
             posts = postRepository.findByBoardAndTitleContainingIgnoreCaseOrderByTypeDescPostLikeNumDescIdDesc(board, keyword, pageable);
         else if (type == PostListType.REPLYEST)
-            posts = postRepository.findByBoardAndTitleContainingIgnoreCaseOrderByTypeDescReplyNumDescIdDesc(board, keyword, pageable);
+            posts = postRepository.findByBoardAndTitleContainingIgnoreCaseOrderByTypeDescPostReplyNumDescIdDesc(board, keyword, pageable);
         else
             throw new PostListTypeNotFoundException();
 
@@ -273,7 +271,7 @@ public class PostService {
         else if (type == PostListType.LIKEEST)
             posts = postRepository.findByBoardAndTitleContainingIgnoreCaseOrContentContainingIgnoreCaseOrderByTypeDescPostLikeNumDescIdDesc(board, keyword, keyword, pageable);
         else if (type == PostListType.REPLYEST)
-            posts = postRepository.findByBoardAndTitleContainingIgnoreCaseOrContentContainingIgnoreCaseOrderByTypeDescReplyNumDescIdDesc(board, keyword, keyword, pageable);
+            posts = postRepository.findByBoardAndTitleContainingIgnoreCaseOrContentContainingIgnoreCaseOrderByTypeDescPostReplyNumDescIdDesc(board, keyword, keyword, pageable);
         else
             throw new PostListTypeNotFoundException();
 
