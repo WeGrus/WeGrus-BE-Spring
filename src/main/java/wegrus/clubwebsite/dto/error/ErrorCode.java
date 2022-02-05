@@ -33,6 +33,8 @@ public enum ErrorCode {
     BOARD_NOT_FOUND(400, "B008", "존재하지 않는 게시판입니다."),
     BOARD_CATEGORY_NOT_FOUND(400, "B009", "존재하지 않는 게시판 종류입니다."),
     POST_LIST_NOT_FOUND(400, "B010", "존재하지 않는 게시물 목록입니다."),
+    BOOKMARK_ALREADY_EXIST(400, "B011", "이미 존재하는 북마크입니다."),
+    BOOKMARK_NOT_FOUND(400, "B012", "존재하지 않는 북마크입니다."),
 
     // Member
     MEMBER_NOT_FOUND(400, "M000", "존재하지 않는 회원입니다."),

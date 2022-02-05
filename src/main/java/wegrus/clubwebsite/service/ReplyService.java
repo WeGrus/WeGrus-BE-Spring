@@ -42,7 +42,7 @@ public class ReplyService {
                 .state(replyState)
                 .build();
 
-        post.replyNum(post.getReplyNum()+1);
+        post.postReplyNum(post.getPostReplyNum()+1);
 
         return replyRepository.save(reply).getId();
     }
@@ -60,7 +60,7 @@ public class ReplyService {
             throw new ReplyMemberNotMatchException();
         }
 
-        post.replyNum(post.getReplyNum()-1);
+        post.postReplyNum(post.getPostReplyNum()-1);
 
         // 댓글 추천수 제거
         replyLikeRepository.deleteReplyLikesByReply(reply);

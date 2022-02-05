@@ -8,10 +8,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import wegrus.clubwebsite.dto.member.MemberInfoUpdateRequest;
 import wegrus.clubwebsite.dto.member.MemberSignupRequest;
-import wegrus.clubwebsite.entity.post.Post;
-import wegrus.clubwebsite.entity.post.ReplyLike;
-import wegrus.clubwebsite.entity.post.PostLike;
-import wegrus.clubwebsite.entity.post.View;
+import wegrus.clubwebsite.entity.post.*;
 import wegrus.clubwebsite.vo.Image;
 
 import javax.persistence.*;
@@ -46,6 +43,9 @@ public class Member {
 
     @OneToMany(mappedBy = "member")
     private List<ReplyLike> replyLikes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "member")
+    private List<Bookmark> bookmarks = new ArrayList<>();
 
     @Column(name = "member_user_id", unique = true, nullable = false)
     private String userId;

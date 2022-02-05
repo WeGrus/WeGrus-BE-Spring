@@ -35,7 +35,7 @@ public class PostListDto {
         this.updatedDate = post.getUpdatedDate();
         this.postLike = post.getPostLikeNum();
         this.postView = post.getViews().size();
-        this.postReplies = post.getReplyNum();
+        this.postReplies = post.getPostReplyNum();
         this.secretFlag = post.isSecretFlag();
     }
 }

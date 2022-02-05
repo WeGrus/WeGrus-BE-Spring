@@ -44,6 +44,9 @@ public class Post {
     @OneToMany(mappedBy = "post")
     private List<View> views = new ArrayList<>();
 
+    @OneToMany(mappedBy = "post")
+    private List<Bookmark> bookmarks = new ArrayList<>();
+
     @Enumerated(EnumType.STRING)
     @Column(name = "post_type")
     private PostType type;
@@ -73,11 +76,11 @@ public class Post {
     @Column(name = "post_like_num")
     private Integer postLikeNum;
 
-    @Column(name = "reply_num")
-    private Integer replyNum;
+    @Column(name = "post_reply_num")
+    private Integer postReplyNum;
 
     @Builder
-    public Post(Member member, Board board, PostType type, String title, String content, boolean secretFlag, PostState state){
+    public Post(Member member, Board board, PostType type, String title, String content, boolean secretFlag, PostState state) {
         this.member = member;
         this.board = board;
         this.type = type;
@@ -86,20 +89,20 @@ public class Post {
         this.secretFlag = secretFlag;
         this.state = state;
         this.postLikeNum = 0;
-        this.replyNum = 0;
+        this.postReplyNum = 0;
     }
 
-    public void update(PostUpdateRequest request){
+    public void update(PostUpdateRequest request) {
         this.title = request.getTitle();
         this.content = request.getContent();
         this.secretFlag = request.isSecretFlag();
     }
 
-    public void likeNum(Integer postLikeNum){
+    public void likeNum(Integer postLikeNum) {
         this.postLikeNum = postLikeNum;
     }
 
-    public void replyNum(Integer replyNum){
-        this.replyNum = replyNum;
+    public void postReplyNum(Integer postReplyNum) {
+        this.postReplyNum = postReplyNum;
     }
 }

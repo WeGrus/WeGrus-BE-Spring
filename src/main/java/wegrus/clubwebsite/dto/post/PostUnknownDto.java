@@ -22,6 +22,7 @@ public class PostUnknownDto {
     private Integer postLike;
     private Integer postReplies;
     private Integer postView;
+    private Integer postBookmarks;
     private boolean secretFlag;
 
     public PostUnknownDto(Post post){
@@ -36,8 +37,9 @@ public class PostUnknownDto {
         this.createdDate = post.getCreatedDate();
         this.updatedDate = post.getUpdatedDate();
         this.postLike = post.getPostLikeNum();
-        this.postReplies = post.getReplyNum();
+        this.postReplies = post.getPostReplyNum();
         this.postView = post.getViews().size();
+        this.postBookmarks = post.getBookmarks().size();
         this.secretFlag = post.isSecretFlag();
     }
 }

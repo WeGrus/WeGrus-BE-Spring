@@ -82,6 +82,25 @@ public class PostController {
         return ResponseEntity.ok(ResultResponse.of(DELETE_POST_LIKE_SUCCESS, null));
     }
 
+    @ApiOperation(value = "게시물 북마크 등록")
+    @PostMapping("/members/bookmarks")
+    public ResponseEntity<ResultResponse> createBookmark(
+            @Validated @NotNull(message = "게시물 id는 필수입니다.") @RequestParam Long postId) {
+        final Long bookmarkId = postService.createBookmark(postId);
+        final BookmarkCreateResponse response = new BookmarkCreateResponse(bookmarkId);
+
+        return ResponseEntity.ok(ResultResponse.of(CREATE_BOOKMARK_SUCCESS, response));
+    }
+
+    @ApiOperation(value = "게시물 북마크 해제")
+    @DeleteMapping("/members/bookmarks")
+    public ResponseEntity<ResultResponse> deleteBookmark(
+            @Validated @NotNull(message = "게시물 id는 필수입니다.") @RequestParam Long postId) {
+        postService.deleteBookmark(postId);
+
+        return ResponseEntity.ok(ResultResponse.of(DELETE_BOOKMARK_SUCCESS, null));
+    }
+
     @ApiOperation(value = "댓글 등록")
     @PostMapping("/comments")
     public ResponseEntity<ResultResponse> createComment(

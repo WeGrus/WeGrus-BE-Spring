@@ -11,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 import wegrus.clubwebsite.dto.post.*;
 import wegrus.clubwebsite.entity.member.MemberRole;
 import wegrus.clubwebsite.entity.member.MemberRoles;
-import wegrus.clubwebsite.entity.member.Role;
 import wegrus.clubwebsite.entity.post.*;
 import wegrus.clubwebsite.entity.member.Member;
 import wegrus.clubwebsite.exception.*;
@@ -19,7 +18,6 @@ import wegrus.clubwebsite.repository.*;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 
@@ -35,6 +33,7 @@ public class PostService {
     private final PostLikeRepository postLikeRepository;
     private final ReplyLikeRepository replyLikeRepository;
     private final ViewRepository viewRepository;
+    private final BookmarkRepository bookmarkRepository;
 
     @Transactional
     public Long create(PostCreateRequest request) {
@@ -90,6 +89,12 @@ public class PostService {
 
         // 게시물 추천 기록 삭제
         postLikeRepository.deletePostLikesByPost(post);
+
+        // 조회수 삭제
+        viewRepository.deleteViewsByPost(post);
+
+        // 북마크 삭제
+        bookmarkRepository.deleteBookmarksByPost(post);
 
         postRepository.delete(post);
     }
@@ -169,6 +174,40 @@ public class PostService {
         post.likeNum(post.getPostLikeNum() - 1);
     }
 
+    @Transactional
+    public Long createBookmark(Long postId) {
+        String memberId = SecurityContextHolder.getContext().getAuthentication().getName();
+        final Member member = memberRepository.findById(Long.valueOf(memberId)).orElseThrow(MemberNotFoundException::new);
+
+        final Post post = postRepository.findById(postId).orElseThrow(PostNotFoundException::new);
+
+        Optional<Bookmark> bookmarks = bookmarkRepository.findByMemberAndPost(member, post);
+
+        if (bookmarks.isPresent())
+            throw new BookmarkAlreadyExistException();
+
+        Bookmark bookmark = Bookmark.builder()
+                .post(post)
+                .member(member)
+                .build();
+
+        bookmarkRepository.save(bookmark);
+
+        return bookmark.getId();
+    }
+
+    @Transactional
+    public void deleteBookmark(Long postId) {
+        String memberId = SecurityContextHolder.getContext().getAuthentication().getName();
+        final Member member = memberRepository.findById(Long.valueOf(memberId)).orElseThrow(MemberNotFoundException::new);
+
+        final Post post = postRepository.findById(postId).orElseThrow(PostNotFoundException::new);
+
+        final Bookmark bookmark = bookmarkRepository.findByMemberAndPost(member, post).orElseThrow(BookmarkNotFoundException::new);
+
+        bookmarkRepository.delete(bookmark);
+    }
+
     @Transactional(readOnly = true)
     public BoardResponse getBoards() {
         List<BoardDto> boardDtos = boardRepository.findAll()
@@ -207,7 +246,7 @@ public class PostService {
         else if (type == PostListType.LIKEEST)
             posts = postRepository.findByBoardOrderByTypeDescPostLikeNumDescIdDesc(board, pageable);
         else if (type == PostListType.REPLYEST)
-            posts = postRepository.findByBoardOrderByTypeDescReplyNumDescIdDesc(board, pageable);
+            posts = postRepository.findByBoardOrderByTypeDescPostReplyNumDescIdDesc(board, pageable);
         else
             throw new PostListTypeNotFoundException();
 
@@ -229,7 +268,7 @@ public class PostService {
         else if (type == PostListType.LIKEEST)
             posts = postRepository.findByBoardAndMemberNameContainingIgnoreCaseOrderByTypeDescPostLikeNumDescIdDesc(board, keyword, pageable);
         else if (type == PostListType.REPLYEST)
-            posts = postRepository.findByBoardAndMemberNameContainingIgnoreCaseOrderByTypeDescReplyNumDescIdDesc(board, keyword, pageable);
+            posts = postRepository.findByBoardAndMemberNameContainingIgnoreCaseOrderByTypeDescPostReplyNumDescIdDesc(board, keyword, pageable);
         else
             throw new PostListTypeNotFoundException();
 
@@ -251,7 +290,7 @@ public class PostService {
         else if (type == PostListType.LIKEEST)
             posts = postRepository.findByBoardAndTitleContainingIgnoreCaseOrderByTypeDescPostLikeNumDescIdDesc(board, keyword, pageable);
         else if (type == PostListType.REPLYEST)
-            posts = postRepository.findByBoardAndTitleContainingIgnoreCaseOrderByTypeDescReplyNumDescIdDesc(board, keyword, pageable);
+            posts = postRepository.findByBoardAndTitleContainingIgnoreCaseOrderByTypeDescPostReplyNumDescIdDesc(board, keyword, pageable);
         else
             throw new PostListTypeNotFoundException();
 
@@ -273,7 +312,7 @@ public class PostService {
         else if (type == PostListType.LIKEEST)
             posts = postRepository.findByBoardAndTitleContainingIgnoreCaseOrContentContainingIgnoreCaseOrderByTypeDescPostLikeNumDescIdDesc(board, keyword, keyword, pageable);
         else if (type == PostListType.REPLYEST)
-            posts = postRepository.findByBoardAndTitleContainingIgnoreCaseOrContentContainingIgnoreCaseOrderByTypeDescReplyNumDescIdDesc(board, keyword, keyword, pageable);
+            posts = postRepository.findByBoardAndTitleContainingIgnoreCaseOrContentContainingIgnoreCaseOrderByTypeDescPostReplyNumDescIdDesc(board, keyword, keyword, pageable);
         else
             throw new PostListTypeNotFoundException();
 
