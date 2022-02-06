@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,9 @@ import wegrus.clubwebsite.dto.Status;
 import wegrus.clubwebsite.dto.StatusResponse;
 import wegrus.clubwebsite.dto.VerificationResponse;
 import wegrus.clubwebsite.dto.member.*;
+import wegrus.clubwebsite.dto.post.BookmarkDto;
+import wegrus.clubwebsite.dto.post.PostDto;
+import wegrus.clubwebsite.dto.post.PostReplyDto;
 import wegrus.clubwebsite.dto.result.ResultResponse;
 import wegrus.clubwebsite.entity.member.MemberRoles;
 import wegrus.clubwebsite.exception.MemberAlreadyBanException;
@@ -207,5 +211,35 @@ public class MemberController {
         final StatusResponse response = memberService.sendRandomCode();
 
         return ResponseEntity.ok(ResultResponse.of(SEND_CERTIFICATION_CODE_SUCCESS, response));
+    }
+
+    @ApiOperation(value = "내가 작성한 게시물 목록 조회")
+    @GetMapping("/members/posts")
+    public ResponseEntity<ResultResponse> getMyPosts(
+            @NotNull(message = "게시물 page는 필수입니다.") @RequestParam int page,
+            @NotNull(message = "게시물 page당 size는 필수입니다.") @RequestParam int size) {
+        final Page<PostDto> response = memberService.getMyPosts(page, size);
+
+        return ResponseEntity.ok(ResultResponse.of(GET_MY_POSTS_SUCCESS, response));
+    }
+
+    @ApiOperation(value = "내가 작성한 댓글 목록 조회")
+    @GetMapping("/members/replies")
+    public ResponseEntity<ResultResponse> getMyReplies(
+            @NotNull(message = "게시물 page는 필수입니다.") @RequestParam int page,
+            @NotNull(message = "게시물 page당 size는 필수입니다.") @RequestParam int size) {
+        final Page<PostReplyDto> response = memberService.getMyReplies(page, size);
+
+        return ResponseEntity.ok(ResultResponse.of(GET_MY_REPLIES_SUCCESS, response));
+    }
+
+    @ApiOperation(value = "내가 저장한 게시물 목록 조회")
+    @GetMapping("/members/bookmarks")
+    public ResponseEntity<ResultResponse> getMyBookmarks(
+            @NotNull(message = "게시물 page는 필수입니다.") @RequestParam int page,
+            @NotNull(message = "게시물 page당 size는 필수입니다.") @RequestParam int size) {
+        final Page<BookmarkDto> response = memberService.getMyBookmarks(page, size);
+
+        return ResponseEntity.ok(ResultResponse.of(GET_MY_BOOKMARKS_SUCCESS, response));
     }
 }

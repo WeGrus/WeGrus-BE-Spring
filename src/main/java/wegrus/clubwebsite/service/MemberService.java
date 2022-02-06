@@ -2,6 +2,9 @@ package wegrus.clubwebsite.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -12,10 +15,14 @@ import org.springframework.web.multipart.MultipartFile;
 import wegrus.clubwebsite.dto.Status;
 import wegrus.clubwebsite.dto.StatusResponse;
 import wegrus.clubwebsite.dto.member.*;
+import wegrus.clubwebsite.dto.post.BookmarkDto;
+import wegrus.clubwebsite.dto.post.PostDto;
+import wegrus.clubwebsite.dto.post.PostReplyDto;
 import wegrus.clubwebsite.entity.member.MemberRole;
 import wegrus.clubwebsite.entity.member.MemberRoles;
 import wegrus.clubwebsite.exception.*;
 import wegrus.clubwebsite.repository.MemberRoleRepository;
+import wegrus.clubwebsite.repository.PostRepository;
 import wegrus.clubwebsite.repository.RoleRepository;
 import wegrus.clubwebsite.util.*;
 import wegrus.clubwebsite.dto.VerificationResponse;
@@ -49,6 +56,7 @@ public class MemberService {
     private final JwtUserDetailsUtil jwtUserDetailsUtil;
     private final AmazonS3Util amazonS3Util;
     private final KakaoUtil kakaoUtil;
+    private final PostRepository postRepository;
 
     @Value("${valid-time.verification-key}")
     private Integer VERIFICATION_KEY_VALID_TIME;
@@ -290,5 +298,29 @@ public class MemberService {
         redisUtil.set(member.getEmail(), String.valueOf(code), 30);
 
         return new StatusResponse(Status.SUCCESS);
+    }
+
+    public Page<PostDto> getMyPosts(int page, int size) {
+        final Long memberId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
+
+        page = (page == 0 ? 0 : page - 1);
+        Pageable pageable = PageRequest.of(page, size);
+        return postRepository.findPostDtoPageByMemberIdOrderByCreatedDateDesc(memberId, pageable);
+    }
+
+    public Page<PostReplyDto> getMyReplies(int page, int size){
+        final Long memberId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
+
+        page = (page == 0 ? 0 : page - 1);
+        Pageable pageable = PageRequest.of(page, size);
+        return postRepository.findPostReplyDtoPageByMemberIdOrderByCreatedDateDesc(memberId, pageable);
+    }
+
+    public Page<BookmarkDto> getMyBookmarks(int page, int size) {
+        final Long memberId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
+
+        page = (page == 0 ? 0 : page - 1);
+        Pageable pageable = PageRequest.of(page, size);
+        return postRepository.findBookmarkedPostDtoPageByMemberIdOrderByCreatedDateDesc(memberId, pageable);
     }
 }

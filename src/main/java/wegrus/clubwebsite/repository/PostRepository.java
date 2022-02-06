@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import wegrus.clubwebsite.entity.post.Board;
 import wegrus.clubwebsite.entity.post.Post;
 
-public interface PostRepository extends JpaRepository<Post, Long> {
+public interface PostRepository extends JpaRepository<Post, Long>, PostRepositoryQuerydsl {
     Page<Post> findByBoardOrderByTypeDescIdDesc(Board board, Pageable pageable);
 
     Page<Post> findByBoardOrderByTypeDescPostLikeNumDescIdDesc(Board board, Pageable pageable);
