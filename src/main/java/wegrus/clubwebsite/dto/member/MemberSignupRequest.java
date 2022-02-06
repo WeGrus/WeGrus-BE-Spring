@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import wegrus.clubwebsite.entity.member.Gender;
 import wegrus.clubwebsite.entity.member.MemberAcademicStatus;
 import wegrus.clubwebsite.entity.member.MemberGrade;
 
@@ -42,7 +43,11 @@ public class MemberSignupRequest {
     @NotNull(message = "회원 학년은 필수입니다.")
     private MemberGrade grade;
 
-    @ApiModelProperty(value = "회원 아이디", example = "kakao_124125124124", required = true)
+    @ApiModelProperty(value = "회원 아이디", example = "kakao_2090341149", required = true)
     @NotBlank(message = "회원 아이디는 필수입니다.")
     private String userId;
+
+    @ApiModelProperty(value = "회원 성별", example = "MAN", required = true)
+    @NotNull(message = "회원 성별은 필수입니다.")
+    private Gender gender;
 }

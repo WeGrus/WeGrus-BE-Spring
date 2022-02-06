@@ -26,10 +26,7 @@ import wegrus.clubwebsite.dto.StatusResponse;
 import wegrus.clubwebsite.dto.VerificationResponse;
 import wegrus.clubwebsite.dto.error.ErrorResponse;
 import wegrus.clubwebsite.dto.member.*;
-import wegrus.clubwebsite.entity.member.Member;
-import wegrus.clubwebsite.entity.member.MemberAcademicStatus;
-import wegrus.clubwebsite.entity.member.MemberGrade;
-import wegrus.clubwebsite.entity.member.MemberRoles;
+import wegrus.clubwebsite.entity.member.*;
 import wegrus.clubwebsite.exception.MemberNotFoundException;
 import wegrus.clubwebsite.exception.MemberResignException;
 import wegrus.clubwebsite.service.MemberService;
@@ -155,10 +152,10 @@ public class MemberControllerTest {
     @DisplayName("회원 가입 API: 성공")
     void signup_success() throws Exception {
         // given
-        final Member member = new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING);
+        final Member member = new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING, Gender.MAN);
         final MemberSignupResponse response = new MemberSignupResponse(new MemberDto(member));
         doReturn(response).when(memberService).validateAndSaveMember(any(MemberSignupRequest.class));
-        final MemberSignupRequest request = new MemberSignupRequest("12161111@inha.edu", "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.SENIOR, "123456789L");
+        final MemberSignupRequest request = new MemberSignupRequest("12161111@inha.edu", "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.SENIOR, "123456789L", Gender.MAN);
 
         // when
         final ResultActions perform = mockMvc.perform(
@@ -177,9 +174,9 @@ public class MemberControllerTest {
     @DisplayName("회원 가입 API: 바인딩 예외")
     void signup_bindEx() throws Exception {
         // given
-        final MemberSignupRequest request = new MemberSignupRequest("12161111@inha.edu", "홍길동", " ", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.SENIOR, "token");
-        final MemberSignupRequest request2 = new MemberSignupRequest("12161111@gmail.com", "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.SENIOR, "token");
-        final MemberSignupRequest request3 = new MemberSignupRequest("12161111@inha.edu", "홍길동", "컴퓨터공학과", "01012341234", MemberAcademicStatus.ATTENDING, MemberGrade.SENIOR, "token");
+        final MemberSignupRequest request = new MemberSignupRequest("12161111@inha.edu", "홍길동", " ", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.SENIOR, "token", Gender.MAN);
+        final MemberSignupRequest request2 = new MemberSignupRequest("12161111@gmail.com", "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.SENIOR, "token", Gender.MAN);
+        final MemberSignupRequest request3 = new MemberSignupRequest("12161111@inha.edu", "홍길동", "컴퓨터공학과", "01012341234", MemberAcademicStatus.ATTENDING, MemberGrade.SENIOR, "token", Gender.MAN);
 
         // when
         final ResultActions perform = mockMvc.perform(
@@ -227,7 +224,7 @@ public class MemberControllerTest {
     @DisplayName("로그인 API: 성공")
     void login_success() throws Exception {
         // given
-        final Member member = new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING);
+        final Member member = new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING, Gender.MAN);
         final String accessToken = "accessToken";
         final String refreshToken = "refreshToken";
         final MemberAndJwtDto dto = new MemberAndJwtDto(new MemberDto(member), accessToken, refreshToken);
@@ -414,7 +411,7 @@ public class MemberControllerTest {
     @DisplayName("회원 정보 조회 API: 성공")
     void getInfo_success() throws Exception {
         // given
-        final Member member = new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING);
+        final Member member = new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING, Gender.MAN);
         final MemberInfoResponse response = new MemberInfoResponse(Status.SUCCESS, new MemberDto(member));
         final MemberInfoResponse response2 = new MemberInfoResponse(Status.SUCCESS, new MemberSimpleDto(member));
         doReturn(response).when(memberService).getMemberInfo(1L);

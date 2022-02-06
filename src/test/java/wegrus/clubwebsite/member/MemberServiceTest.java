@@ -123,9 +123,9 @@ public class MemberServiceTest {
     @DisplayName("회원가입: 성공")
     void validateAndSaveMember_success() throws Exception {
         // given
-        final MemberSignupRequest request = new MemberSignupRequest("12161111@inha.edu", "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.SENIOR, "token");
+        final MemberSignupRequest request = new MemberSignupRequest("12161111@inha.edu", "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.SENIOR, "token", Gender.MAN);
         doReturn(Optional.empty()).when(memberRepository).findByUserIdOrEmail(any(String.class), any(String.class));
-        final Optional<Member> member = Optional.of(new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
+        final Optional<Member> member = Optional.of(new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING, Gender.MAN));
         doReturn(member.get()).when(memberRepository).save(any(Member.class));
         doReturn(Optional.of(new Role(MemberRoles.ROLE_GUEST.name()))).when(roleRepository).findByName(any(String.class));
         doNothing().when(amazonS3Util).createDirectory(any(String.class));
@@ -141,8 +141,8 @@ public class MemberServiceTest {
     @DisplayName("회원 재가입: 성공")
     void validateAndSaveMember_success2() throws Exception {
         // given
-        final MemberSignupRequest request = new MemberSignupRequest("12161111@inha.edu", "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.SENIOR, "123456789L");
-        final Optional<Member> member = Optional.of(new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
+        final MemberSignupRequest request = new MemberSignupRequest("12161111@inha.edu", "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.SENIOR, "123456789L", Gender.MAN);
+        final Optional<Member> member = Optional.of(new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING, Gender.MAN));
         ReflectionTestUtils.setField(member.get(), "id", 1L);
         doReturn(member).when(memberRepository).findByUserId(any(String.class));
 
@@ -174,8 +174,8 @@ public class MemberServiceTest {
     @DisplayName("회원가입: 실패")
     void validateAndSaveMember_fail() throws Exception {
         // given
-        final MemberSignupRequest request = new MemberSignupRequest("12161111@inha.edu", "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.SENIOR, "token");
-        final Optional<Member> member = Optional.of(new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
+        final MemberSignupRequest request = new MemberSignupRequest("12161111@inha.edu", "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.SENIOR, "token", Gender.MAN);
+        final Optional<Member> member = Optional.of(new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING, Gender.MAN));
         doReturn(member).when(memberRepository).findByUserIdOrEmail(any(String.class), any(String.class));
 
         // when
@@ -190,8 +190,8 @@ public class MemberServiceTest {
     @DisplayName("회원 재가입: 실패")
     void validateAndSaveMember_fail2() throws Exception {
         // given
-        final MemberSignupRequest request = new MemberSignupRequest("12161111@inha.edu", "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.SENIOR, "123456789L");
-        final Optional<Member> member = Optional.of(new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
+        final MemberSignupRequest request = new MemberSignupRequest("12161111@inha.edu", "홍길동", "컴퓨터공학과", "010-1234-1234", MemberAcademicStatus.ATTENDING, MemberGrade.SENIOR, "123456789L", Gender.MAN);
+        final Optional<Member> member = Optional.of(new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING, Gender.MAN));
         ReflectionTestUtils.setField(member.get(), "id", 1L);
         doReturn(member).when(memberRepository).findByUserId(any(String.class));
 
@@ -218,7 +218,7 @@ public class MemberServiceTest {
         // given
         doReturn("token").when(kakaoUtil).getAccessTokenFromKakaoAPI(any(String.class));
         doReturn("123456789L").when(kakaoUtil).getUserIdFromKakaoAPI(any(String.class));
-        final Optional<Member> member = Optional.of(new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
+        final Optional<Member> member = Optional.of(new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING, Gender.MAN));
         doReturn(member).when(memberRepository).findByUserId(any(String.class));
 
         final Role roleResign = new Role(MemberRoles.ROLE_RESIGN.name());
@@ -312,7 +312,7 @@ public class MemberServiceTest {
     @DisplayName("이메일 검증: 실패")
     void checkEmailAndSendMail_fail() throws Exception {
         // given
-        final Optional<Member> member = Optional.of(new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
+        final Optional<Member> member = Optional.of(new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING, Gender.MAN));
         doReturn(member).when(memberRepository).findByEmail(any(String.class));
 
         // when
@@ -326,9 +326,9 @@ public class MemberServiceTest {
     @DisplayName("회원 정보 조회: 성공")
     void getMemberInfo_success() throws Exception {
         // given
-        final Optional<Member> me = Optional.of(new Member("123456789L", "12161111@inha.edu", "username", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
+        final Optional<Member> me = Optional.of(new Member("123456789L", "12161111@inha.edu", "username", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING, Gender.MAN));
         ReflectionTestUtils.setField(me.get(), "id", 1L);
-        final Optional<Member> someone = Optional.of(new Member("123456789L", "12161111@inha.edu", "asdfasdf", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
+        final Optional<Member> someone = Optional.of(new Member("123456789L", "12161111@inha.edu", "asdfasdf", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING, Gender.MAN));
         ReflectionTestUtils.setField(someone.get(), "id", 2L);
         doReturn(me).when(memberRepository).findById(1L);
         doReturn(someone).when(memberRepository).findById(2L);
@@ -361,7 +361,7 @@ public class MemberServiceTest {
     @DisplayName("회원 정보 수정: 성공")
     void updateMemberInfo_success() throws Exception {
         // given
-        final Optional<Member> member = Optional.of(new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
+        final Optional<Member> member = Optional.of(new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING, Gender.MAN));
         ReflectionTestUtils.setField(member.get(), "id", 1L);
         final MemberInfoUpdateRequest request = new MemberInfoUpdateRequest("만두", "정통", "010-3333-1234", MemberAcademicStatus.ATTENDING, MemberGrade.SENIOR, "안녕");
         doReturn(member).when(memberRepository).findById(any(Long.class));
@@ -381,7 +381,7 @@ public class MemberServiceTest {
     @DisplayName("회원 이미지 변경: 성공(새 이미지)")
     void updateMemberImage_success() throws Exception {
         // given
-        final Optional<Member> member = Optional.of(new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
+        final Optional<Member> member = Optional.of(new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING, Gender.MAN));
         member.get().updateImage(Image.builder().url("다른 이미지 url").build());
         doReturn(member).when(memberRepository).findById(any(Long.class));
 
@@ -404,7 +404,7 @@ public class MemberServiceTest {
     @DisplayName("회원 이미지 변경: 성공(기본 이미지)")
     void updateMemberImage_success2() throws Exception {
         // given
-        final Optional<Member> member = Optional.of(new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
+        final Optional<Member> member = Optional.of(new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING, Gender.MAN));
         member.get().updateImage(Image.builder().url("다른 이미지 url").build());
         doReturn(member).when(memberRepository).findById(any(Long.class));
 
@@ -423,7 +423,7 @@ public class MemberServiceTest {
     @DisplayName("회원 이미지 변경: 실패")
     void updateMemberImage_fail() throws Exception {
         // given
-        final Optional<Member> member = Optional.of(new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
+        final Optional<Member> member = Optional.of(new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING, Gender.MAN));
         member.get().updateImage(Image.builder().url("구 이미지 저장소 url").build());
         doReturn(member).when(memberRepository).findById(any(Long.class));
 
@@ -474,7 +474,7 @@ public class MemberServiceTest {
         ReflectionTestUtils.setField(role.get(), "id", 1L);
         doReturn(role).when(roleRepository).findByName(any(String.class));
 
-        final Optional<Member> member = Optional.of(new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
+        final Optional<Member> member = Optional.of(new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING, Gender.MAN));
         doReturn(member).when(memberRepository).findById(any(Long.class));
 
         doReturn(Optional.empty()).when(memberRoleRepository).findByMemberIdAndRoleId(any(Long.class), any(Long.class));
@@ -497,7 +497,7 @@ public class MemberServiceTest {
         ReflectionTestUtils.setField(role.get(), "id", 1L);
         doReturn(role).when(roleRepository).findByName(any(String.class));
 
-        final Optional<Member> member = Optional.of(new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
+        final Optional<Member> member = Optional.of(new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING, Gender.MAN));
         doReturn(member).when(memberRepository).findById(any(Long.class));
 
         final MemberRole memberRole = new MemberRole(member.get(), role.get());
@@ -514,7 +514,7 @@ public class MemberServiceTest {
     @DisplayName("회원 탈퇴: 성공")
     void resign_success() throws Exception {
         // given
-        final Optional<Member> member = Optional.of(new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
+        final Optional<Member> member = Optional.of(new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING, Gender.MAN));
         doReturn(member).when(memberRepository).findById(any(Long.class));
 
         final MemberRoles memberRoles = MemberRoles.ROLE_RESIGN;
@@ -570,7 +570,7 @@ public class MemberServiceTest {
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, null, authorities);
         SecurityContextHolder.getContext().setAuthentication(auth);
 
-        final Optional<Member> member = Optional.of(new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING));
+        final Optional<Member> member = Optional.of(new Member("123456789L", "12161111@inha.edu", "홍길동", "컴퓨터공학과", MemberGrade.SENIOR, "010-1234-1234", MemberAcademicStatus.ATTENDING, Gender.MAN));
         doReturn(member).when(memberRepository).findById(any(Long.class));
 
         final String code = "123123";

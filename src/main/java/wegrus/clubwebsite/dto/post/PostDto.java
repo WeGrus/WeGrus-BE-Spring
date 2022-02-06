@@ -1,10 +1,10 @@
 package wegrus.clubwebsite.dto.post;
 
+import com.querydsl.core.annotations.QueryProjection;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import wegrus.clubwebsite.entity.post.Post;
 import wegrus.clubwebsite.vo.Image;
-import wegrus.clubwebsite.vo.ImageType;
 
 import java.time.LocalDateTime;
 
@@ -46,5 +46,25 @@ public class PostDto {
         this.postView = post.getViews().size();
         this.postBookmarks = post.getBookmarks().size();
         this.secretFlag = post.isSecretFlag();
+    }
+
+    @QueryProjection
+    public PostDto(Long postId, Long memberId, String memberName, Image image, String board, String boardCategory, String type, String title, String content, LocalDateTime createdDate, LocalDateTime updatedDate, Integer postLike, Integer postReplies, Integer postView, Integer postBookmarks, boolean secretFlag) {
+        this.postId = postId;
+        this.memberId = memberId;
+        this.memberName = memberName;
+        this.image = image;
+        this.board = board;
+        this.boardCategory = boardCategory;
+        this.type = type;
+        this.title = title;
+        this.content = content;
+        this.createdDate = createdDate;
+        this.updatedDate = updatedDate;
+        this.postLike = postLike;
+        this.postReplies = postReplies;
+        this.postView = postView;
+        this.postBookmarks = postBookmarks;
+        this.secretFlag = secretFlag;
     }
 }

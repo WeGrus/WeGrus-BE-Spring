@@ -1,6 +1,7 @@
 package wegrus.clubwebsite.member;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,10 +21,7 @@ import wegrus.clubwebsite.dto.StatusResponse;
 import wegrus.clubwebsite.dto.VerificationResponse;
 import wegrus.clubwebsite.dto.member.*;
 import wegrus.clubwebsite.dto.result.ResultResponse;
-import wegrus.clubwebsite.entity.member.Member;
-import wegrus.clubwebsite.entity.member.MemberAcademicStatus;
-import wegrus.clubwebsite.entity.member.MemberGrade;
-import wegrus.clubwebsite.entity.member.MemberRoles;
+import wegrus.clubwebsite.entity.member.*;
 import wegrus.clubwebsite.repository.MemberRepository;
 import wegrus.clubwebsite.util.AmazonS3Util;
 import wegrus.clubwebsite.util.KakaoUtil;
@@ -42,6 +40,9 @@ import static wegrus.clubwebsite.dto.result.ResultCode.VERIFY_EMAIL_SUCCESS;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Transactional
 public class MemberIntegrationTest {
+
+    @MockBean
+    private JPAQueryFactory queryFactory;
 
     @Autowired
     private TestRestTemplate restTemplate;
@@ -81,7 +82,7 @@ public class MemberIntegrationTest {
     }
 
     public MemberSignupResponse signupAPI(String email, String name, String department, String phone, MemberAcademicStatus memberAcademicStatus, MemberGrade memberGrade, String userId) {
-        final MemberSignupRequest memberSignupRequest = new MemberSignupRequest(email, name, department, phone, memberAcademicStatus, memberGrade, userId);
+        final MemberSignupRequest memberSignupRequest = new MemberSignupRequest(email, name, department, phone, memberAcademicStatus, memberGrade, userId, Gender.MAN);
 
         final HttpEntity<MemberSignupRequest> request = new HttpEntity<>(memberSignupRequest);
         final ResponseEntity<ResultResponse> response = restTemplate.postForEntity("/signup", request, ResultResponse.class);
