@@ -1,10 +1,12 @@
 package wegrus.clubwebsite.member;
 
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import wegrus.clubwebsite.entity.member.*;
@@ -23,6 +25,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
 public class MemberRoleRepositoryTest {
+
+    @MockBean
+    JPAQueryFactory queryFactory;
 
     @Autowired
     private MemberRoleRepository memberRoleRepository;
