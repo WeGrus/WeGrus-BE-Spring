@@ -25,7 +25,6 @@ public class SetupConfig {
         initTableRoles();
         initTableBoardCategories();
         initTableBoards();
-
     }
 
     private void initTableBoards() {
@@ -40,7 +39,7 @@ public class SetupConfig {
                 .map(Enum::name)
                 .collect(Collectors.toList());
 
-        final String boardSql = "INSERT INTO BOARDS (`board_category_id`, `board_name`) VALUES(?, ?)";
+        final String boardSql = "INSERT INTO boards (`board_category_id`, `board_name`) VALUES(?, ?)";
         final BatchPreparedStatementSetter boardPss = new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
@@ -62,7 +61,7 @@ public class SetupConfig {
                 .map(Enum::name)
                 .collect(Collectors.toList());
 
-        final String categorySql = "INSERT INTO BOARD_CATEGORIES (`board_category_name`) VALUES(?)";
+        final String categorySql = "INSERT INTO board_categories (`board_category_name`) VALUES(?)";
         final BatchPreparedStatementSetter categoryPss = new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
@@ -82,7 +81,7 @@ public class SetupConfig {
                 .map(Enum::name)
                 .collect(Collectors.toList());
 
-        final String sql = "INSERT INTO ROLES (`role_name`) VALUES(?)";
+        final String sql = "INSERT INTO roles (`role_name`) VALUES(?)";
         final BatchPreparedStatementSetter pss = new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {

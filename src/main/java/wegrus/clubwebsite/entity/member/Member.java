@@ -80,7 +80,7 @@ public class Member {
     @Column(name = "member_introduce")
     private String introduce = "";
 
-    @Column(name = "memger_gender")
+    @Column(name = "member_gender")
     private Gender gender;
 
     @Embedded
