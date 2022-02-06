@@ -80,6 +80,9 @@ public class Member {
     @Column(name = "member_introduce")
     private String introduce = "";
 
+    @Column(name = "memger_gender")
+    private Gender gender;
+
     @Embedded
     @AttributeOverrides({
             @AttributeOverride(name = "url", column = @Column(name = "member_image_url")),
@@ -94,7 +97,7 @@ public class Member {
     private MemberAcademicStatus academicStatus;
 
     @Builder
-    public Member(String userId, String email, String name, String department, MemberGrade grade, String phone, MemberAcademicStatus academicStatus) {
+    public Member(String userId, String email, String name, String department, MemberGrade grade, String phone, MemberAcademicStatus academicStatus, Gender gender) {
         this.userId = userId;
         this.email = email;
         this.name = name;
@@ -104,6 +107,7 @@ public class Member {
         this.phone = phone;
         this.academicStatus = academicStatus;
         this.image = Image.builder().url(MEMBER_BASIC_IMAGE_URL).build();
+        this.gender = gender;
     }
 
     public void update(MemberInfoUpdateRequest request) {
@@ -139,5 +143,6 @@ public class Member {
         this.phone = request.getPhone();
         this.academicStatus = request.getAcademicStatus();
         this.grade = request.getGrade();
+        this.gender = request.getGender();
     }
 }
