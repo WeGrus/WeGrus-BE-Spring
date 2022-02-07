@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import wegrus.clubwebsite.entity.post.Reply;
 
-import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Getter
 @NoArgsConstructor
@@ -13,17 +13,17 @@ public class ReplyDto {
     private Long replyId;
     private Long memberId;
     private String memberName;
-    private LocalDateTime createdDate;
-    private LocalDateTime updatedDate;
+    private String createdDate;
+    private String updatedDate;
     private Long replyLike;
     private String content;
 
-    public ReplyDto(Reply reply){
+    public ReplyDto(Reply reply) {
         this.replyId = reply.getId();
         this.memberId = reply.getMember().getId();
         this.memberName = reply.getMember().getName();
-        this.createdDate = reply.getCreatedDate();
-        this.updatedDate = reply.getUpdatedDate();
+        this.createdDate = reply.getCreatedDate().format(DateTimeFormatter.ofPattern("yy/MM/dd|HH:mm:ss"));
+        this.updatedDate = reply.getUpdatedDate().format(DateTimeFormatter.ofPattern("yy/MM/dd|HH:mm:ss"));
         this.replyLike = (long) reply.getReplyLikes().size();
         this.content = reply.getContent();
     }

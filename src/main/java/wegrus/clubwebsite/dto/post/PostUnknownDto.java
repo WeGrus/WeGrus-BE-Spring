@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import wegrus.clubwebsite.entity.post.Post;
 
-import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Getter
 @NoArgsConstructor
@@ -17,8 +17,8 @@ public class PostUnknownDto {
     private String type;
     private String title;
     private String content;
-    private LocalDateTime createdDate;
-    private LocalDateTime updatedDate;
+    private String createdDate;
+    private String updatedDate;
     private Integer postLike;
     private Integer postReplies;
     private Integer postView;
@@ -27,7 +27,7 @@ public class PostUnknownDto {
     private boolean userPostBookmarked;
     private boolean secretFlag;
 
-    public PostUnknownDto(Post post, boolean userPostLiked, boolean userPostBookmarked){
+    public PostUnknownDto(Post post, boolean userPostLiked, boolean userPostBookmarked) {
         this.postId = post.getId();
         this.memberId = post.getMember().getId();
         this.memberName = "알 수 없음";
@@ -36,8 +36,8 @@ public class PostUnknownDto {
         this.type = post.getType().toString();
         this.title = post.getTitle();
         this.content = post.getContent();
-        this.createdDate = post.getCreatedDate();
-        this.updatedDate = post.getUpdatedDate();
+        this.createdDate = post.getCreatedDate().format(DateTimeFormatter.ofPattern("yy/MM/dd|HH:mm:ss"));
+        this.updatedDate = post.getUpdatedDate().format(DateTimeFormatter.ofPattern("yy/MM/dd|HH:mm:ss"));
         this.postLike = post.getPostLikeNum();
         this.postReplies = post.getPostReplyNum();
         this.postView = post.getViews().size();
