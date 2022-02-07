@@ -27,9 +27,11 @@ public class PostDto {
     private Integer postReplies;
     private Integer postView;
     private Integer postBookmarks;
+    private boolean userPostLiked;
+    private boolean userPostBookmarked;
     private boolean secretFlag;
 
-    public PostDto(Post post) {
+    public PostDto(Post post, boolean userPostLiked, boolean userPostBookmarked) {
         this.postId = post.getId();
         this.memberId = post.getMember().getId();
         this.memberName = post.getMember().getStudentId().substring(2, 4) + post.getMember().getName();
@@ -45,6 +47,8 @@ public class PostDto {
         this.postReplies = post.getPostReplyNum();
         this.postView = post.getViews().size();
         this.postBookmarks = post.getBookmarks().size();
+        this.userPostLiked = userPostLiked;
+        this.userPostBookmarked = userPostBookmarked;
         this.secretFlag = post.isSecretFlag();
     }
 

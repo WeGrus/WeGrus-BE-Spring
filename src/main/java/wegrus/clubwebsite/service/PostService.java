@@ -123,15 +123,27 @@ public class PostService {
                 .map(ReplyDto::new)
                 .collect(Collectors.toList());
 
+        // 현재 유저 추천, 북마크 여부
+        boolean userPostLiked = false;
+        boolean userPostBookmarked = false;
+
+        Optional<PostLike> postLikes = postLikeRepository.findByMemberAndPost(member, post);
+        if (postLikes.isPresent())
+            userPostLiked = true;
+
+        Optional<Bookmark> bookmarks = bookmarkRepository.findByMemberAndPost(member, post);
+        if (bookmarks.isPresent())
+            userPostBookmarked = true;
+
         List<MemberRole> memberRoles = memberRoleRepository.findAllByMemberId(post.getMember().getId());
         List<String> roles = memberRoles.stream()
                 .map(s -> s.getRole().getName())
                 .collect(Collectors.toList());
 
         if (roles.contains(MemberRoles.ROLE_BAN.name()) || roles.contains(MemberRoles.ROLE_RESIGN.name()))
-            return new PostResponse(new PostUnknownDto(post), replies);
+            return new PostResponse(new PostUnknownDto(post, userPostLiked, userPostBookmarked), replies);
 
-        return new PostResponse(new PostDto(post), replies);
+        return new PostResponse(new PostDto(post, userPostLiked, userPostBookmarked), replies);
     }
 
     @Transactional
