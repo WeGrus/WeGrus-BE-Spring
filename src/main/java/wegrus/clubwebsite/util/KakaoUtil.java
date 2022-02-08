@@ -11,7 +11,6 @@ import org.springframework.web.client.RestTemplate;
 import wegrus.clubwebsite.dto.error.ErrorCode;
 import wegrus.clubwebsite.dto.error.ErrorResponse;
 import wegrus.clubwebsite.exception.AuthorizationCodeInvalidException;
-import wegrus.clubwebsite.exception.JwtInvalidException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,7 +44,6 @@ public class KakaoUtil {
         final String grant_type = "authorization_code";
         final String redirect_url = "http://localhost:3000/oauth/kakao/callback";
         HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(null, headers);
-        System.out.println("어디서 멈추냐");
         final ResponseEntity<Map> responseEntity;
         try {
             responseEntity = restTemplate.exchange(
