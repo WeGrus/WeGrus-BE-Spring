@@ -164,6 +164,14 @@ public class PostController {
         return ResponseEntity.ok(ResultResponse.of(DELETE_BOARD_SUCCESS, null));
     }
 
+    @ApiOperation(value = "게시물 공지여부 변경")
+    @PatchMapping("club/executives/boards/pin")
+    public ResponseEntity<ResultResponse> updateNoticeFlag(@Validated @RequestBody PostUpdateNoticeRequest request) {
+        final PostUpdateNoticeResponse response = postService.updateNotice(request);
+
+        return ResponseEntity.ok(ResultResponse.of(UPDATE_POST_NOTICE_SUCCESS, response));
+    }
+
     @ApiOperation(value = "게시물 목록 조회")
     @GetMapping("boards/{boardId}")
     public ResponseEntity<ResultResponse> getPostList(

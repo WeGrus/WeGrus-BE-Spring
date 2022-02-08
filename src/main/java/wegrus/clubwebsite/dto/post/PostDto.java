@@ -7,6 +7,7 @@ import wegrus.clubwebsite.entity.post.Post;
 import wegrus.clubwebsite.vo.Image;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Getter
 @NoArgsConstructor
@@ -21,15 +22,17 @@ public class PostDto {
     private String type;
     private String title;
     private String content;
-    private LocalDateTime createdDate;
-    private LocalDateTime updatedDate;
+    private String createdDate;
+    private String updatedDate;
     private Integer postLike;
     private Integer postReplies;
     private Integer postView;
     private Integer postBookmarks;
+    private boolean userPostLiked;
+    private boolean userPostBookmarked;
     private boolean secretFlag;
 
-    public PostDto(Post post) {
+    public PostDto(Post post, boolean userPostLiked, boolean userPostBookmarked) {
         this.postId = post.getId();
         this.memberId = post.getMember().getId();
         this.memberName = post.getMember().getStudentId().substring(2, 4) + post.getMember().getName();
@@ -39,12 +42,14 @@ public class PostDto {
         this.type = post.getType().toString();
         this.title = post.getTitle();
         this.content = post.getContent();
-        this.createdDate = post.getCreatedDate();
-        this.updatedDate = post.getUpdatedDate();
+        this.createdDate = post.getCreatedDate().format(DateTimeFormatter.ofPattern("yy/MM/dd|HH:mm:ss"));
+        this.updatedDate = post.getUpdatedDate().format(DateTimeFormatter.ofPattern("yy/MM/dd|HH:mm:ss"));
         this.postLike = post.getPostLikeNum();
         this.postReplies = post.getPostReplyNum();
         this.postView = post.getViews().size();
         this.postBookmarks = post.getBookmarks().size();
+        this.userPostLiked = userPostLiked;
+        this.userPostBookmarked = userPostBookmarked;
         this.secretFlag = post.isSecretFlag();
     }
 
@@ -59,8 +64,8 @@ public class PostDto {
         this.type = type;
         this.title = title;
         this.content = content;
-        this.createdDate = createdDate;
-        this.updatedDate = updatedDate;
+        this.createdDate = createdDate.format(DateTimeFormatter.ofPattern("yy/MM/dd|HH:mm:ss"));
+        this.updatedDate = updatedDate.format(DateTimeFormatter.ofPattern("yy/MM/dd|HH:mm:ss"));
         this.postLike = postLike;
         this.postReplies = postReplies;
         this.postView = postView;
