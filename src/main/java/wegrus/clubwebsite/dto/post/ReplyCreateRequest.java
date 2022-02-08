@@ -18,6 +18,10 @@ public class ReplyCreateRequest {
     @NotNull(message = "게시물 id는 필수입니다.")
     private Long postId;
 
+    @ApiModelProperty(value = "부모 댓글 id", example = "-1", required = true)
+    @NotNull(message = "답글이 아니라면 -1 작성")
+    private Long replyId;
+
     @ApiModelProperty(value = "댓글 내용", example = "댓글 내용입니다.", required = true)
     @NotBlank(message = "댓글 내용은 필수입니다.")
     private String content;
