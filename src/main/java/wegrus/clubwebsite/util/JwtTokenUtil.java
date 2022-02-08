@@ -5,13 +5,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import wegrus.clubwebsite.dto.error.ErrorResponse;
 import wegrus.clubwebsite.exception.RefreshTokenExpiredException;
 import wegrus.clubwebsite.exception.JwtInvalidException;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
+
+import static wegrus.clubwebsite.dto.error.ErrorCode.INVALID_JWT;
 
 @Slf4j
 @Component
@@ -79,22 +80,27 @@ public class JwtTokenUtil {
     }
 
     public Boolean validateAccessToken(String token) {
-        return validateToken(token, ACCESS_TOKEN_SECRET);
-    }
-
-    public void validateRefreshToken(String token) {
-        if (!validateToken(token, REFRESH_TOKEN_SECRET))
-            throw new RefreshTokenExpiredException();
-    }
-
-    private Boolean validateToken(String token, String secret) {
         try {
-            Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
+            Jwts.parser().setSigningKey(ACCESS_TOKEN_SECRET).parseClaimsJws(token).getBody();
         } catch (ExpiredJwtException e) {
             return false;
         } catch (JwtException e) {
-            throw new JwtInvalidException();
+            final List<ErrorResponse.FieldError> errors = new ArrayList<>();
+            errors.add(new ErrorResponse.FieldError("Authorization", "Bearer " + token, INVALID_JWT.getMessage()));
+            throw new JwtInvalidException(errors);
         }
         return true;
+    }
+
+    public void validateRefreshToken(String token) {
+        try {
+            Jwts.parser().setSigningKey(REFRESH_TOKEN_SECRET).parseClaimsJws(token).getBody();
+        } catch (ExpiredJwtException e) {
+            throw new RefreshTokenExpiredException();
+        } catch (JwtException e) {
+            final List<ErrorResponse.FieldError> errors = new ArrayList<>();
+            errors.add(new ErrorResponse.FieldError("refreshToken", token, INVALID_JWT.getMessage()));
+            throw new JwtInvalidException(errors);
+        }
     }
 }
