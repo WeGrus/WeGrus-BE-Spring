@@ -20,6 +20,7 @@ public enum ErrorCode {
     INVALID_TYPE_VALUE(400, "C008", "입력 타입이 유효하지 않습니다."),
     INSUFFICIENT_AUTHORITY(403, "C009", "접근 권한이 부족합니다."),
     MULTIPARTFILE_CONVERT_FAIL(400, "C010", "MultipartFile을 File로 변환하는 데 실패하였습니다."),
+    INVALID_AUTHORIZATION_CODE(400, "C011", "유효하지 않은 인증 코드입니다."),
 
     // Post
     POST_NOT_FOUND(400, "B000", "존재하지 않는 게시물입니다."),
@@ -50,6 +51,10 @@ public enum ErrorCode {
     MEMBER_ALREADY_RESIGN(400, "M010", "이미 탈퇴한 회원은 회원 탈퇴를 할 수 없습니다."),
     MEMBER_ALREADY_BAN(400, "M011", "이미 재가입 불가인 회원 탈퇴를 할 수 없습니다."),
     CERTIFICATION_CODE_INVALID(400, "M012", "유효하지 않은 인증 코드입니다."),
+
+    // Group
+    GROUP_NOT_FOUND(400, "G000", "존재하지 않는 그룹입니다."),
+    GROUP_MEMBER_ALREADY_EXIST(400, "G001", "이미 해당 그룹에 속한 회원입니다."),
 
     // File
     NOT_SUPPORTED_IMAGE_TYPE(400, "F000", "이미지 타입은 JPG, PNG, GIF만 지원합니다."),
