@@ -18,18 +18,17 @@ import wegrus.clubwebsite.dto.member.*;
 import wegrus.clubwebsite.dto.post.BookmarkDto;
 import wegrus.clubwebsite.dto.post.PostDto;
 import wegrus.clubwebsite.dto.post.PostReplyDto;
+import wegrus.clubwebsite.entity.group.Group;
+import wegrus.clubwebsite.entity.group.GroupMember;
 import wegrus.clubwebsite.entity.member.MemberRole;
 import wegrus.clubwebsite.entity.member.MemberRoles;
 import wegrus.clubwebsite.exception.*;
-import wegrus.clubwebsite.repository.MemberRoleRepository;
-import wegrus.clubwebsite.repository.PostRepository;
-import wegrus.clubwebsite.repository.RoleRepository;
+import wegrus.clubwebsite.repository.*;
 import wegrus.clubwebsite.util.*;
 import wegrus.clubwebsite.dto.VerificationResponse;
 import wegrus.clubwebsite.dto.error.ErrorResponse;
 import wegrus.clubwebsite.entity.member.Member;
 import wegrus.clubwebsite.entity.member.Role;
-import wegrus.clubwebsite.repository.MemberRepository;
 import wegrus.clubwebsite.vo.Image;
 
 import javax.mail.MessagingException;
@@ -57,11 +56,11 @@ public class MemberService {
     private final AmazonS3Util amazonS3Util;
     private final KakaoUtil kakaoUtil;
     private final PostRepository postRepository;
+    private final GroupRepository groupRepository;
+    private final GroupMemberRepository groupMemberRepository;
 
     @Value("${valid-time.verification-key}")
     private Integer VERIFICATION_KEY_VALID_TIME;
-    @Value("${valid-time.refresh-token}")
-    private Integer REFRESH_TOKEN_VALID_TIME;
 
     @Transactional
     public VerificationResponse checkVerificationKey(String verificationKey) {
@@ -119,8 +118,7 @@ public class MemberService {
                 // TODO: 회원가입 축하 이메일 전송 -> 내용 논의
 
                 return new MemberSignupResponse(new MemberDto(member));
-            }
-            else if (memberRoleRepository.findByMemberIdAndRoleId(memberId, banId).isPresent())
+            } else if (memberRoleRepository.findByMemberIdAndRoleId(memberId, banId).isPresent())
                 throw new MemberAlreadyBanException();
         }
         return null;
@@ -129,7 +127,7 @@ public class MemberService {
     private void validateDuplication(String email, String userId) {
         final Optional<Member> findMember = memberRepository.findByUserIdOrEmail(userId, email);
         if (findMember.isPresent()) {
-            List<ErrorResponse.FieldError> errors = new ArrayList<>();
+            final List<ErrorResponse.FieldError> errors = new ArrayList<>();
             if (findMember.get().getEmail().equals(email))
                 errors.add(new ErrorResponse.FieldError("email", email, EMAIL_ALREADY_EXIST.getMessage()));
             if (findMember.get().getUserId().equals(userId))
@@ -148,6 +146,7 @@ public class MemberService {
         return verificationKey;
     }
 
+    @Transactional
     public MemberAndJwtDto findMemberAndGenerateJwt(String authorizationCode) {
         final String userId = kakaoUtil.getUserIdFromKakaoAPI(kakaoUtil.getAccessTokenFromKakaoAPI(authorizationCode));
 
@@ -165,23 +164,26 @@ public class MemberService {
         final String accessToken = jwtTokenUtil.generateAccessToken(userDetails);
         final String refreshToken = jwtTokenUtil.generateRefreshToken(userDetails);
 
-        redisUtil.set(refreshToken, member.getId(), REFRESH_TOKEN_VALID_TIME);
+        member.updateRefreshToken(refreshToken);
         return new MemberAndJwtDto(new MemberDto(member), accessToken, refreshToken);
     }
 
-    public void deleteRefreshToken(String refreshToken) {
-        redisUtil.delete(refreshToken);
-    }
-
+    @Transactional
     public JwtDto reIssueJwt(String refreshToken) {
         jwtTokenUtil.validateRefreshToken(refreshToken);
-        redisUtil.delete(refreshToken);
+        final Long memberId = Long.valueOf(jwtTokenUtil.getUsernameFromRefreshToken(refreshToken));
+        final Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
+        if (!member.getRefreshToken().equals(refreshToken)) {
+            List<ErrorResponse.FieldError> errors = new ArrayList<>();
+            errors.add(new ErrorResponse.FieldError("refreshToken", refreshToken, INVALID_JWT.getMessage()));
+            throw new JwtInvalidException(errors);
+        }
 
-        final UserDetails userDetails = jwtUserDetailsUtil.loadUserByUsername(jwtTokenUtil.getUsernameFromRefreshToken(refreshToken));
+        final UserDetails userDetails = jwtUserDetailsUtil.loadUserByUsername(member.getId().toString());
         final String newAccessToken = jwtTokenUtil.generateAccessToken(userDetails);
         final String newRefreshToken = jwtTokenUtil.generateRefreshToken(userDetails);
+        member.updateRefreshToken(newRefreshToken);
 
-        redisUtil.set(newRefreshToken, userDetails.getUsername(), REFRESH_TOKEN_VALID_TIME);
         return new JwtDto(newAccessToken, newRefreshToken);
     }
 
@@ -308,7 +310,7 @@ public class MemberService {
         return postRepository.findPostDtoPageByMemberIdOrderByCreatedDateDesc(memberId, pageable);
     }
 
-    public Page<PostReplyDto> getMyReplies(int page, int size){
+    public Page<PostReplyDto> getMyReplies(int page, int size) {
         final Long memberId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
 
         page = (page == 0 ? 0 : page - 1);
@@ -322,5 +324,18 @@ public class MemberService {
         page = (page == 0 ? 0 : page - 1);
         Pageable pageable = PageRequest.of(page, size);
         return postRepository.findBookmarkedPostDtoPageByMemberIdOrderByCreatedDateDesc(memberId, pageable);
+    }
+
+    public StatusResponse applyToGroup(Long groupId) {
+        final Long memberId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
+        final Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
+        final Group group = groupRepository.findById(groupId).orElseThrow(GroupNotFoundException::new);
+        if (groupMemberRepository.findByMemberIdAndGroupId(memberId, groupId).isPresent())
+            throw new GroupMemberAlreadyExistException();
+
+        final GroupMember groupMember = new GroupMember(member, group);
+        groupMemberRepository.save(groupMember);
+
+        return new StatusResponse(Status.SUCCESS);
     }
 }

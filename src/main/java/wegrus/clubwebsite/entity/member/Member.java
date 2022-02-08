@@ -96,6 +96,9 @@ public class Member {
     @Column(name = "member_academic_status", nullable = false)
     private MemberAcademicStatus academicStatus;
 
+    @Column(name = "member_refresh_token")
+    private String refreshToken;
+
     @Builder
     public Member(String userId, String email, String name, String department, MemberGrade grade, String phone, MemberAcademicStatus academicStatus, Gender gender) {
         this.userId = userId;
@@ -144,5 +147,9 @@ public class Member {
         this.academicStatus = request.getAcademicStatus();
         this.grade = request.getGrade();
         this.gender = request.getGender();
+    }
+
+    public void updateRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
     }
 }

@@ -105,11 +105,10 @@ public class MemberController {
 
     private void putRefreshTokenToCookie(HttpServletResponse httpServletResponse, String refreshToken) {
         // TODO: HTTPS 적용 후에 secure(true) 적용하기
-        //  Frontend 호스팅 시 sameSite, domain 적용하기
+        //  Frontend 호스팅 시 sameSite 적용하기
         ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true)
-//                .sameSite("strict")
-//                .domain("domain")
+                .sameSite("strict")
                 .maxAge(14 * 24 * 60 * 60)
                 .path("/")
                 .build();
@@ -117,20 +116,11 @@ public class MemberController {
         httpServletResponse.addHeader("Set-Cookie", cookie.toString());
     }
 
-    @ApiOperation(value = "로그아웃")
-    @PostMapping("/members/signout")
-    public ResponseEntity<ResultResponse> signout(@CookieValue(value = "refreshToken") Cookie cookie) {
-        memberService.deleteRefreshToken(cookie.getValue());
-        final MemberSignoutResponse response = new MemberSignoutResponse(Status.SUCCESS);
-
-        return ResponseEntity.ok(ResultResponse.of(SIGNOUT_SUCCESS, response));
-    }
-
     @ApiOperation(value = "토큰 재발급")
     @ApiImplicitParam(name = "Authorization", value = "불필요", example = " ")
     @PostMapping("/reissue")
     public ResponseEntity<ResultResponse> reissue(
-            @CookieValue(value = "refreshToken") Cookie cookie,
+            @NotNull(message = "refreshToken 쿠키는 필수입니다.") @CookieValue(value = "refreshToken", required = false) Cookie cookie,
             HttpServletResponse httpServletResponse) {
         final JwtDto jwtDto = memberService.reIssueJwt(cookie.getValue());
         putRefreshTokenToCookie(httpServletResponse, jwtDto.getRefreshToken());
@@ -241,5 +231,14 @@ public class MemberController {
         final Page<BookmarkDto> response = memberService.getMyBookmarks(page, size);
 
         return ResponseEntity.ok(ResultResponse.of(GET_MY_BOOKMARKS_SUCCESS, response));
+    }
+
+    @ApiOperation(value = "그룹 가입 신청 API")
+    @PostMapping("/members/groups/apply")
+    public ResponseEntity<ResultResponse> applyToGroup(
+            @NotNull(message = "그룹 PK는 필수입니다.") @RequestParam Long groupId) {
+        final StatusResponse response = memberService.applyToGroup(groupId);
+
+        return ResponseEntity.ok(ResultResponse.of(APPLY_TO_GROUP_SUCCESS, response));
     }
 }
