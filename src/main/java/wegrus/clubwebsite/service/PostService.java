@@ -248,6 +248,14 @@ public class PostService {
     }
 
     @Transactional
+    public PostUpdateNoticeResponse updateNotice(PostUpdateNoticeRequest request) {
+        final Post post = postRepository.findById(request.getPostId()).orElseThrow(PostNotFoundException::new);
+
+        post.updateNotice(request);
+        return new PostUpdateNoticeResponse(request.getPostId(), request.getType());
+    }
+
+    @Transactional
     public PostListResponse getList(Integer page, Integer pageSize, Long boardId, PostListType type) {
         Pageable pageable = PageRequest.of(page, pageSize);
         final Board board = boardRepository.findById(boardId).orElseThrow(BoardNotFoundException::new);
