@@ -14,17 +14,18 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import static wegrus.clubwebsite.dto.error.ErrorCode.INSUFFICIENT_AUTHORITY;
+
 @Component
 public class JwtAccessDeniedHandler implements AccessDeniedHandler {
 
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
-        ErrorCode errorCode = (ErrorCode) request.getAttribute("errorCode");
-        response.setStatus(errorCode.getStatus());
+        response.setStatus(INSUFFICIENT_AUTHORITY.getStatus());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         try (OutputStream os = response.getOutputStream()){
             ObjectMapper objectMapper = new ObjectMapper();
-            objectMapper.writeValue(os, ErrorResponse.of(errorCode));
+            objectMapper.writeValue(os, ErrorResponse.of(INSUFFICIENT_AUTHORITY));
             os.flush();
         }
     }
