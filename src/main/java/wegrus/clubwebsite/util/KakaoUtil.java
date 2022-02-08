@@ -8,7 +8,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+import wegrus.clubwebsite.dto.error.ErrorCode;
+import wegrus.clubwebsite.dto.error.ErrorResponse;
+import wegrus.clubwebsite.exception.AuthorizationCodeInvalidException;
+import wegrus.clubwebsite.exception.JwtInvalidException;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -39,11 +45,20 @@ public class KakaoUtil {
         final String grant_type = "authorization_code";
         final String redirect_url = "http://localhost:3000/oauth/kakao/callback";
         HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(null, headers);
-        final ResponseEntity<Map> responseEntity = restTemplate.exchange(
-                url + "?grant_type=" + grant_type + "&client_id=" + KAKAO_CLIENT_REST_API_KEY + "&redirect_url=" + redirect_url + "&code=" + authorizationCode
-                , HttpMethod.POST, requestEntity, Map.class);
-        final Map response = responseEntity.getBody();
-        final String accessToken = (String) response.get("access_token");
-        return accessToken;
+        System.out.println("어디서 멈추냐");
+        final ResponseEntity<Map> responseEntity;
+        try {
+            responseEntity = restTemplate.exchange(
+                    url + "?grant_type=" + grant_type + "&client_id=" + KAKAO_CLIENT_REST_API_KEY + "&redirect_url=" + redirect_url + "&code=" + authorizationCode
+                    , HttpMethod.POST, requestEntity, Map.class);
+            final Map response = responseEntity.getBody();
+            final String accessToken = (String) response.get("access_token");
+
+            return accessToken;
+        } catch(Exception e) {
+            final List<ErrorResponse.FieldError> errors = new ArrayList<>();
+            errors.add(new ErrorResponse.FieldError("authorizationCode", authorizationCode, ErrorCode.INVALID_AUTHORIZATION_CODE.getMessage()));
+            throw new AuthorizationCodeInvalidException(errors);
+        }
     }
 }
