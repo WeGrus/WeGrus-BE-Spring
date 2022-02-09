@@ -54,6 +54,7 @@ public enum ResultCode {
     SEARCH_BY_ALL_SUCCESS(200, "B116", "제목, 내용 검색에 성공하였습니다."),
     CREATE_BOOKMARK_SUCCESS(200, "B117", "북마크 등록에 성공하였습니다."),
     DELETE_BOOKMARK_SUCCESS(200, "B118", "북마크 삭제에 성공하였습니다."),
+    UPDATE_POST_NOTICE_SUCCESS(200, "B119", "게시물 공지여부 변경에 성공하였습니다."),
 
     // Verification
     REQUEST_VERIFY_SUCCESS(200, "V100", "인증 키 검증 요청에 성공하였습니다."),

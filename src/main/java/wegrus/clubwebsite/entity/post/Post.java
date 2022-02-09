@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import wegrus.clubwebsite.dto.post.PostUpdateNoticeRequest;
 import wegrus.clubwebsite.dto.post.PostUpdateRequest;
 import wegrus.clubwebsite.entity.member.Member;
 
@@ -96,6 +97,10 @@ public class Post {
         this.title = request.getTitle();
         this.content = request.getContent();
         this.secretFlag = request.isSecretFlag();
+    }
+
+    public void updateNotice(PostUpdateNoticeRequest request) {
+        this.type = request.getType();
     }
 
     public void likeNum(Integer postLikeNum) {
