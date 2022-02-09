@@ -42,7 +42,7 @@ public enum ErrorCode {
     USERID_ALREADY_EXIST(400, "M001", "이미 존재하는 아이디입니다."),
     EMAIL_ALREADY_EXIST(400, "M002", "이미 존재하는 이메일입니다."),
     INVALID_EMAIL(400, "M003", "인하대학교 이메일 형식만 가능합니다."),
-    MEMBER_ROLE_NOT_FOUND(400, "M004", "존재하지 않는 회원 등급입니다."),
+    MEMBER_ROLE_NOT_FOUND(400, "M004", "존재하지 않는 회원 권한입니다."),
     MEMBER_IMAGE_ALREADY_BASIC(400, "M005", "회원 이미지가 이미 기본 이미지입니다."),
     EMAIL_CERTIFICATION_TOKEN_INVALID(400, "M006", "이메일 검증 토큰이 유효하지 않습니다."),
     MEMBER_ALREADY_HAS_ROLE(400, "M007", "이미 해당 권한을 가지고 있는 회원입니다."),
@@ -51,6 +51,11 @@ public enum ErrorCode {
     MEMBER_ALREADY_RESIGN(400, "M010", "이미 탈퇴한 회원은 회원 탈퇴를 할 수 없습니다."),
     MEMBER_ALREADY_BAN(400, "M011", "이미 재가입 불가인 회원 탈퇴를 할 수 없습니다."),
     CERTIFICATION_CODE_INVALID(400, "M012", "유효하지 않은 인증 코드입니다."),
+
+    // Request
+    REQUEST_NOT_FOUND(400, "R000", "존재하지 않는 권한 요청입니다."),
+    CANNOT_REQUEST_AUTHORITY(400, "R001", "요청할 수 없는 권한입니다."),
+    REQUEST_ALREADY_EXIST(400, "R002", "이미 해당 권한을 요청하였습니다."),
 
     // Group
     GROUP_NOT_FOUND(400, "G000", "존재하지 않는 그룹입니다."),
