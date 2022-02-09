@@ -159,7 +159,7 @@ public class MemberController {
     }
 
     @ApiOperation(value = "회원 이미지 변경")
-    @ApiImplicitParam(name = "multipartFile", value = "회원 이미지")
+    @ApiImplicitParam(name = "image", value = "회원 이미지")
     @PatchMapping(value = "/members/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ResultResponse> updateImage(@RequestPart(required = false, name = "image") MultipartFile image) throws IOException {
         final MemberImageUpdateResponse response = memberService.updateMemberImage(image);
@@ -233,7 +233,7 @@ public class MemberController {
         return ResponseEntity.ok(ResultResponse.of(GET_MY_BOOKMARKS_SUCCESS, response));
     }
 
-    @ApiOperation(value = "그룹 가입 신청 API")
+    @ApiOperation(value = "그룹 가입 신청")
     @PostMapping("/members/groups/apply")
     public ResponseEntity<ResultResponse> applyToGroup(
             @NotNull(message = "그룹 PK는 필수입니다.") @RequestParam Long groupId) {
