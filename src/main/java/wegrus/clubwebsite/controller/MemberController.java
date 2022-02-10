@@ -32,6 +32,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 
 import java.io.IOException;
 
@@ -61,7 +62,7 @@ public class MemberController {
     @ApiOperation(value = "회원 가입", notes = "이메일 검증 API에서 받은 토큰과 함께 요청해주세요.")
     @ApiImplicitParam(name = "Authorization", value = "불필요", example = " ")
     @PostMapping("/signup")
-    public ResponseEntity<ResultResponse> signup(@Validated @RequestBody MemberSignupRequest request) {
+    public ResponseEntity<ResultResponse> signup(@RequestBody MemberSignupRequest request) {
         final MemberSignupResponse response = memberService.validateAndSaveMember(request);
 
         return ResponseEntity.ok(ResultResponse.of(SIGNUP_SUCCESS, response));
@@ -73,8 +74,7 @@ public class MemberController {
             @ApiImplicitParam(name = "authorizationCode", value = "카카오 인증 코드", required = true, example = "ASKDJASIN12231KNsakdasdl1210SSALadk5234")
     })
     @PostMapping("/signin")
-    public ResponseEntity<ResultResponse> signin(
-            @Validated @NotBlank(message = "카카오 인증 코드는 필수입니다.") @RequestParam String authorizationCode,
+    public ResponseEntity<ResultResponse> signin(@NotBlank(message = "카카오 인증 코드는 필수입니다.") @RequestParam String authorizationCode,
             HttpServletResponse httpServletResponse) {
         try {
             final MemberAndJwtDto dto = memberService.findMemberAndGenerateJwt(authorizationCode);
@@ -135,7 +135,7 @@ public class MemberController {
             @ApiImplicitParam(name = "email", value = "이메일", required = true, example = "12161542@inha.edu")
     })
     @PostMapping("/signup/check/email")
-    public ResponseEntity<ResultResponse> checkEmail(@RequestParam String email) throws MessagingException {
+    public ResponseEntity<ResultResponse> checkEmail(@NotBlank(message = "이메일은 필수입니다.") @RequestParam String email) throws MessagingException {
         final EmailCheckResponse response = memberService.checkEmailAndSendMail(email);
 
         return ResponseEntity.ok(ResultResponse.of(CHECK_EMAIL_SUCCESS, response));
@@ -152,14 +152,14 @@ public class MemberController {
 
     @ApiOperation(value = "회원 정보 수정")
     @PatchMapping("/members/info")
-    public ResponseEntity<ResultResponse> updateInfo(@Validated @RequestBody MemberInfoUpdateRequest request) {
+    public ResponseEntity<ResultResponse> updateInfo(@RequestBody MemberInfoUpdateRequest request) {
         final MemberInfoUpdateResponse response = memberService.updateMemberInfo(request);
 
         return ResponseEntity.ok(ResultResponse.of(UPDATE_MEMBER_INFO_SUCCESS, response));
     }
 
     @ApiOperation(value = "회원 이미지 변경")
-    @ApiImplicitParam(name = "multipartFile", value = "회원 이미지")
+    @ApiImplicitParam(name = "image", value = "회원 이미지")
     @PatchMapping(value = "/members/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ResultResponse> updateImage(@RequestPart(required = false, name = "image") MultipartFile image) throws IOException {
         final MemberImageUpdateResponse response = memberService.updateMemberImage(image);
@@ -173,7 +173,7 @@ public class MemberController {
             @ApiImplicitParam(name = "email", value = "이메일", required = true, example = "12161542@inha.edu")
     })
     @GetMapping("/signup/validate/email")
-    public ResponseEntity<ResultResponse> validateEmail(@RequestParam String email) {
+    public ResponseEntity<ResultResponse> validateEmail(@NotBlank(message = "이메일은 필수입니다.") @RequestParam String email) {
         final ValidateEmailResponse response = memberService.validateEmail(email);
 
         return ResponseEntity.ok(ResultResponse.of(VALIDATE_EMAIL_SUCCESS, response));
@@ -188,8 +188,9 @@ public class MemberController {
     }
 
     @ApiOperation(value = "회원 탈퇴")
+    @ApiImplicitParam(name = "certificationCode", value = "인증 코드", example = "123456", required = true)
     @PostMapping("/members/resign")
-    public ResponseEntity<ResultResponse> resign(@RequestParam String certificationCode) {
+    public ResponseEntity<ResultResponse> resign(@Pattern(regexp = "^[0-9]{6}$", message = "6자리 인증 코드를 입력해주세요.") @RequestParam String certificationCode) {
         final StatusResponse response = memberService.resign(certificationCode);
 
         return ResponseEntity.ok(ResultResponse.of(MEMBER_RESIGN_SUCCESS, response));
@@ -204,6 +205,10 @@ public class MemberController {
     }
 
     @ApiOperation(value = "내가 작성한 게시물 목록 조회")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "페이지", example = "1", required = true),
+            @ApiImplicitParam(name = "size", value = "페이지당 개수", example = "10", required = true)
+    })
     @GetMapping("/members/posts")
     public ResponseEntity<ResultResponse> getMyPosts(
             @NotNull(message = "게시물 page는 필수입니다.") @RequestParam int page,
@@ -214,6 +219,10 @@ public class MemberController {
     }
 
     @ApiOperation(value = "내가 작성한 댓글 목록 조회")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "페이지", example = "1", required = true),
+            @ApiImplicitParam(name = "size", value = "페이지당 개수", example = "10", required = true)
+    })
     @GetMapping("/members/replies")
     public ResponseEntity<ResultResponse> getMyReplies(
             @NotNull(message = "게시물 page는 필수입니다.") @RequestParam int page,
@@ -224,6 +233,10 @@ public class MemberController {
     }
 
     @ApiOperation(value = "내가 저장한 게시물 목록 조회")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "페이지", example = "1", required = true),
+            @ApiImplicitParam(name = "size", value = "페이지당 개수", example = "10", required = true)
+    })
     @GetMapping("/members/bookmarks")
     public ResponseEntity<ResultResponse> getMyBookmarks(
             @NotNull(message = "게시물 page는 필수입니다.") @RequestParam int page,
@@ -233,7 +246,8 @@ public class MemberController {
         return ResponseEntity.ok(ResultResponse.of(GET_MY_BOOKMARKS_SUCCESS, response));
     }
 
-    @ApiOperation(value = "그룹 가입 신청 API")
+    @ApiOperation(value = "그룹 가입 신청")
+    @ApiImplicitParam(name = "groupId", value = "그룹 PK", example = "1", required = true)
     @PostMapping("/members/groups/apply")
     public ResponseEntity<ResultResponse> applyToGroup(
             @NotNull(message = "그룹 PK는 필수입니다.") @RequestParam Long groupId) {

@@ -26,7 +26,7 @@ public class JwtUserDetailsUtil implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String id) {
-        Member findMember = memberRepository.findById(Long.valueOf(id)).orElseThrow(MemberNotFoundException::new);
+        Member findMember = memberRepository.findWithMemberRolesAndRoleById(Long.valueOf(id)).orElseThrow(MemberNotFoundException::new);
 
         List<GrantedAuthority> authorities = new ArrayList<>();
         for (MemberRole role : findMember.getRoles())

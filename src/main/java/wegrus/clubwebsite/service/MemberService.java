@@ -14,10 +14,12 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import wegrus.clubwebsite.dto.Status;
 import wegrus.clubwebsite.dto.StatusResponse;
+import wegrus.clubwebsite.dto.error.ErrorCode;
 import wegrus.clubwebsite.dto.member.*;
 import wegrus.clubwebsite.dto.post.BookmarkDto;
 import wegrus.clubwebsite.dto.post.PostDto;
 import wegrus.clubwebsite.dto.post.PostReplyDto;
+import wegrus.clubwebsite.entity.Request;
 import wegrus.clubwebsite.entity.group.Group;
 import wegrus.clubwebsite.entity.group.GroupMember;
 import wegrus.clubwebsite.entity.member.MemberRole;
@@ -39,6 +41,7 @@ import java.util.stream.Collectors;
 
 import static wegrus.clubwebsite.dto.error.ErrorCode.*;
 import static wegrus.clubwebsite.dto.result.ResultCode.*;
+import static wegrus.clubwebsite.entity.member.MemberRoles.*;
 import static wegrus.clubwebsite.util.ImageUtil.MEMBER_BASIC_IMAGE_URL;
 
 @Service
@@ -58,6 +61,7 @@ public class MemberService {
     private final PostRepository postRepository;
     private final GroupRepository groupRepository;
     private final GroupMemberRepository groupMemberRepository;
+    private final RequestRepository requestRepository;
 
     @Value("${valid-time.verification-key}")
     private Integer VERIFICATION_KEY_VALID_TIME;
@@ -247,10 +251,22 @@ public class MemberService {
         final Long memberId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
         final Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
 
+        if (requestRepository.findByMemberIdAndRoleId(memberId, role.getId()).isPresent())
+            return new RequestAuthorityFailResponse(Status.FAILURE, REQUEST_ALREADY_EXIST.getMessage());
+
         if (memberRoleRepository.findByMemberIdAndRoleId(memberId, role.getId()).isPresent())
             throw new MemberAlreadyHasRoleException();
-        memberRoleRepository.save(new MemberRole(member, role));
-        return new RequestAuthorityResponse(Status.SUCCESS, memberRoles);
+
+        final Set<MemberRoles> roles = Set.of(ROLE_MEMBER, ROLE_GROUP_PRESIDENT, ROLE_CLUB_EXECUTIVE);
+        if (roles.contains(memberRoles)) {
+            requestRepository.save(new Request(member, role));
+        } else {
+            List<ErrorResponse.FieldError> errors = new ArrayList<>();
+            errors.add(new ErrorResponse.FieldError("role", memberRoles.name(), ErrorCode.CANNOT_REQUEST_AUTHORITY.getMessage()));
+            throw new CannotRequestAuthorityException(errors);
+        }
+
+        return new RequestAuthoritySuccessResponse(Status.SUCCESS, memberRoles);
     }
 
     @Transactional
