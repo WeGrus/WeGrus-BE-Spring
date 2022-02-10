@@ -1,9 +1,7 @@
 package wegrus.clubwebsite.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -11,6 +9,9 @@ import org.springframework.transaction.annotation.Transactional;
 import wegrus.clubwebsite.dto.Status;
 import wegrus.clubwebsite.dto.StatusResponse;
 import wegrus.clubwebsite.dto.error.ErrorResponse;
+import wegrus.clubwebsite.dto.member.MemberDto;
+import wegrus.clubwebsite.dto.member.MemberSearchType;
+import wegrus.clubwebsite.dto.member.MemberSortType;
 import wegrus.clubwebsite.dto.member.RequestDto;
 import wegrus.clubwebsite.entity.Request;
 import wegrus.clubwebsite.entity.member.Member;
@@ -67,14 +68,6 @@ public class ClubService {
                 throw new InsufficientAuthorityException(errors);
             }
             saveMemberRole(request, role, applicant, roles);
-        } else {
-            List<ErrorResponse.FieldError> errors = new ArrayList<>();
-            if (request.getRole().getName().equals(ROLE_CLUB_EXECUTIVE.name())) {
-                errors.add(new ErrorResponse.FieldError("authority", ROLE_CLUB_PRESIDENT.name(), "해당 권한이 부족합니다."));
-            } else {
-                errors.add(new ErrorResponse.FieldError("authority", ROLE_CLUB_EXECUTIVE.name(), "해당 권한이 부족합니다."));
-            }
-            throw new InsufficientAuthorityException(errors);
         }
     }
 
@@ -100,5 +93,17 @@ public class ClubService {
         page = (page == 0 ? 0 : page - 1);
         Pageable pageable = PageRequest.of(page, size);
         return requestRepository.findRequestDtoPageByRole(role, pageable);
+    }
+
+    public Page<MemberDto> getMemberDtoPage(int page, int size, MemberSortType type, Sort.Direction direction) {
+        page = (page == 0 ? 0 : page - 1);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, type.getField()));
+        return memberRepository.findMemberDtoPage(pageable);
+    }
+
+    public Page<MemberDto> searchMember(int page, int size, MemberSortType sortType, Sort.Direction direction, MemberSearchType searchType, String word) {
+        page = (page == 0 ? 0 : page - 1);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortType.getField()));
+        return memberRepository.findMemberDtoPageByWordContainingAtSearchType(pageable, searchType, word);
     }
 }
