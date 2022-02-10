@@ -1,17 +1,21 @@
 package wegrus.clubwebsite.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import wegrus.clubwebsite.dto.Status;
 import wegrus.clubwebsite.dto.StatusResponse;
-import wegrus.clubwebsite.dto.error.ErrorCode;
 import wegrus.clubwebsite.dto.error.ErrorResponse;
+import wegrus.clubwebsite.dto.member.RequestDto;
 import wegrus.clubwebsite.entity.Request;
 import wegrus.clubwebsite.entity.member.Member;
 import wegrus.clubwebsite.entity.member.MemberRole;
+import wegrus.clubwebsite.entity.member.MemberRoles;
 import wegrus.clubwebsite.entity.member.Role;
 import wegrus.clubwebsite.exception.*;
 import wegrus.clubwebsite.repository.MemberRepository;
@@ -23,6 +27,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static wegrus.clubwebsite.dto.error.ErrorCode.*;
 import static wegrus.clubwebsite.entity.member.MemberRoles.*;
 
 @Service
@@ -79,8 +84,21 @@ public class ClubService {
             memberRoleRepository.save(new MemberRole(applicant, role));
         } else {
             List<ErrorResponse.FieldError> errors = new ArrayList<>();
-            errors.add(new ErrorResponse.FieldError("role", request.getRole().getName(), ErrorCode.CANNOT_REQUEST_AUTHORITY.getMessage()));
+            errors.add(new ErrorResponse.FieldError("role", request.getRole().getName(), CANNOT_REQUEST_AUTHORITY.getMessage()));
             throw new CannotRequestAuthorityException(errors);
         }
+    }
+
+    public Page<RequestDto> getRequestDtoPage(int page, int size, MemberRoles role) {
+        final Set<MemberRoles> roles = Set.of(ROLE_MEMBER, ROLE_GROUP_PRESIDENT, ROLE_CLUB_EXECUTIVE);
+        if (!roles.contains(role)) {
+            List<ErrorResponse.FieldError> errors = new ArrayList<>();
+            errors.add(new ErrorResponse.FieldError("role", role.name(), CANNOT_REQUEST_AUTHORITY.getMessage()));
+            throw new CannotRequestAuthorityException(errors);
+        }
+
+        page = (page == 0 ? 0 : page - 1);
+        Pageable pageable = PageRequest.of(page, size);
+        return requestRepository.findRequestDtoPageByRole(role, pageable);
     }
 }

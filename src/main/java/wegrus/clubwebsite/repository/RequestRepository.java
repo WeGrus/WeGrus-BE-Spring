@@ -7,7 +7,7 @@ import wegrus.clubwebsite.entity.Request;
 
 import java.util.Optional;
 
-public interface RequestRepository extends JpaRepository<Request, Long> {
+public interface RequestRepository extends JpaRepository<Request, Long>, RequestRepositoryQuerydsl {
     void deleteByMemberIdAndRoleId(Long memberId, Long roleId);
     @Query("select r from Request r join fetch r.role where r.id = :id")
     Optional<Request> findWithRoleById(@Param("id") Long id);
