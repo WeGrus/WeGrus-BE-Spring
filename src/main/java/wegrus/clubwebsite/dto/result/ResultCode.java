@@ -34,6 +34,8 @@ public enum ResultCode {
     // Club management
     EMPOWER_MEMBER_SUCCESS(200, "C100", "권한 부여에 성공하였습니다"),
     GET_REQUESTS_SUCCESS(200, "C101", "권한 요청 목록 조회에 성공하였습니다"),
+    GET_MEMBERS_SUCCESS(200, "C102", "회원 목록 조회에 성공하였습니다"),
+    SEARCH_MEMBER_SUCCESS(200, "C103", "회원 검색에 성공하였습니다"),
 
     // Post
     CREATE_POST_SUCCESS(200, "B100", "게시물 등록에 성공하였습니다."),

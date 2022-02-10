@@ -23,6 +23,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.List;
 
 import static org.springframework.web.cors.CorsConfiguration.ALL;
+import static wegrus.clubwebsite.entity.member.MemberRoles.*;
 
 @Configuration
 @EnableWebSecurity
@@ -67,9 +68,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
                 .antMatchers("/", "/swagger-resources/**", "/swagger-ui/**", "/signup/**", "/signin", "/reissue").permitAll()
-                .antMatchers("/members/**").hasAuthority("ROLE_GUEST")
-                .antMatchers("/posts/**", "/comments/**").hasAuthority("ROLE_MEMBER")
-                .antMatchers("/club/executives/**").hasAuthority("ROLE_CLUB_EXECUTIVE")
+                .antMatchers("/members/**").hasAuthority(ROLE_MEMBER.name())
+                .antMatchers("/posts/**", "/comments/**").hasAuthority(ROLE_MEMBER.name())
+                .antMatchers("/club/executives/**").hasAnyAuthority(ROLE_CLUB_EXECUTIVE.name(), ROLE_CLUB_PRESIDENT.name())
                 .anyRequest().authenticated()
                 .and()
 
