@@ -193,7 +193,7 @@ public class MemberService {
 
     public EmailCheckResponse checkEmailAndSendMail(String email) throws MessagingException {
         if (memberRepository.findByEmail(email).isPresent())
-            return new EmailCheckResponse(Status.FAILURE, EMAIL_ALREADY_EXIST.getMessage()); // TODO: 제거
+            return new EmailCheckResponse(Status.FAILURE, EMAIL_ALREADY_EXIST.getMessage());
         else if (!Pattern.matches("^[0-9]{8}@(inha.edu|inha.ac.kr)$", email))
             return new EmailCheckResponse(Status.FAILURE, INVALID_EMAIL.getMessage());
         final String verificationKey = sendVerificationMail(email);
