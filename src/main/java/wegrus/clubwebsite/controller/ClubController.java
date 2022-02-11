@@ -10,12 +10,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import wegrus.clubwebsite.dto.member.MemberSearchType;
+import wegrus.clubwebsite.dto.member.*;
 import wegrus.clubwebsite.dto.StatusResponse;
-import wegrus.clubwebsite.dto.member.MemberDto;
-import wegrus.clubwebsite.dto.member.MemberSortType;
-import wegrus.clubwebsite.dto.member.RequestDto;
 import wegrus.clubwebsite.dto.result.ResultResponse;
+import wegrus.clubwebsite.entity.member.Gender;
+import wegrus.clubwebsite.entity.member.MemberAcademicStatus;
+import wegrus.clubwebsite.entity.member.MemberGrade;
 import wegrus.clubwebsite.entity.member.MemberRoles;
 import wegrus.clubwebsite.service.ClubService;
 
@@ -86,8 +86,8 @@ public class ClubController {
             @ApiImplicitParam(name = "searchType", value = "검색 타입", example = "DEPARTMENT", required = true),
             @ApiImplicitParam(name = "word", value = "검색어", example = "컴퓨터공학과", required = true)
     })
-    @GetMapping("/executives/search")
-    public ResponseEntity<ResultResponse> searchMembers(
+    @GetMapping("/executives/members/search")
+    public ResponseEntity<ResultResponse> searchMember(
             @NotNull(message = "page는 필수입니다.") @RequestParam int page,
             @NotNull(message = "size는 필수입니다.") @RequestParam int size,
             @NotNull(message = "정렬 타입은 필수입니다.") @RequestParam MemberSortType sortType,
@@ -95,6 +95,106 @@ public class ClubController {
             @NotNull(message = "검색 타입은 필수입니다.") @RequestParam MemberSearchType searchType,
             @NotBlank(message = "검색어는 필수입니다.") @RequestParam String word) {
         final Page<MemberDto> response = clubService.searchMember(page, size, sortType, direction, searchType, word);
+
+        return ResponseEntity.ok(ResultResponse.of(SEARCH_MEMBER_SUCCESS, response));
+    }
+
+    @ApiOperation(value = "회원 검색(성별)")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "페이지", example = "1", required = true),
+            @ApiImplicitParam(name = "size", value = "페이지당 개수", example = "10", required = true),
+            @ApiImplicitParam(name = "sortType", value = "정렬 타입", example = "ID", required = true),
+            @ApiImplicitParam(name = "direction", value = "정렬 방향", example = "ASC", required = true),
+            @ApiImplicitParam(name = "gender", value = "회원 성별", example = "MAN", required = true)
+    })
+    @GetMapping("/executives/members/genders")
+    public ResponseEntity<ResultResponse> searchMembersByGender(
+            @NotNull(message = "page는 필수입니다.") @RequestParam int page,
+            @NotNull(message = "size는 필수입니다.") @RequestParam int size,
+            @NotNull(message = "정렬 타입은 필수입니다.") @RequestParam MemberSortType sortType,
+            @NotNull(message = "정렬 방향은 필수입니다.") @RequestParam Sort.Direction direction,
+            @NotNull(message = "회원 성별은 필수입니다.") @RequestParam Gender gender) {
+        final Page<MemberDto> response = clubService.searchMemberByGender(page, size, sortType, direction, gender);
+
+        return ResponseEntity.ok(ResultResponse.of(SEARCH_MEMBER_SUCCESS, response));
+    }
+
+    @ApiOperation(value = "회원 검색(학적 상태)")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "페이지", example = "1", required = true),
+            @ApiImplicitParam(name = "size", value = "페이지당 개수", example = "10", required = true),
+            @ApiImplicitParam(name = "sortType", value = "정렬 타입", example = "ID", required = true),
+            @ApiImplicitParam(name = "direction", value = "정렬 방향", example = "ASC", required = true),
+            @ApiImplicitParam(name = "academicStatus", value = "회원 학적 상태", example = "ATTENDING", required = true)
+    })
+    @GetMapping("/executives/members/academic-statuses")
+    public ResponseEntity<ResultResponse> searchMembersByAcademicStatus(
+            @NotNull(message = "page는 필수입니다.") @RequestParam int page,
+            @NotNull(message = "size는 필수입니다.") @RequestParam int size,
+            @NotNull(message = "정렬 타입은 필수입니다.") @RequestParam MemberSortType sortType,
+            @NotNull(message = "정렬 방향은 필수입니다.") @RequestParam Sort.Direction direction,
+            @NotNull(message = "회원 학적 상태는 필수입니다.") @RequestParam MemberAcademicStatus academicStatus) {
+        final Page<MemberDto> response = clubService.searchMemberByAcademicStatus(page, size, sortType, direction, academicStatus);
+
+        return ResponseEntity.ok(ResultResponse.of(SEARCH_MEMBER_SUCCESS, response));
+    }
+
+    @ApiOperation(value = "회원 검색(학년)")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "페이지", example = "1", required = true),
+            @ApiImplicitParam(name = "size", value = "페이지당 개수", example = "10", required = true),
+            @ApiImplicitParam(name = "sortType", value = "정렬 타입", example = "ID", required = true),
+            @ApiImplicitParam(name = "direction", value = "정렬 방향", example = "ASC", required = true),
+            @ApiImplicitParam(name = "grade", value = "회원 학년", example = "SENIOR", required = true)
+    })
+    @GetMapping("/executives/members/grades")
+    public ResponseEntity<ResultResponse> searchMembersByAcademicStatus(
+            @NotNull(message = "page는 필수입니다.") @RequestParam int page,
+            @NotNull(message = "size는 필수입니다.") @RequestParam int size,
+            @NotNull(message = "정렬 타입은 필수입니다.") @RequestParam MemberSortType sortType,
+            @NotNull(message = "정렬 방향은 필수입니다.") @RequestParam Sort.Direction direction,
+            @NotNull(message = "회원 학년은 필수입니다.") @RequestParam MemberGrade grade) {
+        final Page<MemberDto> response = clubService.searchMemberByGrade(page, size, sortType, direction, grade);
+
+        return ResponseEntity.ok(ResultResponse.of(SEARCH_MEMBER_SUCCESS, response));
+    }
+
+    @ApiOperation(value = "회원 검색(권한)")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "페이지", example = "1", required = true),
+            @ApiImplicitParam(name = "size", value = "페이지당 개수", example = "10", required = true),
+            @ApiImplicitParam(name = "sortType", value = "정렬 타입", example = "ID", required = true),
+            @ApiImplicitParam(name = "direction", value = "정렬 방향", example = "ASC", required = true),
+            @ApiImplicitParam(name = "authority", value = "회원 권한", example = "MEMBER", required = true)
+    })
+    @GetMapping("/executives/members/authorities")
+    public ResponseEntity<ResultResponse> searchMembersByAuthority(
+            @NotNull(message = "page는 필수입니다.") @RequestParam int page,
+            @NotNull(message = "size는 필수입니다.") @RequestParam int size,
+            @NotNull(message = "정렬 타입은 필수입니다.") @RequestParam MemberSortType sortType,
+            @NotNull(message = "정렬 방향은 필수입니다.") @RequestParam Sort.Direction direction,
+            @NotNull(message = "회원 학년은 필수입니다.") @RequestParam MemberRoleSearchType authority) {
+        final Page<MemberDto> response = clubService.searchMembersByAuthority(page, size, sortType, direction, authority);
+
+        return ResponseEntity.ok(ResultResponse.of(SEARCH_MEMBER_SUCCESS, response));
+    }
+
+    @ApiOperation(value = "회원 검색(그룹)")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "페이지", example = "1", required = true),
+            @ApiImplicitParam(name = "size", value = "페이지당 개수", example = "10", required = true),
+            @ApiImplicitParam(name = "sortType", value = "정렬 타입", example = "ID", required = true),
+            @ApiImplicitParam(name = "direction", value = "정렬 방향", example = "ASC", required = true),
+            @ApiImplicitParam(name = "groupId", value = "그룹 PK", example = "1", required = true)
+    })
+    @GetMapping("/executives/members/groups")
+    public ResponseEntity<ResultResponse> searchMembersByGroup(
+            @NotNull(message = "page는 필수입니다.") @RequestParam int page,
+            @NotNull(message = "size는 필수입니다.") @RequestParam int size,
+            @NotNull(message = "정렬 타입은 필수입니다.") @RequestParam MemberSortType sortType,
+            @NotNull(message = "정렬 방향은 필수입니다.") @RequestParam Sort.Direction direction,
+            @NotNull(message = "그룹 PK는 필수입니다.") @RequestParam Long groupId) {
+        final Page<MemberDto> response = clubService.searchMembersByGroup(page, size, sortType, direction, groupId);
 
         return ResponseEntity.ok(ResultResponse.of(SEARCH_MEMBER_SUCCESS, response));
     }

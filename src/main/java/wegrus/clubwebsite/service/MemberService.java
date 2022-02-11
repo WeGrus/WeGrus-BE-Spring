@@ -90,6 +90,7 @@ public class MemberService {
                 .email(request.getEmail())
                 .academicStatus(request.getAcademicStatus())
                 .department(request.getDepartment())
+                .gender(request.getGender())
                 .grade(request.getGrade())
                 .name(request.getName())
                 .phone(request.getPhone())
@@ -169,7 +170,8 @@ public class MemberService {
         final String refreshToken = jwtTokenUtil.generateRefreshToken(userDetails);
 
         member.updateRefreshToken(refreshToken);
-        return new MemberAndJwtDto(new MemberDto(member), accessToken, refreshToken);
+        final MemberDto memberDto = memberRepository.findMemberDtoById(member.getId()).get();
+        return new MemberAndJwtDto(memberDto, accessToken, refreshToken);
     }
 
     @Transactional
@@ -202,10 +204,14 @@ public class MemberService {
 
     public MemberInfoResponse getMemberInfo(Long memberId) {
         final Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
-        if (member.getId().toString().equals(SecurityContextHolder.getContext().getAuthentication().getName()))
-            return new MemberInfoResponse(Status.SUCCESS, new MemberDto(member));
-        else
-            return new MemberInfoResponse(Status.SUCCESS, new MemberSimpleDto(member));
+        if (member.getId().toString().equals(SecurityContextHolder.getContext().getAuthentication().getName())) {
+            final MemberDto memberDto = memberRepository.findMemberDtoById(member.getId()).get();
+            return new MemberInfoResponse(Status.SUCCESS, memberDto);
+        }
+        else {
+            final MemberSimpleDto memberSimpleDto = memberRepository.findMemberSimpleDtoById(member.getId()).get();
+            return new MemberInfoResponse(Status.SUCCESS, memberSimpleDto);
+        }
     }
 
     @Transactional
@@ -342,6 +348,7 @@ public class MemberService {
         return postRepository.findBookmarkedPostDtoPageByMemberIdOrderByCreatedDateDesc(memberId, pageable);
     }
 
+    @Transactional
     public StatusResponse applyToGroup(Long groupId) {
         final Long memberId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
         final Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
@@ -353,5 +360,9 @@ public class MemberService {
         groupMemberRepository.save(groupMember);
 
         return new StatusResponse(Status.SUCCESS);
+    }
+
+    public List<Group> getGroups() {
+        return groupRepository.findAll();
     }
 }
