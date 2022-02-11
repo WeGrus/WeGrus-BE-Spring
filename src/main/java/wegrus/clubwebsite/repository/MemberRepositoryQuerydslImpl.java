@@ -11,7 +11,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import wegrus.clubwebsite.dto.member.*;
-import wegrus.clubwebsite.entity.group.QGroupMember;
 import wegrus.clubwebsite.entity.member.*;
 
 import java.util.List;
