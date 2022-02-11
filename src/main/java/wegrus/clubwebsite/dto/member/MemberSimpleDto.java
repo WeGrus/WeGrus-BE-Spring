@@ -2,6 +2,7 @@ package wegrus.clubwebsite.dto.member;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import wegrus.clubwebsite.entity.member.Member;
 import wegrus.clubwebsite.entity.member.MemberGrade;
 
@@ -10,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Getter
+@Setter
 @NoArgsConstructor
 public class MemberSimpleDto {
 
@@ -21,6 +23,7 @@ public class MemberSimpleDto {
     private String introduce;
     private String imageUrl;
     private List<String> roles = new ArrayList<>();
+    private List<GroupDto> groups = new ArrayList<>();
 
     public MemberSimpleDto(Member member) {
         this.name = member.getName();
