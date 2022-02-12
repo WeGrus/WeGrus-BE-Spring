@@ -30,6 +30,7 @@ public enum ResultCode {
     GET_MY_REPLIES_SUCCESS(200, "M118", "회원이 작성한 댓글 목록 조회에 성공하였습니다."),
     GET_MY_BOOKMARKS_SUCCESS(200, "M119", "회원이 저장한 게시물 목록 조회에 성공하였습니다."),
     APPLY_TO_GROUP_SUCCESS(200, "M120", "해당 그룹에 성공적으로 가입 신청을 하였습니다."),
+    GET_GROUPS_SUCCESS(200, "M121", "그룹 목록 조회에 성공하였습니다."),
 
     // Club management
     EMPOWER_MEMBER_SUCCESS(200, "C100", "권한 부여에 성공하였습니다"),

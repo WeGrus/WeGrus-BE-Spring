@@ -9,15 +9,9 @@ import org.springframework.transaction.annotation.Transactional;
 import wegrus.clubwebsite.dto.Status;
 import wegrus.clubwebsite.dto.StatusResponse;
 import wegrus.clubwebsite.dto.error.ErrorResponse;
-import wegrus.clubwebsite.dto.member.MemberDto;
-import wegrus.clubwebsite.dto.member.MemberSearchType;
-import wegrus.clubwebsite.dto.member.MemberSortType;
-import wegrus.clubwebsite.dto.member.RequestDto;
+import wegrus.clubwebsite.dto.member.*;
 import wegrus.clubwebsite.entity.Request;
-import wegrus.clubwebsite.entity.member.Member;
-import wegrus.clubwebsite.entity.member.MemberRole;
-import wegrus.clubwebsite.entity.member.MemberRoles;
-import wegrus.clubwebsite.entity.member.Role;
+import wegrus.clubwebsite.entity.member.*;
 import wegrus.clubwebsite.exception.*;
 import wegrus.clubwebsite.repository.MemberRepository;
 import wegrus.clubwebsite.repository.MemberRoleRepository;
@@ -105,5 +99,35 @@ public class ClubService {
         page = (page == 0 ? 0 : page - 1);
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortType.getField()));
         return memberRepository.findMemberDtoPageByWordContainingAtSearchType(pageable, searchType, word);
+    }
+
+    public Page<MemberDto> searchMemberByGender(int page, int size, MemberSortType sortType, Sort.Direction direction, Gender gender) {
+        page = (page == 0 ? 0 : page - 1);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortType.getField()));
+        return memberRepository.findMemberDtoPageByGender(pageable, gender);
+    }
+
+    public Page<MemberDto> searchMemberByAcademicStatus(int page, int size, MemberSortType sortType, Sort.Direction direction, MemberAcademicStatus academicStatus) {
+        page = (page == 0 ? 0 : page - 1);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortType.getField()));
+        return memberRepository.findMemberDtoPageByAcademicStatus(pageable, academicStatus);
+    }
+
+    public Page<MemberDto> searchMemberByGrade(int page, int size, MemberSortType sortType, Sort.Direction direction, MemberGrade grade) {
+        page = (page == 0 ? 0 : page - 1);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortType.getField()));
+        return memberRepository.findMemberDtoPageByGrade(pageable, grade);
+    }
+
+    public Page<MemberDto> searchMembersByAuthority(int page, int size, MemberSortType sortType, Sort.Direction direction, MemberRoleSearchType authority) {
+        page = (page == 0 ? 0 : page - 1);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortType.getField()));
+        return memberRepository.findMemberDtoPageByAuthority(pageable, authority);
+    }
+
+    public Page<MemberDto> searchMembersByGroup(int page, int size, MemberSortType sortType, Sort.Direction direction, Long groupId) {
+        page = (page == 0 ? 0 : page - 1);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortType.getField()));
+        return memberRepository.findMemberDtoPageByGroup(pageable, groupId);
     }
 }

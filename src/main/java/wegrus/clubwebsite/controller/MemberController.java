@@ -20,6 +20,7 @@ import wegrus.clubwebsite.dto.post.BookmarkDto;
 import wegrus.clubwebsite.dto.post.PostDto;
 import wegrus.clubwebsite.dto.post.PostReplyDto;
 import wegrus.clubwebsite.dto.result.ResultResponse;
+import wegrus.clubwebsite.entity.group.Group;
 import wegrus.clubwebsite.entity.member.MemberRoles;
 import wegrus.clubwebsite.exception.MemberAlreadyBanException;
 import wegrus.clubwebsite.exception.MemberAlreadyResignException;
@@ -35,6 +36,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
 import java.io.IOException;
+import java.util.List;
 
 import static wegrus.clubwebsite.dto.result.ResultCode.*;
 
@@ -254,5 +256,13 @@ public class MemberController {
         final StatusResponse response = memberService.applyToGroup(groupId);
 
         return ResponseEntity.ok(ResultResponse.of(APPLY_TO_GROUP_SUCCESS, response));
+    }
+
+    @ApiOperation(value = "그룹 목록 조회")
+    @GetMapping("/members/groups")
+    public ResponseEntity<ResultResponse> getGroups() {
+        final List<Group> response = memberService.getGroups();
+
+        return ResponseEntity.ok(ResultResponse.of(GET_GROUPS_SUCCESS, response));
     }
 }
