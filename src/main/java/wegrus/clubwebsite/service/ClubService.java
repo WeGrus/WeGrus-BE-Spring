@@ -172,4 +172,33 @@ public class ClubService {
         if (!errors.isEmpty())
             throw new CannotBanMember(errors);
     }
+
+    @Transactional
+    public StatusResponse delegatePresident(Long memberId) {
+        final Role roleMember = roleRepository.findByName(ROLE_MEMBER.name()).orElseThrow(MemberRoleNotFoundException::new);
+        final Member nextPresident = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
+        if (memberRoleRepository.findByMemberIdAndRoleId(nextPresident.getId(), roleMember.getId()).isEmpty())
+            throw new CannotDelegateMember();
+
+        final Role roleClubPresident = roleRepository.findByName(ROLE_CLUB_PRESIDENT.name()).orElseThrow(MemberRoleNotFoundException::new);
+        final Long presidentId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
+        memberRoleRepository.deleteByMemberIdAndRoleId(presidentId, roleClubPresident.getId());
+        memberRoleRepository.save(new MemberRole(nextPresident, roleClubPresident));
+
+        return new StatusResponse(Status.SUCCESS);
+    }
+
+    @Transactional
+    public StatusResponse resetAuthorities() {
+        final List<Long> roleIds = new ArrayList<>();
+        roleRepository.findAll().forEach(r -> {
+            if (r.getName().equals(ROLE_CLUB_EXECUTIVE.name()) || r.getName().equals(ROLE_GROUP_EXECUTIVE.name()) ||
+                    r.getName().equals(ROLE_GROUP_PRESIDENT.name()) || r.getName().equals(ROLE_MEMBER.name()))
+                roleIds.add(r.getId());
+        });
+
+        final List<MemberRole> memberRoles = memberRoleRepository.findAllByRoleIdIn(roleIds);
+        memberRoleRepository.deleteAllInBatch(memberRoles);
+        return new StatusResponse(Status.SUCCESS);
+    }
 }
