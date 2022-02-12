@@ -33,7 +33,7 @@ public class ClubController {
 
     private final ClubService clubService;
 
-    @ApiOperation(value = "동아리원 권한 부여")
+    @ApiOperation(value = "회원 권한 부여")
     @ApiImplicitParam(name = "requestId", value = "권한 요청 PK", example = "1", required = true)
     @PostMapping("/executives/authority")
     public ResponseEntity<ResultResponse> empower(
@@ -43,7 +43,7 @@ public class ClubController {
         return ResponseEntity.ok(ResultResponse.of(EMPOWER_MEMBER_SUCCESS, response));
     }
 
-    @ApiOperation(value = "동아리원 권한 요청 목록 조회")
+    @ApiOperation(value = "회원 권한 요청 목록 조회")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "page", value = "페이지", example = "1", required = true),
             @ApiImplicitParam(name = "size", value = "페이지당 개수", example = "10", required = true),
@@ -173,7 +173,7 @@ public class ClubController {
             @NotNull(message = "size는 필수입니다.") @RequestParam int size,
             @NotNull(message = "정렬 타입은 필수입니다.") @RequestParam MemberSortType sortType,
             @NotNull(message = "정렬 방향은 필수입니다.") @RequestParam Sort.Direction direction,
-            @NotNull(message = "회원 학년은 필수입니다.") @RequestParam MemberRoleSearchType authority) {
+            @NotNull(message = "회원 권한은 필수입니다.") @RequestParam MemberRoleSearchType authority) {
         final Page<MemberDto> response = clubService.searchMembersByAuthority(page, size, sortType, direction, authority);
 
         return ResponseEntity.ok(ResultResponse.of(SEARCH_MEMBER_SUCCESS, response));
@@ -197,5 +197,28 @@ public class ClubController {
         final Page<MemberDto> response = clubService.searchMembersByGroup(page, size, sortType, direction, groupId);
 
         return ResponseEntity.ok(ResultResponse.of(SEARCH_MEMBER_SUCCESS, response));
+    }
+    
+    @ApiOperation(value = "회원 권한 해제")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "memberId", value = "회원 PK", example = "1", required = true),
+            @ApiImplicitParam(name = "type", value = "회원 권한", example = "ROLE_MEMBER", required = true)
+    })
+    @DeleteMapping("/president/authority")
+    public ResponseEntity<ResultResponse> deleteAuthority(
+            @NotNull(message = "회원 PK는 필수입니다.") @RequestParam Long memberId,
+            @NotNull(message = "회원 권한은 필수입니다.") @RequestParam MemberRoleDeleteType type) {
+        final StatusResponse response = clubService.deleteAuthority(memberId, type);
+
+        return ResponseEntity.ok(ResultResponse.of(DELETE_AUTHORITY_SUCCESS, response));
+    }
+
+    @ApiOperation(value = "회원 강제 탈퇴(재가입 불가)")
+    @ApiImplicitParam(name = "memberId", value = "회원 PK", example = "1", required = true)
+    @PatchMapping("/president/ban")
+    public ResponseEntity<ResultResponse> banMember(@NotNull(message = "회원 PK는 필수입니다.") @RequestParam Long memberId) {
+        final StatusResponse response = clubService.banMember(memberId);
+
+        return ResponseEntity.ok(ResultResponse.of(BAN_MEMBER_SUCCESS, response));
     }
 }

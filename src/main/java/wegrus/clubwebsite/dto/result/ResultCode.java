@@ -33,10 +33,12 @@ public enum ResultCode {
     GET_GROUPS_SUCCESS(200, "M121", "그룹 목록 조회에 성공하였습니다."),
 
     // Club management
-    EMPOWER_MEMBER_SUCCESS(200, "C100", "권한 부여에 성공하였습니다"),
-    GET_REQUESTS_SUCCESS(200, "C101", "권한 요청 목록 조회에 성공하였습니다"),
-    GET_MEMBERS_SUCCESS(200, "C102", "회원 목록 조회에 성공하였습니다"),
-    SEARCH_MEMBER_SUCCESS(200, "C103", "회원 검색에 성공하였습니다"),
+    EMPOWER_MEMBER_SUCCESS(200, "CM100", "회원 권한 부여에 성공하였습니다"),
+    GET_REQUESTS_SUCCESS(200, "CM101", "회원 권한 요청 목록 조회에 성공하였습니다"),
+    GET_MEMBERS_SUCCESS(200, "CM102", "회원 목록 조회에 성공하였습니다"),
+    SEARCH_MEMBER_SUCCESS(200, "CM103", "회원 검색에 성공하였습니다"),
+    DELETE_AUTHORITY_SUCCESS(200, "CM104", "회원 권한 해제에 성공하였습니다"),
+    BAN_MEMBER_SUCCESS(200, "CM105", "회원 강제 탈퇴에 성공하였습니다"),
 
     // Post
     CREATE_POST_SUCCESS(200, "B100", "게시물 등록에 성공하였습니다."),
