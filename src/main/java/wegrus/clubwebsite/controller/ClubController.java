@@ -221,4 +221,21 @@ public class ClubController {
 
         return ResponseEntity.ok(ResultResponse.of(BAN_MEMBER_SUCCESS, response));
     }
+
+    @ApiOperation(value = "회장 위임")
+    @ApiImplicitParam(name = "memberId", value = "회원 PK", example = "1", required = true)
+    @PatchMapping("/president/delegate")
+    public ResponseEntity<ResultResponse> delegatePresident(@NotNull(message = "회원 PK는 필수입니다.") @RequestParam Long memberId) {
+        final StatusResponse response = clubService.delegatePresident(memberId);
+
+        return ResponseEntity.ok(ResultResponse.of(DELEGATE_PRESIDENT_SUCCESS, response));
+    }
+
+    @ApiOperation(value = "전체 동아리원 권한 초기화")
+    @PatchMapping("/president/reset")
+    public ResponseEntity<ResultResponse> resetAuthorities() {
+        final StatusResponse response = clubService.resetAuthorities();
+
+        return ResponseEntity.ok(ResultResponse.of(RESET_AUTHORITIES_SUCCESS, response));
+    }
 }

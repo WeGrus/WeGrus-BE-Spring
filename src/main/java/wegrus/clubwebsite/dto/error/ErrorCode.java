@@ -64,6 +64,7 @@ public enum ErrorCode {
 
     // Club management
     CANNOT_BAN_MEMBER(400, "CM000", "강제 탈퇴시킬 수 없는 회원입니다."),
+    CANNOT_DELEGATE_MEMBER(400, "CM001", "동아리원이 아닌 회원에게 동아리 회장 권한을 위임할 수 없습니다."),
 
     // File
     NOT_SUPPORTED_IMAGE_TYPE(400, "F000", "이미지 타입은 JPG, PNG, GIF만 지원합니다."),

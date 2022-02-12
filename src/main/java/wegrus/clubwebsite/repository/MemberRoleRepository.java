@@ -18,4 +18,10 @@ public interface MemberRoleRepository extends JpaRepository<MemberRole, Long> {
 
     @Query("select mr from MemberRole mr join fetch mr.role where mr.member.id = :memberId")
     List<MemberRole> findAllWithRoleByMemberId(@Param("memberId") Long memberId);
+
+    void deleteByMemberIdAndRoleId(Long presidentId, Long roleId);
+
+    void deleteAllInBatchByRoleIdNotIn(List<Long> roleIds);
+
+    List<MemberRole> findAllByRoleIdIn(List<Long> roleIds);
 }
