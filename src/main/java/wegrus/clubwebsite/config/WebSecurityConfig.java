@@ -71,6 +71,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/members/**").hasAuthority(ROLE_MEMBER.name())
                 .antMatchers("/posts/**", "/comments/**").hasAuthority(ROLE_MEMBER.name())
                 .antMatchers("/club/executives/**").hasAnyAuthority(ROLE_CLUB_EXECUTIVE.name(), ROLE_CLUB_PRESIDENT.name())
+                .antMatchers("/club/president/**").hasAuthority(ROLE_CLUB_PRESIDENT.name())
                 .anyRequest().authenticated()
                 .and()
 

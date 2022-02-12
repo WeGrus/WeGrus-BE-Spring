@@ -22,6 +22,7 @@ import wegrus.clubwebsite.dto.post.PostReplyDto;
 import wegrus.clubwebsite.entity.Request;
 import wegrus.clubwebsite.entity.group.Group;
 import wegrus.clubwebsite.entity.group.GroupMember;
+import wegrus.clubwebsite.entity.group.GroupRoles;
 import wegrus.clubwebsite.entity.member.MemberRole;
 import wegrus.clubwebsite.entity.member.MemberRoles;
 import wegrus.clubwebsite.exception.*;
@@ -207,8 +208,7 @@ public class MemberService {
         if (member.getId().toString().equals(SecurityContextHolder.getContext().getAuthentication().getName())) {
             final MemberDto memberDto = memberRepository.findMemberDtoById(member.getId()).get();
             return new MemberInfoResponse(Status.SUCCESS, memberDto);
-        }
-        else {
+        } else {
             final MemberSimpleDto memberSimpleDto = memberRepository.findMemberSimpleDtoById(member.getId()).get();
             return new MemberInfoResponse(Status.SUCCESS, memberSimpleDto);
         }
@@ -279,7 +279,8 @@ public class MemberService {
     public StatusResponse resign(String certificationCode) {
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         final Long memberId = Long.valueOf(authentication.getName());
-        validateMemberRole(authentication);
+        final List<GroupMember> groupMembers = groupMemberRepository.findAllByMemberId(memberId);
+        validateMemberRole(authentication, groupMembers);
 
         final Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
         final String code = (String) redisUtil.get(member.getEmail());
@@ -288,10 +289,9 @@ public class MemberService {
 
         final Role role = roleRepository.findByName(MemberRoles.ROLE_RESIGN.name()).orElseThrow(MemberRoleNotFoundException::new);
         final MemberRole memberRole = new MemberRole(member, role);
-        final List<Long> ids = memberRoleRepository.findAllByMemberId(memberId).stream()
-                .map(MemberRole::getId)
-                .collect(Collectors.toList());
-        memberRoleRepository.deleteAllByIdInBatch(ids);
+
+        groupMemberRepository.deleteAllByMemberId(member.getId());
+        memberRoleRepository.deleteAllByMemberId(member.getId());
         memberRoleRepository.save(memberRole);
         member.resign();
         redisUtil.delete(member.getEmail());
@@ -299,7 +299,7 @@ public class MemberService {
         return new StatusResponse(Status.SUCCESS);
     }
 
-    private void validateMemberRole(Authentication authentication) {
+    private void validateMemberRole(Authentication authentication, List<GroupMember> groupMembers) {
         final Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         final List<ErrorResponse.FieldError> errors = new ArrayList<>();
         authorities
@@ -310,6 +310,11 @@ public class MemberService {
                         errors.add(new ErrorResponse.FieldError("role", o.getAuthority(), MEMBER_ALREADY_RESIGN.getMessage()));
                     else if (o.getAuthority().equals(MemberRoles.ROLE_BAN.name()))
                         errors.add(new ErrorResponse.FieldError("role", o.getAuthority(), MEMBER_ALREADY_BAN.getMessage()));
+                });
+        groupMembers
+                .forEach(gm -> {
+                    if (gm.getRole().equals(GroupRoles.PRESIDENT))
+                        errors.add(new ErrorResponse.FieldError("groupRole", GroupRoles.PRESIDENT.name(), GROUP_PRESIDENT_CANNOT_RESIGN.getMessage()));
                 });
         if (!errors.isEmpty())
             throw new MemberResignException(errors);
