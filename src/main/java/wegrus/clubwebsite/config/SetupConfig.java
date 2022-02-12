@@ -38,7 +38,7 @@ public class SetupConfig {
         );
 
         final List<String> boards = Arrays.stream(Boards.values())
-                .map(Enum::name)
+                .map(Boards::getKrName)
                 .collect(Collectors.toList());
 
         final String boardSql = "INSERT INTO boards (`board_category_id`, `board_name`) VALUES(?, ?)";
