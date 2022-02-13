@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import wegrus.clubwebsite.dto.Status;
 import wegrus.clubwebsite.dto.StatusResponse;
-import wegrus.clubwebsite.dto.error.ErrorCode;
 import wegrus.clubwebsite.dto.member.*;
 import wegrus.clubwebsite.dto.post.BookmarkDto;
 import wegrus.clubwebsite.dto.post.PostDto;
@@ -38,7 +37,6 @@ import javax.mail.MessagingException;
 import java.io.IOException;
 import java.util.*;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import static wegrus.clubwebsite.dto.error.ErrorCode.*;
 import static wegrus.clubwebsite.dto.result.ResultCode.*;
