@@ -36,17 +36,6 @@ public class GroupService {
     private final GroupMemberRepository groupMemberRepository;
     private final GroupRepository groupRepository;
 
-    public Page<MemberDto> getApplicants(Long groupId, int page, int size, MemberSortType sortType, Sort.Direction direction) {
-        final Long memberId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
-        final Group group = groupRepository.findById(groupId).orElseThrow(GroupNotFoundException::new);
-
-        checkExecutiveOrPresident(groupId, memberId);
-
-        page = (page == 0 ? 0 : page - 1);
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortType.getField()));
-        return memberRepository.findMemberDtoPageByGroupAndRole(pageable, group, APPLICANT);
-    }
-
     @Transactional
     public StatusResponse approve(Long groupId, Long applicantId) {
         final Long memberId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
@@ -163,5 +152,16 @@ public class GroupService {
             errors.add(new ErrorResponse.FieldError("groupRole", PRESIDENT.name(), INSUFFICIENT_AUTHORITY.getMessage()));
             throw new InsufficientAuthorityException(errors);
         }
+    }
+
+    public Page<MemberDto> getMemberDtoPage(Long groupId, GroupRoles role, int page, int size, MemberSortType type, Sort.Direction direction) {
+        final Long memberId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
+        final Group group = groupRepository.findById(groupId).orElseThrow(GroupNotFoundException::new);
+
+        checkExecutiveOrPresident(groupId, memberId);
+
+        page = (page == 0 ? 0 : page - 1);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, type.getField()));
+        return memberRepository.findMemberDtoPageByGroupAndRole(pageable, group, role);
     }
 }

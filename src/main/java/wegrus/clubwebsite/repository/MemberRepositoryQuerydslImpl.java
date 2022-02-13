@@ -105,6 +105,10 @@ public class MemberRepositoryQuerydslImpl implements MemberRepositoryQuerydsl {
                 .limit(pageable.getPageSize())
                 .fetch();
 
+        final long total = queryFactory
+                .selectFrom(member)
+                .fetchCount();
+
         final List<Long> memberIds = members.stream()
                 .map(Member::getId)
                 .collect(Collectors.toList());
@@ -132,7 +136,7 @@ public class MemberRepositoryQuerydslImpl implements MemberRepositoryQuerydsl {
                 }
         );
 
-        return new PageImpl<>(memberDtos, pageable, memberDtos.size());
+        return new PageImpl<>(memberDtos, pageable, total);
     }
 
     @Override
@@ -147,6 +151,11 @@ public class MemberRepositoryQuerydslImpl implements MemberRepositoryQuerydsl {
                 .limit(pageable.getPageSize())
                 .fetch();
 
+        final long total = queryFactory
+                .selectFrom(member)
+                .where(search(searchType, word))
+                .fetchCount();
+
         final List<Long> memberIds = members.stream()
                 .map(Member::getId)
                 .collect(Collectors.toList());
@@ -174,7 +183,7 @@ public class MemberRepositoryQuerydslImpl implements MemberRepositoryQuerydsl {
                 }
         );
 
-        return new PageImpl<>(memberDtos, pageable, memberDtos.size());
+        return new PageImpl<>(memberDtos, pageable, total);
     }
 
     @Override
@@ -189,6 +198,11 @@ public class MemberRepositoryQuerydslImpl implements MemberRepositoryQuerydsl {
                 .limit(pageable.getPageSize())
                 .fetch();
 
+        final long total = queryFactory
+                .selectFrom(member)
+                .where(member.gender.eq(gender))
+                .fetchCount();
+
         final List<Long> memberIds = members.stream()
                 .map(Member::getId)
                 .collect(Collectors.toList());
@@ -216,7 +230,7 @@ public class MemberRepositoryQuerydslImpl implements MemberRepositoryQuerydsl {
                 }
         );
 
-        return new PageImpl<>(memberDtos, pageable, memberDtos.size());
+        return new PageImpl<>(memberDtos, pageable, total);
     }
 
     @Override
@@ -231,6 +245,11 @@ public class MemberRepositoryQuerydslImpl implements MemberRepositoryQuerydsl {
                 .limit(pageable.getPageSize())
                 .fetch();
 
+        final long total = queryFactory
+                .selectFrom(member)
+                .where(member.academicStatus.eq(academicStatus))
+                .fetchCount();
+
         final List<Long> memberIds = members.stream()
                 .map(Member::getId)
                 .collect(Collectors.toList());
@@ -258,7 +277,7 @@ public class MemberRepositoryQuerydslImpl implements MemberRepositoryQuerydsl {
                 }
         );
 
-        return new PageImpl<>(memberDtos, pageable, memberDtos.size());
+        return new PageImpl<>(memberDtos, pageable, total);
     }
 
     @Override
@@ -273,6 +292,11 @@ public class MemberRepositoryQuerydslImpl implements MemberRepositoryQuerydsl {
                 .limit(pageable.getPageSize())
                 .fetch();
 
+        final long total = queryFactory
+                .selectFrom(member)
+                .where(member.grade.eq(grade))
+                .fetchCount();
+
         final List<Long> memberIds = members.stream()
                 .map(Member::getId)
                 .collect(Collectors.toList());
@@ -300,7 +324,7 @@ public class MemberRepositoryQuerydslImpl implements MemberRepositoryQuerydsl {
                 }
         );
 
-        return new PageImpl<>(memberDtos, pageable, memberDtos.size());
+        return new PageImpl<>(memberDtos, pageable, total);
     }
 
     @Override
@@ -319,6 +343,16 @@ public class MemberRepositoryQuerydslImpl implements MemberRepositoryQuerydsl {
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
+
+        final long total = queryFactory
+                .selectFrom(member)
+                .where(
+                        JPAExpressions
+                                .selectFrom(memberRole)
+                                .where(memberRole.member.eq(member).and(memberRole.role.name.eq(authority.getRoleName())))
+                                .exists()
+                )
+                .fetchCount();
 
         final List<Long> memberIds = members.stream()
                 .map(Member::getId)
@@ -361,7 +395,7 @@ public class MemberRepositoryQuerydslImpl implements MemberRepositoryQuerydsl {
                         .collect(Collectors.toList()))
         );
 
-        return new PageImpl<>(memberDtos, pageable, memberDtos.size());
+        return new PageImpl<>(memberDtos, pageable, total);
     }
 
     @Override
@@ -381,6 +415,16 @@ public class MemberRepositoryQuerydslImpl implements MemberRepositoryQuerydsl {
                 .limit(pageable.getPageSize())
                 .fetch();
 
+        final long total = queryFactory
+                .selectFrom(member)
+                .where(
+                        JPAExpressions
+                                .selectFrom(groupMember)
+                                .where(groupMember.group.id.eq(groupId).and(groupMember.member.eq(member)))
+                                .exists()
+                )
+                .fetchCount();
+
         final List<Long> memberIds = members.stream()
                 .map(Member::getId)
                 .collect(Collectors.toList());
@@ -408,11 +452,11 @@ public class MemberRepositoryQuerydslImpl implements MemberRepositoryQuerydsl {
                 }
         );
 
-        return new PageImpl<>(memberDtos, pageable, memberDtos.size());
+        return new PageImpl<>(memberDtos, pageable, total);
     }
 
     @Override
-    public Page<MemberDto> findMemberDtoPageByGroupAndRole(Pageable pageable, Group group, GroupRoles applicant) {
+    public Page<MemberDto> findMemberDtoPageByGroupAndRole(Pageable pageable, Group group, GroupRoles groupRole) {
         final List<Member> members = queryFactory
                 .selectFrom(member)
                 .innerJoin(member.roles, memberRole).fetchJoin()
@@ -420,13 +464,23 @@ public class MemberRepositoryQuerydslImpl implements MemberRepositoryQuerydsl {
                 .where(
                         JPAExpressions
                                 .selectFrom(groupMember)
-                                .where(groupMember.group.id.eq(group.getId()).and(groupMember.member.eq(member)).and(groupMember.role.eq(applicant)))
+                                .where(groupMember.group.id.eq(group.getId()).and(groupMember.member.eq(member)).and(groupMember.role.eq(groupRole)))
                                 .exists()
                 )
                 .orderBy(memberSort(pageable))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
+
+        final long total = queryFactory
+                .selectFrom(member)
+                .where(
+                        JPAExpressions
+                                .selectFrom(groupMember)
+                                .where(groupMember.group.id.eq(group.getId()).and(groupMember.member.eq(member)).and(groupMember.role.eq(groupRole)))
+                                .exists()
+                )
+                .fetchCount();
 
         final List<Long> memberIds = members.stream()
                 .map(Member::getId)
@@ -455,7 +509,7 @@ public class MemberRepositoryQuerydslImpl implements MemberRepositoryQuerydsl {
                 }
         );
 
-        return new PageImpl<>(memberDtos, pageable, memberDtos.size());
+        return new PageImpl<>(memberDtos, pageable, total);
 
     }
 

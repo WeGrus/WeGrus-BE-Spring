@@ -56,7 +56,12 @@ public class PostRepositoryQuerydslImpl implements PostRepositoryQuerydsl {
                 .orderBy(post.createdDate.desc())
                 .fetch();
 
-        return new PageImpl<>(postDtos, pageable, postDtos.size());
+        final long total = queryFactory
+                .selectFrom(post)
+                .where(post.member.id.eq(memberId))
+                .fetchCount();
+
+        return new PageImpl<>(postDtos, pageable, total);
     }
 
     @Override
@@ -72,6 +77,11 @@ public class PostRepositoryQuerydslImpl implements PostRepositoryQuerydsl {
         final List<Long> postIds = bookmarks.stream()
                 .map(b -> b.getPost().getId())
                 .collect(Collectors.toList());
+
+        final long total = queryFactory
+                .selectFrom(bookmark)
+                .where(bookmark.member.id.eq(memberId))
+                .fetchCount();
 
         final List<PostDto> postDtos = queryFactory
                 .select(new QPostDto(
@@ -104,7 +114,7 @@ public class PostRepositoryQuerydslImpl implements PostRepositoryQuerydsl {
         final List<BookmarkDto> bookmarkDtos = bookmarks.stream()
                 .map(b -> new BookmarkDto(b.getId(), postDtoMap.get(b.getPost().getId())))
                 .collect(Collectors.toList());
-        return new PageImpl<>(bookmarkDtos, pageable, bookmarkDtos.size());
+        return new PageImpl<>(bookmarkDtos, pageable, total);
     }
 
     @Override
@@ -121,6 +131,11 @@ public class PostRepositoryQuerydslImpl implements PostRepositoryQuerydsl {
         final List<Long> postIds = replies.stream()
                 .map(r -> r.getPost().getId())
                 .collect(Collectors.toList());
+
+        final long total = queryFactory
+                .selectFrom(reply)
+                .where(reply.member.id.eq(memberId))
+                .fetchCount();
 
         final List<PostDto> postDtos = queryFactory
                 .select(new QPostDto(
@@ -153,6 +168,6 @@ public class PostRepositoryQuerydslImpl implements PostRepositoryQuerydsl {
         final List<PostReplyDto> replyDtos = replies.stream()
                 .map(r -> new PostReplyDto(r, postDtoMap.get(r.getPost().getId())))
                 .collect(Collectors.toList());
-        return new PageImpl<>(replyDtos, pageable, replyDtos.size());
+        return new PageImpl<>(replyDtos, pageable, total);
     }
 }
