@@ -252,8 +252,8 @@ public class MemberService {
     }
 
     @Transactional
-    public RequestAuthorityResponse requestAuthority(MemberRoles memberRoles) {
-        final Role role = roleRepository.findByName(memberRoles.name()).orElseThrow(MemberRoleNotFoundException::new);
+    public RequestAuthorityResponse applyToClub() {
+        final Role role = roleRepository.findByName(ROLE_MEMBER.name()).orElseThrow(MemberRoleNotFoundException::new);
         final Long memberId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
         final Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
 
@@ -264,15 +264,15 @@ public class MemberService {
             throw new MemberAlreadyHasRoleException();
 
         final Set<MemberRoles> roles = Set.of(ROLE_MEMBER, ROLE_GROUP_PRESIDENT, ROLE_CLUB_EXECUTIVE);
-        if (roles.contains(memberRoles)) {
+        if (roles.contains(ROLE_MEMBER)) {
             requestRepository.save(new Request(member, role));
         } else {
             List<ErrorResponse.FieldError> errors = new ArrayList<>();
-            errors.add(new ErrorResponse.FieldError("role", memberRoles.name(), ErrorCode.CANNOT_REQUEST_AUTHORITY.getMessage()));
+            errors.add(new ErrorResponse.FieldError("role", ROLE_MEMBER.name(), ALREADY_HAVE_AUTHORITY.getMessage()));
             throw new CannotRequestAuthorityException(errors);
         }
 
-        return new RequestAuthoritySuccessResponse(Status.SUCCESS, memberRoles);
+        return new RequestAuthoritySuccessResponse(Status.SUCCESS, ROLE_MEMBER);
     }
 
     @Transactional
@@ -323,8 +323,8 @@ public class MemberService {
     public StatusResponse sendRandomCode() {
         final Long memberId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
         final Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
-        final int code = mailService.sendCertificationCode(member.getEmail());
-        redisUtil.set(member.getEmail(), String.valueOf(code), 30);
+        final String code = mailService.sendCertificationCode(member.getEmail());
+        redisUtil.set(member.getEmail(), code, 30);
 
         return new StatusResponse(Status.SUCCESS);
     }

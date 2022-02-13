@@ -55,8 +55,9 @@ public enum ErrorCode {
 
     // Request
     REQUEST_NOT_FOUND(400, "R000", "존재하지 않는 권한 요청입니다."),
-    CANNOT_REQUEST_AUTHORITY(400, "R001", "요청할 수 없는 권한입니다."),
+    ALREADY_HAVE_AUTHORITY(400, "R001", "이미 가지고 있는 권한입니다."),
     REQUEST_ALREADY_EXIST(400, "R002", "이미 해당 권한을 요청하였습니다."),
+    CANNOT_REQUEST_AUTHORITY(400, "R003", "요청할 수 없는 권한입니다."),
 
     // Group
     GROUP_NOT_FOUND(400, "G000", "존재하지 않는 그룹입니다."),
