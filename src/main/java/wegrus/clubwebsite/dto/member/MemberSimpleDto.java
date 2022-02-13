@@ -4,7 +4,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import wegrus.clubwebsite.entity.member.Member;
-import wegrus.clubwebsite.entity.member.MemberGrade;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
