@@ -11,6 +11,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import wegrus.clubwebsite.dto.member.*;
+import wegrus.clubwebsite.entity.group.GroupRoles;
 import wegrus.clubwebsite.entity.member.*;
 
 import java.util.List;
@@ -49,7 +50,7 @@ public class MemberRepositoryQuerydslImpl implements MemberRepositoryQuerydsl {
                         groupMember.member.id
                 ))
                 .from(groupMember)
-                .where(groupMember.member.id.in(member.getId()))
+                .where(groupMember.member.id.in(member.getId()).and(groupMember.role.ne(GroupRoles.APPLICANT)))
                 .innerJoin(groupMember.group)
                 .fetch();
 
@@ -81,7 +82,7 @@ public class MemberRepositoryQuerydslImpl implements MemberRepositoryQuerydsl {
                         groupMember.member.id
                 ))
                 .from(groupMember)
-                .where(groupMember.member.id.in(member.getId()))
+                .where(groupMember.member.id.in(member.getId()).and(groupMember.role.ne(GroupRoles.APPLICANT)))
                 .innerJoin(groupMember.group)
                 .fetch();
 
@@ -115,7 +116,7 @@ public class MemberRepositoryQuerydslImpl implements MemberRepositoryQuerydsl {
                         groupMember.member.id
                 ))
                 .from(groupMember)
-                .where(groupMember.member.id.in(memberIds))
+                .where(groupMember.member.id.in(memberIds).and(groupMember.role.ne(GroupRoles.APPLICANT)))
                 .innerJoin(groupMember.group)
                 .fetch()
                 .stream()
@@ -157,7 +158,7 @@ public class MemberRepositoryQuerydslImpl implements MemberRepositoryQuerydsl {
                         groupMember.member.id
                 ))
                 .from(groupMember)
-                .where(groupMember.member.id.in(memberIds))
+                .where(groupMember.member.id.in(memberIds).and(groupMember.role.ne(GroupRoles.APPLICANT)))
                 .innerJoin(groupMember.group)
                 .fetch()
                 .stream()
@@ -199,7 +200,7 @@ public class MemberRepositoryQuerydslImpl implements MemberRepositoryQuerydsl {
                         groupMember.member.id
                 ))
                 .from(groupMember)
-                .where(groupMember.member.id.in(memberIds))
+                .where(groupMember.member.id.in(memberIds).and(groupMember.role.ne(GroupRoles.APPLICANT)))
                 .innerJoin(groupMember.group)
                 .fetch()
                 .stream()
