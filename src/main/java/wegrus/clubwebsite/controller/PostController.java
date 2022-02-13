@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import wegrus.clubwebsite.dto.post.*;
 import wegrus.clubwebsite.dto.result.ResultResponse;
 import wegrus.clubwebsite.entity.post.PostListType;
@@ -14,6 +15,8 @@ import wegrus.clubwebsite.service.PostService;
 import wegrus.clubwebsite.service.ReplyService;
 
 import javax.validation.constraints.NotNull;
+
+import java.io.IOException;
 
 import static wegrus.clubwebsite.dto.result.ResultCode.*;
 
@@ -24,6 +27,15 @@ public class PostController {
 
     private final PostService postService;
     private final ReplyService replyService;
+
+    @ApiOperation(value = "게시물 이미지 서버 등록")
+    @PostMapping("/posts/image")
+    public ResponseEntity<ResultResponse> createPostImage(
+            @RequestPart(name = "image") MultipartFile image) throws IOException {
+        final PostImageCreateResponse response = postService.createPostImage(image);
+
+        return ResponseEntity.ok(ResultResponse.of(CREATE_POST_IMAGE_SUCCESS, response));
+    }
 
     @ApiOperation(value = "게시물 등록")
     @PostMapping("/posts")

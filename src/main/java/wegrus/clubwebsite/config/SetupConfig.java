@@ -8,6 +8,7 @@ import wegrus.clubwebsite.entity.group.Groups;
 import wegrus.clubwebsite.entity.member.MemberRoles;
 import wegrus.clubwebsite.entity.post.BoardCategories;
 import wegrus.clubwebsite.entity.post.Boards;
+import wegrus.clubwebsite.util.AmazonS3Util;
 
 import javax.annotation.PostConstruct;
 import java.sql.PreparedStatement;
@@ -20,13 +21,19 @@ import java.util.stream.Collectors;
 public class SetupConfig {
 
     private final JdbcTemplate jdbcTemplate;
+    private final AmazonS3Util amazonS3Util;
 
     @PostConstruct
     private void setup() {
+        initAwsS3Directory();
         initTableRoles();
         initTableBoardCategories();
         initTableBoards();
         initTableGroups();
+    }
+
+    private void initAwsS3Directory() {
+        amazonS3Util.createDirectory("posts/temp");
     }
 
     private void initTableBoards() {

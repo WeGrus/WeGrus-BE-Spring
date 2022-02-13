@@ -21,6 +21,7 @@ public enum ErrorCode {
     INSUFFICIENT_AUTHORITY(403, "C009", "접근 권한이 부족합니다."),
     MULTIPARTFILE_CONVERT_FAIL(400, "C010", "MultipartFile을 File로 변환하는 데 실패하였습니다."),
     INVALID_AUTHORIZATION_CODE(400, "C011", "유효하지 않은 인증 코드입니다."),
+    MULTIPARTFILE_NOT_FOUND(400, "C012", "존재하지 않는 MultipartFile입니다."),
 
     // Post
     POST_NOT_FOUND(400, "B000", "존재하지 않는 게시물입니다."),
@@ -36,6 +37,7 @@ public enum ErrorCode {
     POST_LIST_NOT_FOUND(400, "B010", "존재하지 않는 게시물 목록입니다."),
     BOOKMARK_ALREADY_EXIST(400, "B011", "이미 존재하는 북마크입니다."),
     BOOKMARK_NOT_FOUND(400, "B012", "존재하지 않는 북마크입니다."),
+    POST_IMAGE_NOT_FOUND(400, "B013", "존재하지 않는 게시물 이미지입니다."),
 
     // Member
     MEMBER_NOT_FOUND(400, "M000", "존재하지 않는 회원입니다."),
