@@ -44,9 +44,6 @@ public class PostService {
     @Transactional
     public PostImageCreateResponse createPostImage(MultipartFile multipartFile) throws IOException {
         final String dirName = "posts/temp";
-        if (multipartFile == null) {
-            throw new MultiPartFileNotFoundException();
-        }
 
         final Image image = amazonS3Util.uploadImage(multipartFile, dirName);
 
