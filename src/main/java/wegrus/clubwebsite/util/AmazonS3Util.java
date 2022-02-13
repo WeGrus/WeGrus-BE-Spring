@@ -27,7 +27,7 @@ public class AmazonS3Util {
     @Value("${cloud.aws.s3.bucket}")
     public String bucket;
 
-    public void createDirectory(String dirName){
+    public void createDirectory(String dirName) {
         amazonS3Client.putObject(bucket, dirName + "/", new ByteArrayInputStream(new byte[0]), new ObjectMetadata());
     }
 
@@ -53,6 +53,19 @@ public class AmazonS3Util {
         return uploadImageUrl;
     }
 
+    public Image updateImage(Image image, String prevDirName, String dirName) {
+        final String oldSource = prevDirName + "/" + image.getUuid() + "_" + image.getName() + "." + image.getType().toString();
+        final String newSource = dirName + "/" + image.getUuid() + "_" + image.getName() + "." + image.getType().toString();
+
+        moveS3(oldSource, newSource);
+        deleteS3(oldSource);
+
+        final String url = "https://igrus-webservice-bucket.s3.ap-northeast-2.amazonaws.com/";
+
+        image.setUrl(url.concat(newSource));
+        return image;
+    }
+
     /**
      * S3에 <b>File</b> 업로드
      */
@@ -64,8 +77,15 @@ public class AmazonS3Util {
     /**
      * S3에서 <b>File</b> 삭제
      */
-    private void deleteS3(String filename){
+    private void deleteS3(String filename) {
         amazonS3Client.deleteObject(bucket, filename);
+    }
+
+    /**
+     * S3에 저장된 <b>File</b> 복사
+     */
+    private void moveS3(String oldSource, String newSource) {
+        amazonS3Client.copyObject(bucket, oldSource, bucket, newSource);
     }
 
     /**
