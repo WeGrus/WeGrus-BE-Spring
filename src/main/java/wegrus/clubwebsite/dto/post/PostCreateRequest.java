@@ -17,9 +17,9 @@ import java.util.List;
 @AllArgsConstructor
 public class PostCreateRequest {
 
-    @ApiModelProperty(value = "게시판 종류", example = "자유 게시판", required = true)
-    @NotNull(message = "게시판 종류는 필수입니다.")
-    private String boardName;
+    @ApiModelProperty(value = "게시판 종류 id", example = "11", required = true)
+    @NotNull(message = "게시판 종류 id는 필수입니다.")
+    private Long boardId;
 
     @ApiModelProperty(value = "게시물 타입", example = "NORMAL", required = true)
     @NotNull(message = "게시물 타입(공지사항 여부)은 필수입니다.")
