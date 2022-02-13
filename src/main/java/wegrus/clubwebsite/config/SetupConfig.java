@@ -25,15 +25,10 @@ public class SetupConfig {
 
     @PostConstruct
     private void setup() {
-        initAwsS3Directory();
         initTableRoles();
         initTableBoardCategories();
         initTableBoards();
         initTableGroups();
-    }
-
-    private void initAwsS3Directory() {
-        amazonS3Util.createDirectory("posts/temp");
     }
 
     private void initTableBoards() {
