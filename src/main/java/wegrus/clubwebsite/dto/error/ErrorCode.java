@@ -69,6 +69,12 @@ public enum ErrorCode {
     CANNOT_BAN_MEMBER(400, "CM000", "강제 탈퇴시킬 수 없는 회원입니다."),
     CANNOT_DELEGATE_MEMBER(400, "CM001", "동아리원이 아닌 회원에게 동아리 회장 권한을 위임할 수 없습니다."),
 
+    // Group Management
+    CANNOT_PROMOTE_GROUP_MEMBER(400, "GM000", "그룹원에게만 그룹 임원 권한을 부여할 수 있습니다."),
+    CANNOT_DEGRADE_GROUP_MEMBER(400, "GM001", "해당 회원은 그룹 임원이 아니므로, 임원 권한을 해제할 수 없습니다."),
+    CANNOT_DELEGATE_GROUP_MEMBER(400, "GM002", "그룹원이 아닌 회원에게 그룹 회장 권한을 위임할 수 없습니다."),
+    CANNOT_KICK_GROUP_MEMBER(400, "GM003", "그룹원과 그룹 임원만 강제 탈퇴를 할 수 있습니다."),
+
     // File
     NOT_SUPPORTED_IMAGE_TYPE(400, "F000", "이미지 타입은 JPG, PNG, GIF만 지원합니다."),
     ;

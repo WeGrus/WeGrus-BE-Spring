@@ -40,7 +40,7 @@ public class GroupService {
         final Long memberId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
         final Group group = groupRepository.findById(groupId).orElseThrow(GroupNotFoundException::new);
 
-        validateGroupRole(groupId, memberId);
+        checkExecutiveOrPresident(groupId, memberId);
 
         page = (page == 0 ? 0 : page - 1);
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortType.getField()));
@@ -53,7 +53,7 @@ public class GroupService {
         groupRepository.findById(groupId).orElseThrow(GroupNotFoundException::new);
         memberRepository.findById(applicantId).orElseThrow(MemberNotFoundException::new);
 
-        validateGroupRole(groupId, memberId);
+        checkExecutiveOrPresident(groupId, memberId);
 
         final GroupMember groupMember = groupMemberRepository.findByMemberIdAndGroupId(applicantId, groupId).orElseThrow(ApplicantNotFoundException::new);
         if (!groupMember.getRole().equals(APPLICANT))
@@ -69,7 +69,7 @@ public class GroupService {
         groupRepository.findById(groupId).orElseThrow(GroupNotFoundException::new);
         memberRepository.findById(applicantId).orElseThrow(MemberNotFoundException::new);
 
-        validateGroupRole(groupId, memberId);
+        checkExecutiveOrPresident(groupId, memberId);
 
         final GroupMember groupMember = groupMemberRepository.findByMemberIdAndGroupId(applicantId, groupId).orElseThrow(ApplicantNotFoundException::new);
         if (!groupMember.getRole().equals(APPLICANT))
@@ -79,13 +79,89 @@ public class GroupService {
         return new StatusResponse(Status.SUCCESS);
     }
 
-    private void validateGroupRole(Long groupId, Long memberId) {
+    private void checkExecutiveOrPresident(Long groupId, Long memberId) {
         final GroupMember groupMember = groupMemberRepository.findByMemberIdAndGroupId(memberId, groupId).orElseThrow(GroupMemberNotFoundException::new);
         if (groupMember.getRole().equals(APPLICANT) || groupMember.getRole().equals(GroupRoles.MEMBER)) {
             final List<ErrorResponse.FieldError> errors = new ArrayList<>();
-            errors.add(new ErrorResponse.FieldError("groupRole", GroupRoles.EXECUTIVE.name(), INSUFFICIENT_AUTHORITY.getMessage()));
+            errors.add(new ErrorResponse.FieldError("groupRole", EXECUTIVE.name(), INSUFFICIENT_AUTHORITY.getMessage()));
             throw new InsufficientAuthorityException(errors);
         }
     }
 
+    @Transactional
+    public StatusResponse promote(Long groupId, Long targetId) {
+        final Long memberId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
+        groupRepository.findById(groupId).orElseThrow(GroupNotFoundException::new);
+        memberRepository.findById(targetId).orElseThrow(MemberNotFoundException::new);
+        final GroupMember president = groupMemberRepository.findByMemberIdAndGroupId(memberId, groupId).orElseThrow(GroupMemberNotFoundException::new);
+
+        checkPresident(president);
+
+        final GroupMember groupMember = groupMemberRepository.findByMemberIdAndGroupId(targetId, groupId).orElseThrow(GroupMemberNotFoundException::new);
+        if (!groupMember.getRole().equals(MEMBER))
+            throw new GroupMemberCannotPromoteException();
+        groupMember.updateRole(EXECUTIVE);
+
+        return new StatusResponse(Status.SUCCESS);
+    }
+
+    @Transactional
+    public StatusResponse degrade(Long groupId, Long targetId) {
+        final Long memberId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
+        groupRepository.findById(groupId).orElseThrow(GroupNotFoundException::new);
+        memberRepository.findById(targetId).orElseThrow(MemberNotFoundException::new);
+        final GroupMember president = groupMemberRepository.findByMemberIdAndGroupId(memberId, groupId).orElseThrow(GroupMemberNotFoundException::new);
+
+        checkPresident(president);
+
+        final GroupMember groupMember = groupMemberRepository.findByMemberIdAndGroupId(targetId, groupId).orElseThrow(GroupMemberNotFoundException::new);
+        if (!groupMember.getRole().equals(EXECUTIVE))
+            throw new GroupMemberCannotDegradeException();
+        groupMember.updateRole(MEMBER);
+
+        return new StatusResponse(Status.SUCCESS);
+    }
+
+    @Transactional
+    public StatusResponse delegate(Long groupId, Long targetId) {
+        final Long memberId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
+        groupRepository.findById(groupId).orElseThrow(GroupNotFoundException::new);
+        memberRepository.findById(targetId).orElseThrow(MemberNotFoundException::new);
+        final GroupMember president = groupMemberRepository.findByMemberIdAndGroupId(memberId, groupId).orElseThrow(GroupMemberNotFoundException::new);
+
+        checkPresident(president);
+
+        final GroupMember groupMember = groupMemberRepository.findByMemberIdAndGroupId(targetId, groupId).orElseThrow(GroupMemberNotFoundException::new);
+        if (!groupMember.getRole().equals(EXECUTIVE) && !groupMember.getRole().equals(MEMBER))
+            throw new GroupMemberCannotDelegateException();
+        president.updateRole(MEMBER);
+        groupMember.updateRole(PRESIDENT);
+
+        return new StatusResponse(Status.SUCCESS);
+    }
+
+    @Transactional
+    public StatusResponse kickMember(Long groupId, Long targetId) {
+        final Long memberId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
+        groupRepository.findById(groupId).orElseThrow(GroupNotFoundException::new);
+        memberRepository.findById(targetId).orElseThrow(MemberNotFoundException::new);
+        final GroupMember president = groupMemberRepository.findByMemberIdAndGroupId(memberId, groupId).orElseThrow(GroupMemberNotFoundException::new);
+
+        checkPresident(president);
+
+        final GroupMember groupMember = groupMemberRepository.findByMemberIdAndGroupId(targetId, groupId).orElseThrow(GroupMemberNotFoundException::new);
+        if (groupMember.getRole().equals(PRESIDENT) || groupMember.getRole().equals(APPLICANT))
+            throw new GroupMemberCannotKickException();
+        groupMemberRepository.delete(groupMember);
+
+        return new StatusResponse(Status.SUCCESS);
+    }
+
+    private void checkPresident(GroupMember groupMember) {
+        if (!groupMember.getRole().equals(PRESIDENT)) {
+            final List<ErrorResponse.FieldError> errors = new ArrayList<>();
+            errors.add(new ErrorResponse.FieldError("groupRole", PRESIDENT.name(), INSUFFICIENT_AUTHORITY.getMessage()));
+            throw new InsufficientAuthorityException(errors);
+        }
+    }
 }

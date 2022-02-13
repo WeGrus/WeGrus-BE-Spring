@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import wegrus.clubwebsite.dto.StatusResponse;
 import wegrus.clubwebsite.dto.member.MemberDto;
 import wegrus.clubwebsite.dto.member.MemberSortType;
-import wegrus.clubwebsite.dto.result.ResultCode;
 import wegrus.clubwebsite.dto.result.ResultResponse;
 import wegrus.clubwebsite.service.GroupService;
 
@@ -76,5 +75,61 @@ public class GroupController {
         final StatusResponse response = groupService.reject(groupId, memberId);
 
         return ResponseEntity.ok(ResultResponse.of(REJECT_APPLICANT_SUCCESS, response));
+    }
+    
+    @ApiOperation(value = "그룹 임원 권한 부여")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "groupId", value = "그룹 PK", example = "1", required = true),
+            @ApiImplicitParam(name = "memberId", value = "회원 PK", example = "1", required = true)
+    })
+    @PatchMapping("/president/promote")
+    public ResponseEntity<ResultResponse> promote(
+            @NotNull(message = "그룹 PK는 필수입니다.") @RequestParam Long groupId,
+            @NotNull(message = "회원 PK는 필수입니다.") Long memberId) {
+        final StatusResponse response = groupService.promote(groupId, memberId);
+
+        return ResponseEntity.ok(ResultResponse.of(PROMOTE_MEMBER_SUCCESS, response));
+    }
+
+    @ApiOperation(value = "그룹 임원 권한 해제")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "groupId", value = "그룹 PK", example = "1", required = true),
+            @ApiImplicitParam(name = "memberId", value = "회원 PK", example = "1", required = true)
+    })
+    @PatchMapping("/president/degrade")
+    public ResponseEntity<ResultResponse> degrade(
+            @NotNull(message = "그룹 PK는 필수입니다.") @RequestParam Long groupId,
+            @NotNull(message = "회원 PK는 필수입니다.") Long memberId) {
+        final StatusResponse response = groupService.degrade(groupId, memberId);
+
+        return ResponseEntity.ok(ResultResponse.of(DEGRADE_MEMBER_SUCCESS, response));
+    }
+
+    @ApiOperation(value = "그룹 회장 위임")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "groupId", value = "그룹 PK", example = "1", required = true),
+            @ApiImplicitParam(name = "memberId", value = "회원 PK", example = "1", required = true)
+    })
+    @PatchMapping("/president/delegate")
+    public ResponseEntity<ResultResponse> delegate(
+            @NotNull(message = "그룹 PK는 필수입니다.") @RequestParam Long groupId,
+            @NotNull(message = "회원 PK는 필수입니다.") Long memberId) {
+        final StatusResponse response = groupService.delegate(groupId, memberId);
+
+        return ResponseEntity.ok(ResultResponse.of(DEGRADE_MEMBER_SUCCESS, response));
+    }
+
+    @ApiOperation(value = "그룹원 강제 탈퇴")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "groupId", value = "그룹 PK", example = "1", required = true),
+            @ApiImplicitParam(name = "memberId", value = "회원 PK", example = "1", required = true)
+    })
+    @PatchMapping("/president/kick")
+    public ResponseEntity<ResultResponse> kickMember(
+            @NotNull(message = "그룹 PK는 필수입니다.") @RequestParam Long groupId,
+            @NotNull(message = "회원 PK는 필수입니다.") Long memberId) {
+        final StatusResponse response = groupService.kickMember(groupId, memberId);
+
+        return ResponseEntity.ok(ResultResponse.of(KICK_GROUP_MEMBER_SUCCESS, response));
     }
 }

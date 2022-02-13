@@ -2,9 +2,9 @@ package wegrus.clubwebsite.exception;
 
 import wegrus.clubwebsite.dto.error.ErrorCode;
 
-public class CannotDelegateMember extends BusinessException {
+public class GroupMemberCannotDelegateException extends BusinessException {
 
-    public CannotDelegateMember() {
+    public GroupMemberCannotDelegateException() {
         super(ErrorCode.CANNOT_DELEGATE_GROUP_MEMBER);
     }
 }
