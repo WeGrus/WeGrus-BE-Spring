@@ -74,17 +74,10 @@ public class ClubService {
         }
     }
 
-    public Page<RequestDto> getRequestDtoPage(int page, int size, MemberRoles role) {
-        final Set<MemberRoles> roles = Set.of(ROLE_MEMBER, ROLE_GROUP_PRESIDENT, ROLE_CLUB_EXECUTIVE);
-        if (!roles.contains(role)) {
-            List<ErrorResponse.FieldError> errors = new ArrayList<>();
-            errors.add(new ErrorResponse.FieldError("role", role.name(), CANNOT_REQUEST_AUTHORITY.getMessage()));
-            throw new CannotRequestAuthorityException(errors);
-        }
-
+    public Page<RequestDto> getRequestDtoPage(int page, int size) {
         page = (page == 0 ? 0 : page - 1);
         Pageable pageable = PageRequest.of(page, size);
-        return requestRepository.findRequestDtoPageByRole(role, pageable);
+        return requestRepository.findRequestDtoPageByRole(ROLE_MEMBER, pageable);
     }
 
     public Page<MemberDto> getMemberDtoPage(int page, int size, MemberSortType type, Sort.Direction direction) {
