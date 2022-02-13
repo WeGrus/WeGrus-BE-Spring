@@ -60,9 +60,7 @@ public class AmazonS3Util {
         moveS3(oldSource, newSource);
         deleteS3(oldSource);
 
-        final String url = "https://igrus-webservice-bucket.s3.ap-northeast-2.amazonaws.com/";
-
-        image.setUrl(url.concat(newSource));
+        image.setUrl(amazonS3Client.getUrl(bucket, newSource).toString());
         return image;
     }
 
