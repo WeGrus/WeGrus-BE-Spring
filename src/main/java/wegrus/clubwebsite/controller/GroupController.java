@@ -14,6 +14,7 @@ import wegrus.clubwebsite.dto.StatusResponse;
 import wegrus.clubwebsite.dto.member.MemberDto;
 import wegrus.clubwebsite.dto.member.MemberSortType;
 import wegrus.clubwebsite.dto.result.ResultResponse;
+import wegrus.clubwebsite.entity.group.GroupRoles;
 import wegrus.clubwebsite.service.GroupService;
 
 import javax.validation.constraints.NotNull;
@@ -28,26 +29,6 @@ import static wegrus.clubwebsite.dto.result.ResultCode.*;
 public class GroupController {
 
     private final GroupService groupService;
-
-    @ApiOperation(value = "그룹 가입 신청 목록 조회")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "page", value = "페이지", example = "1", required = true),
-            @ApiImplicitParam(name = "size", value = "페이지당 개수", example = "10", required = true),
-            @ApiImplicitParam(name = "sortType", value = "정렬 타입", example = "ID", required = true),
-            @ApiImplicitParam(name = "direction", value = "정렬 방향", example = "ASC", required = true),
-            @ApiImplicitParam(name = "groupId", value = "그룹 PK", example = "1", required = true)
-    })
-    @GetMapping("/executives/applicants")
-    public ResponseEntity<ResultResponse> getApplicants(
-            @NotNull(message = "page는 필수입니다.") @RequestParam int page,
-            @NotNull(message = "size는 필수입니다.") @RequestParam int size,
-            @NotNull(message = "정렬 타입은 필수입니다.") @RequestParam MemberSortType sortType,
-            @NotNull(message = "정렬 방향은 필수입니다.") @RequestParam Sort.Direction direction,
-            @NotNull(message = "그룹 PK는 필수입니다.") @RequestParam Long groupId) {
-        final Page<MemberDto> response = groupService.getApplicants(groupId, page, size, sortType, direction);
-
-        return ResponseEntity.ok(ResultResponse.of(GET_GROUP_APPLICANTS_SUCCESS, response));
-    }
 
     @ApiOperation(value = "그룹 가입 승인")
     @ApiImplicitParams({
@@ -131,5 +112,27 @@ public class GroupController {
         final StatusResponse response = groupService.kickMember(groupId, memberId);
 
         return ResponseEntity.ok(ResultResponse.of(KICK_GROUP_MEMBER_SUCCESS, response));
+    }
+
+    @ApiOperation(value = "그룹원 목록 조회")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "groupId", value = "그룹 PK", example = "1", required = true),
+            @ApiImplicitParam(name = "role", value = "그룹 권한", example = "MEMBER", required = true),
+            @ApiImplicitParam(name = "page", value = "페이지", example = "1", required = true),
+            @ApiImplicitParam(name = "size", value = "페이지당 개수", example = "10", required = true),
+            @ApiImplicitParam(name = "type", value = "정렬 타입", example = "ID", required = true),
+            @ApiImplicitParam(name = "direction", value = "정렬 방향", example = "ASC", required = true)
+    })
+    @GetMapping("/executives/members")
+    public ResponseEntity<ResultResponse> getMembers(
+            @NotNull(message = "그룹 PK는 필수입니다.") @RequestParam Long groupId,
+            @NotNull(message = "그룹 PK는 필수입니다.") @RequestParam GroupRoles role,
+            @NotNull(message = "page는 필수입니다.") @RequestParam int page,
+            @NotNull(message = "size는 필수입니다.") @RequestParam int size,
+            @NotNull(message = "정렬 타입은 필수입니다.") @RequestParam MemberSortType type,
+            @NotNull(message = "정렬 방향은 필수입니다.") @RequestParam Sort.Direction direction) {
+        final Page<MemberDto> response = groupService.getMemberDtoPage(groupId, role, page, size, type, direction);
+
+        return ResponseEntity.ok(ResultResponse.of(GET_GROUP_MEMBERS_SUCCESS, response));
     }
 }

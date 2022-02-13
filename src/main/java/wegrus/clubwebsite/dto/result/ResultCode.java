@@ -43,7 +43,7 @@ public enum ResultCode {
     RESET_AUTHORITIES_SUCCESS(200, "CM107", "전체 동아리원 권한 초기화에 성공하였습니다."),
 
     // Group management
-    GET_GROUP_APPLICANTS_SUCCESS(200, "GM100", "그룹 가입 신청 목록 조회에 성공하였습니다."),
+    GET_GROUP_MEMBERS_SUCCESS(200, "GM100", "그룹원 목록 조회에 성공하였습니다."),
     APPROVE_APPLICANT_SUCCESS(200, "GM101", "그룹 가입 신청 승인에 성공하였습니다."),
     REJECT_APPLICANT_SUCCESS(200, "GM102", "그룹 가입 신청 거절에 성공하였습니다."),
     PROMOTE_MEMBER_SUCCESS(200, "GM103", "그룹 임원 권한 부여에 성공하였습니다."),

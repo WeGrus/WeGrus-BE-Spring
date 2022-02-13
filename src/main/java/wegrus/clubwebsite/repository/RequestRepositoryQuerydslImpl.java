@@ -33,6 +33,12 @@ public class RequestRepositoryQuerydslImpl implements RequestRepositoryQuerydsl 
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
+
+        final long total = queryFactory
+                .selectFrom(request)
+                .where(request.role.name.eq(memberRoles.name()))
+                .fetchCount();
+
         final List<Long> memberIds = requests.stream()
                 .map(r -> r.getMember().getId())
                 .collect(Collectors.toList());
@@ -50,6 +56,6 @@ public class RequestRepositoryQuerydslImpl implements RequestRepositoryQuerydsl 
                 .map(r -> new RequestDto(r.getId(), r.getRole().getName(), r.getCreatedDate(), memberMap.get(r.getMember().getId()).get(0)))
                 .collect(Collectors.toList());
 
-        return new PageImpl<>(requestDtos, pageable, requestDtos.size());
+        return new PageImpl<>(requestDtos, pageable, total);
     }
 }
