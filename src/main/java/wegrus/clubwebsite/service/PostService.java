@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import wegrus.clubwebsite.dto.post.*;
 import wegrus.clubwebsite.entity.member.MemberRole;
 import wegrus.clubwebsite.entity.member.MemberRoles;
@@ -15,11 +16,13 @@ import wegrus.clubwebsite.entity.post.*;
 import wegrus.clubwebsite.entity.member.Member;
 import wegrus.clubwebsite.exception.*;
 import wegrus.clubwebsite.repository.*;
+import wegrus.clubwebsite.util.AmazonS3Util;
+import wegrus.clubwebsite.vo.Image;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 
 @RequiredArgsConstructor
 @Service
@@ -27,6 +30,7 @@ public class PostService {
     private final BoardRepository boardRepository;
     private final BoardCategoryRepository boardCategoryRepository;
     private final PostRepository postRepository;
+    private final PostImageRepository postImageRepository;
     private final MemberRepository memberRepository;
     private final MemberRoleRepository memberRoleRepository;
     private final ReplyRepository replyRepository;
@@ -35,11 +39,26 @@ public class PostService {
     private final ViewRepository viewRepository;
     private final BookmarkRepository bookmarkRepository;
 
+    private final AmazonS3Util amazonS3Util;
+
+    @Transactional
+    public PostImageCreateResponse createPostImage(MultipartFile multipartFile) throws IOException {
+        final String dirName = "posts/temp";
+
+        final Image image = amazonS3Util.uploadImage(multipartFile, dirName);
+
+        PostImage postImage = PostImage.builder()
+                .image(image)
+                .build();
+
+        return new PostImageCreateResponse(image.getUrl(), postImageRepository.save(postImage).getId());
+    }
+
     @Transactional
     public Long create(PostCreateRequest request) {
         String memberId = SecurityContextHolder.getContext().getAuthentication().getName();
         final Member member = memberRepository.findById(Long.valueOf(memberId)).orElseThrow(MemberNotFoundException::new);
-        final Board board = boardRepository.findByName(request.getBoardName()).orElseThrow(BoardNotFoundException::new);
+        final Board board = boardRepository.findById(request.getBoardId()).orElseThrow(BoardNotFoundException::new);
         PostState state = PostState.ACTIVATE; // 생성되는 게시물은 모두 활성화 되어있는 상태
 
         Post post = Post.builder()
@@ -52,7 +71,28 @@ public class PostService {
                 .state(state)
                 .build();
 
-        return postRepository.save(post).getId();
+        final Long postId = postRepository.save(post).getId();
+
+        // 게시물 사진 이동경로 변경
+        List<Long> postImageIds = request.getPostImageIds();
+
+        if (!postImageIds.isEmpty()) {
+            List<PostImage> postImages = postImageIds.stream()
+                    .map(m -> postImageRepository.findById(m).orElseThrow(PostImageNotFoundException::new))
+                    .collect(Collectors.toList());
+
+            final String prevDirName = "posts/temp";
+            final String dirName = "posts/" + postId;
+
+            amazonS3Util.createDirectory(dirName);
+
+            for (PostImage postImage : postImages) {
+                postImage.updatePost(post);
+                final Image image = amazonS3Util.updateImage(postImage.getImage(), prevDirName, dirName);
+            }
+        }
+
+        return postId;
     }
 
     @Transactional
@@ -95,6 +135,13 @@ public class PostService {
 
         // 북마크 삭제
         bookmarkRepository.deleteBookmarksByPost(post);
+
+        // 이미지 삭제
+        List<PostImage> postImages = post.getImages();
+        for (PostImage postImage : postImages) {
+            amazonS3Util.deleteImage(postImage.getImage(), "posts/" + postId);
+        }
+        postImageRepository.deletePostImagesByPost(post);
 
         postRepository.delete(post);
     }

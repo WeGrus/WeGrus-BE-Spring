@@ -48,6 +48,9 @@ public class Post {
     @OneToMany(mappedBy = "post")
     private List<Bookmark> bookmarks = new ArrayList<>();
 
+    @OneToMany(mappedBy = "post")
+    private List<PostImage> images = new ArrayList<>();
+
     @Enumerated(EnumType.STRING)
     @Column(name = "post_type")
     private PostType type;

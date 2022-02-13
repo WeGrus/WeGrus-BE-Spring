@@ -9,6 +9,7 @@ import wegrus.clubwebsite.entity.post.PostType;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 @ApiModel(description = "게시물 등록 요청 데이터 모델")
 @Getter
@@ -16,9 +17,9 @@ import javax.validation.constraints.NotNull;
 @AllArgsConstructor
 public class PostCreateRequest {
 
-    @ApiModelProperty(value = "게시판 종류", example = "FREE", required = true)
-    @NotNull(message = "게시판 종류는 필수입니다.")
-    private String boardName;
+    @ApiModelProperty(value = "게시판 종류 id", example = "11", required = true)
+    @NotNull(message = "게시판 종류 id는 필수입니다.")
+    private Long boardId;
 
     @ApiModelProperty(value = "게시물 타입", example = "NORMAL", required = true)
     @NotNull(message = "게시물 타입(공지사항 여부)은 필수입니다.")
@@ -34,5 +35,8 @@ public class PostCreateRequest {
 
     @ApiModelProperty(value = "비밀글 여부", example = "false", required = true)
     private boolean secretFlag;
+
+    @ApiModelProperty(value = "이미지 pk 리스트", example = "[1, 2, 3]", required = true)
+    private List<Long> postImageIds;
 
 }

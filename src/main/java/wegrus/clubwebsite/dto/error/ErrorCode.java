@@ -36,6 +36,7 @@ public enum ErrorCode {
     POST_LIST_NOT_FOUND(400, "B010", "존재하지 않는 게시물 목록입니다."),
     BOOKMARK_ALREADY_EXIST(400, "B011", "이미 존재하는 북마크입니다."),
     BOOKMARK_NOT_FOUND(400, "B012", "존재하지 않는 북마크입니다."),
+    POST_IMAGE_NOT_FOUND(400, "B013", "존재하지 않는 게시물 이미지입니다."),
 
     // Member
     MEMBER_NOT_FOUND(400, "M000", "존재하지 않는 회원입니다."),

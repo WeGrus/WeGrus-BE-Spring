@@ -8,6 +8,7 @@ import wegrus.clubwebsite.entity.group.Groups;
 import wegrus.clubwebsite.entity.member.MemberRoles;
 import wegrus.clubwebsite.entity.post.BoardCategories;
 import wegrus.clubwebsite.entity.post.Boards;
+import wegrus.clubwebsite.util.AmazonS3Util;
 
 import javax.annotation.PostConstruct;
 import java.sql.PreparedStatement;
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
 public class SetupConfig {
 
     private final JdbcTemplate jdbcTemplate;
+    private final AmazonS3Util amazonS3Util;
 
     @PostConstruct
     private void setup() {
@@ -38,7 +40,7 @@ public class SetupConfig {
         );
 
         final List<String> boards = Arrays.stream(Boards.values())
-                .map(Enum::name)
+                .map(Boards::getKrName)
                 .collect(Collectors.toList());
 
         final String boardSql = "INSERT INTO boards (`board_category_id`, `board_name`) VALUES(?, ?)";
