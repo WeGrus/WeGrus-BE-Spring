@@ -191,14 +191,25 @@ public class ClubService {
     @Transactional
     public StatusResponse resetAuthorities() {
         final List<Long> roleIds = new ArrayList<>();
-        roleRepository.findAll().forEach(r -> {
+        final List<Role> roles = roleRepository.findAll();
+        roles.forEach(r -> {
             if (r.getName().equals(ROLE_CLUB_EXECUTIVE.name()) || r.getName().equals(ROLE_GROUP_EXECUTIVE.name()) ||
                     r.getName().equals(ROLE_GROUP_PRESIDENT.name()) || r.getName().equals(ROLE_MEMBER.name()))
                 roleIds.add(r.getId());
         });
 
+
         final List<MemberRole> memberRoles = memberRoleRepository.findAllByRoleIdIn(roleIds);
         memberRoleRepository.deleteAllInBatch(memberRoles);
+
+        final Long memberId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
+        final Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
+        Role role = null;
+        for (Role r : roles) {
+            if (r.getName().equals(ROLE_MEMBER.name()))
+                role = r;
+        }
+        memberRoleRepository.save(new MemberRole(member, role));
         return new StatusResponse(Status.SUCCESS);
     }
 }

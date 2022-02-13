@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -59,15 +60,25 @@ public class MailServiceGmail implements MailService {
     }
 
     @Override
-    public int sendCertificationCode(String receiver) {
-        final int code = (int) (Math.random() * 1000000);
+    public String sendCertificationCode(String receiver) {
+        final String code = generateCode(6);
+
         final SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(receiver);
         message.setFrom(SENDER);
         message.setSubject(VERIFY_CODE);
-        message.setText(String.valueOf(code));
+        message.setText(code);
 
         mailSender.send(message);
         return code;
+    }
+
+    private String generateCode(int length) {
+        final StringBuilder builder = new StringBuilder();
+        final Random random = new Random();
+        for (int i = 0; i < length; i++)
+            builder.append(random.nextInt(10));
+
+        return builder.toString();
     }
 }
