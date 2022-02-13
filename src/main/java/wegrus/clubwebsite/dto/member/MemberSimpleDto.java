@@ -4,7 +4,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import wegrus.clubwebsite.entity.member.Member;
-import wegrus.clubwebsite.entity.member.MemberGrade;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -18,7 +17,8 @@ public class MemberSimpleDto {
     private String name;
     private String studentId;
     private String department;
-    private MemberGrade grade;
+    private String grade;
+    private String gender;
     private LocalDateTime createdDate;
     private String introduce;
     private String imageUrl;
@@ -29,7 +29,8 @@ public class MemberSimpleDto {
         this.name = member.getName();
         this.studentId = member.getStudentId().substring(2, 4);
         this.department = member.getDepartment();
-        this.grade = member.getGrade();
+        this.grade = member.getGrade().getValue();
+        this.gender = member.getGender().getValue();
         this.createdDate = member.getCreatedDate();
         this.introduce = member.getIntroduce();
         this.imageUrl = member.getImage().getUrl();

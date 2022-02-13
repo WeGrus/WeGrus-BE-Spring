@@ -14,7 +14,7 @@ public class GroupDto {
 
     private Long id;
     private String name;
-    private GroupRoles role;
+    private String  role;
     private LocalDateTime joinDate;
 
     @JsonIgnore
@@ -24,7 +24,7 @@ public class GroupDto {
     public GroupDto(Long id, String name, GroupRoles role, LocalDateTime joinDate, Long memberId) {
         this.id = id;
         this.name = name;
-        this.role = role;
+        this.role = role.getValue();
         this.joinDate = joinDate;
         this.memberId = memberId;
     }

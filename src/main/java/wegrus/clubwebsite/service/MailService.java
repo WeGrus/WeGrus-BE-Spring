@@ -8,5 +8,5 @@ public interface MailService {
     String VERIFY_CODE = "[IGRUS] 인증 코드 안내";
     String SENDER = "GraduProject11@gmail.com";
     void sendSchoolMailVerification(String receiver, String key) throws MessagingException;
-    int sendCertificationCode(String email);
+    String sendCertificationCode(String email);
 }
