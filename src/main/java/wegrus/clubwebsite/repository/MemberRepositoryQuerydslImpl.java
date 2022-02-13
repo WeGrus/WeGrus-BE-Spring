@@ -11,6 +11,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import wegrus.clubwebsite.dto.member.*;
+import wegrus.clubwebsite.entity.group.Group;
 import wegrus.clubwebsite.entity.group.GroupRoles;
 import wegrus.clubwebsite.entity.member.*;
 
@@ -408,6 +409,54 @@ public class MemberRepositoryQuerydslImpl implements MemberRepositoryQuerydsl {
         );
 
         return new PageImpl<>(memberDtos, pageable, memberDtos.size());
+    }
+
+    @Override
+    public Page<MemberDto> findMemberDtoPageByGroupAndRole(Pageable pageable, Group group, GroupRoles applicant) {
+        final List<Member> members = queryFactory
+                .selectFrom(member)
+                .innerJoin(member.roles, memberRole).fetchJoin()
+                .innerJoin(memberRole.role, role).fetchJoin()
+                .where(
+                        JPAExpressions
+                                .selectFrom(groupMember)
+                                .where(groupMember.group.id.eq(group.getId()).and(groupMember.member.eq(member)).and(groupMember.role.eq(applicant)))
+                                .exists()
+                )
+                .orderBy(memberSort(pageable))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        final List<Long> memberIds = members.stream()
+                .map(Member::getId)
+                .collect(Collectors.toList());
+        final Map<Long, List<GroupDto>> groupDtoMap = queryFactory
+                .select(new QGroupDto(
+                        groupMember.group.id,
+                        groupMember.group.name,
+                        groupMember.role,
+                        groupMember.createdDate,
+                        groupMember.member.id
+                ))
+                .from(groupMember)
+                .where(groupMember.member.id.in(memberIds))
+                .innerJoin(groupMember.group)
+                .fetch()
+                .stream()
+                .collect(Collectors.groupingBy(GroupDto::getMemberId));
+
+        final List<MemberDto> memberDtos = members.stream()
+                .map(MemberDto::new)
+                .collect(Collectors.toList());
+        memberDtos.forEach(m -> {
+                    if (groupDtoMap.get(m.getId()) != null)
+                        m.setGroups(groupDtoMap.get(m.getId()));
+                }
+        );
+
+        return new PageImpl<>(memberDtos, pageable, memberDtos.size());
+
     }
 
     private BooleanExpression search(MemberSearchType searchType, String word) {
