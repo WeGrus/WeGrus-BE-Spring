@@ -62,6 +62,8 @@ public enum ErrorCode {
     // Group
     GROUP_NOT_FOUND(400, "G000", "존재하지 않는 그룹입니다."),
     GROUP_MEMBER_ALREADY_EXIST(400, "G001", "이미 해당 그룹에 속한 회원입니다."),
+    GROUP_MEMBER_NOT_FOUND(400, "G002", "해당 그룹에 가입하지 않은 회원입니다."),
+    APPLICANT_NOT_FOUND(400, "G003", "해당 그룹에 가입 신청을 하지 않은 회원입니다."),
 
     // Club management
     CANNOT_BAN_MEMBER(400, "CM000", "강제 탈퇴시킬 수 없는 회원입니다."),

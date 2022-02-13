@@ -6,6 +6,8 @@ import wegrus.clubwebsite.dto.member.MemberDto;
 import wegrus.clubwebsite.dto.member.MemberRoleSearchType;
 import wegrus.clubwebsite.dto.member.MemberSearchType;
 import wegrus.clubwebsite.dto.member.MemberSimpleDto;
+import wegrus.clubwebsite.entity.group.Group;
+import wegrus.clubwebsite.entity.group.GroupRoles;
 import wegrus.clubwebsite.entity.member.Gender;
 import wegrus.clubwebsite.entity.member.MemberAcademicStatus;
 import wegrus.clubwebsite.entity.member.MemberGrade;
@@ -31,4 +33,6 @@ public interface MemberRepositoryQuerydsl {
     Page<MemberDto> findMemberDtoPageByAuthority(Pageable pageable, MemberRoleSearchType authority);
 
     Page<MemberDto> findMemberDtoPageByGroup(Pageable pageable, Long groupId);
+
+    Page<MemberDto> findMemberDtoPageByGroupAndRole(Pageable pageable, Group group, GroupRoles applicant);
 }

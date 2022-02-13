@@ -56,7 +56,7 @@ public class ClubService {
             final Set<String> roles = Set.of(ROLE_MEMBER.name(), ROLE_GROUP_PRESIDENT.name());
             if (request.getRole().getName().equals(ROLE_CLUB_EXECUTIVE.name())) {
                 List<ErrorResponse.FieldError> errors = new ArrayList<>();
-                errors.add(new ErrorResponse.FieldError("authority", ROLE_CLUB_PRESIDENT.name(), "해당 권한이 부족합니다."));
+                errors.add(new ErrorResponse.FieldError("authority", ROLE_CLUB_PRESIDENT.name(), INSUFFICIENT_AUTHORITY.getMessage()));
                 throw new InsufficientAuthorityException(errors);
             }
             saveMemberRole(request, role, applicant, roles);

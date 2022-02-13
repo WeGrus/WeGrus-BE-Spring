@@ -42,6 +42,11 @@ public enum ResultCode {
     DELEGATE_PRESIDENT_SUCCESS(200, "CM106", "동아리 회장 권한 위임에 성공하였습니다."),
     RESET_AUTHORITIES_SUCCESS(200, "CM107", "전체 동아리원 권한 초기화에 성공하였습니다."),
 
+    // Group management
+    GET_GROUP_APPLICANTS_SUCCESS(200, "GM100", "그룹 가입 신청 목록 조회에 성공하였습니다."),
+    APPROVE_APPLICANT_SUCCESS(200, "GM101", "그룹 가입 신청 승인에 성공하였습니다."),
+    REJECT_APPLICANT_SUCCESS(200, "GM102", "그룹 가입 신청 거절에 성공하였습니다."),
+
     // Post
     CREATE_POST_SUCCESS(200, "B100", "게시물 등록에 성공하였습니다."),
     UPDATE_POST_SUCCESS(200, "B101", "게시물 수정에 성공하였습니다."),
