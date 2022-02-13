@@ -3,6 +3,7 @@ package wegrus.clubwebsite.dto.member;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import wegrus.clubwebsite.entity.member.Gender;
 import wegrus.clubwebsite.entity.member.Member;
 import wegrus.clubwebsite.entity.member.MemberAcademicStatus;
 import wegrus.clubwebsite.entity.member.MemberGrade;
@@ -21,12 +22,13 @@ public class MemberDto {
     private String name;
     private String studentId;
     private String department;
-    private MemberGrade grade;
+    private String grade;
+    private String gender;
     private String phone;
     private LocalDateTime createdDate;
     private String introduce;
     private String imageUrl;
-    private MemberAcademicStatus academicStatus;
+    private String academicStatus;
     private List<String> roles = new ArrayList<>();
     private List<GroupDto> groups = new ArrayList<>();
 
@@ -36,12 +38,13 @@ public class MemberDto {
         this.name = member.getName();
         this.studentId = member.getStudentId();
         this.department = member.getDepartment();
-        this.grade = member.getGrade();
+        this.gender = member.getGender().getValue();
+        this.grade = member.getGrade().getValue();
         this.phone = member.getPhone();
         this.createdDate = member.getCreatedDate();
         this.introduce = member.getIntroduce();
         this.imageUrl = member.getImage().getUrl();
-        this.academicStatus = member.getAcademicStatus();
+        this.academicStatus = member.getAcademicStatus().getValue();
         member.getRoles()
                 .forEach(r -> this.roles.add(r.getRole().getName()));
     }
