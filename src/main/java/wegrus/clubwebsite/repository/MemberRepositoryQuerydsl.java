@@ -2,10 +2,7 @@ package wegrus.clubwebsite.repository;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import wegrus.clubwebsite.dto.member.MemberDto;
-import wegrus.clubwebsite.dto.member.MemberRoleSearchType;
-import wegrus.clubwebsite.dto.member.MemberSearchType;
-import wegrus.clubwebsite.dto.member.MemberSimpleDto;
+import wegrus.clubwebsite.dto.member.*;
 import wegrus.clubwebsite.entity.group.Group;
 import wegrus.clubwebsite.entity.group.GroupRoles;
 import wegrus.clubwebsite.entity.member.Gender;
@@ -35,4 +32,14 @@ public interface MemberRepositoryQuerydsl {
     Page<MemberDto> findMemberDtoPageByGroup(Pageable pageable, Long groupId);
 
     Page<MemberDto> findMemberDtoPageByGroupAndRole(Pageable pageable, Group group, GroupRoles applicant);
+
+    Page<MemberDto> findMemberDtoPageByWordContainingAtRequesterSearchType(Pageable pageable, RequesterSearchType type, String word);
+
+    Page<MemberDto> findMemberDtoPageByWordContainingAtSearchTypeAndGroup(Pageable pageable, Group group, MemberSearchType searchType, String word);
+
+    Page<MemberDto> findMemberDtoPageByGenderAndGroup(Pageable pageable, Group group, Gender gender);
+
+    Page<MemberDto> findMemberDtoPageByAcademicStatusAndGroup(Pageable pageable, Group group, MemberAcademicStatus academicStatus);
+
+    Page<MemberDto> findMemberDtoPageByGradeAndGroup(Pageable pageable, Group group, MemberGrade grade);
 }

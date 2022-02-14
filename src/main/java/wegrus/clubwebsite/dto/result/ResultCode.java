@@ -43,6 +43,7 @@ public enum ResultCode {
     RESET_AUTHORITIES_SUCCESS(200, "CM107", "전체 동아리원 권한 초기화에 성공하였습니다."),
     REJECT_AUTHORITY_REQUEST_SUCCESS(200, "CM108", "회원 권한 요청 거절에 성공하였습니다."),
     EMPOWER_MEMBER_SUCCESS(200, "CM109", "회원 권한 부여에 성공하였습니다."),
+    EMPOWER_GROUP_PRESIDENT_SUCCESS(200, "CM110", "그룹 회장 권한 부여에 성공하였습니다."),
 
     // Group management
     GET_GROUP_MEMBERS_SUCCESS(200, "GM100", "그룹원 목록 조회에 성공하였습니다."),
@@ -51,6 +52,7 @@ public enum ResultCode {
     PROMOTE_MEMBER_SUCCESS(200, "GM103", "그룹 임원 권한 부여에 성공하였습니다."),
     DEGRADE_MEMBER_SUCCESS(200, "GM104", "그룹 임원 권한 해제에 성공하였습니다."),
     KICK_GROUP_MEMBER_SUCCESS(200, "GM105", "그룹원 강제 탈퇴에 성공하였습니다."),
+    SEARCH_GROUP_MEMBER_SUCCESS(200, "GM106", "그룹원 검색에 성공하였습니다."),
 
     // Post
     CREATE_POST_SUCCESS(200, "B100", "게시물 등록에 성공하였습니다."),

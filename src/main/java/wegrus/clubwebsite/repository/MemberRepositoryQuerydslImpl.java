@@ -513,6 +513,289 @@ public class MemberRepositoryQuerydslImpl implements MemberRepositoryQuerydsl {
 
     }
 
+    @Override
+    public Page<MemberDto> findMemberDtoPageByWordContainingAtRequesterSearchType(Pageable pageable, RequesterSearchType type, String word) {
+        final List<Member> members = queryFactory
+                .selectFrom(member)
+                .innerJoin(member.roles, memberRole).fetchJoin()
+                .innerJoin(memberRole.role, role).fetchJoin()
+                .where(searchRequester(type, word))
+                .orderBy(memberSort(pageable))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        final long total = queryFactory
+                .selectFrom(member)
+                .where(searchRequester(type, word))
+                .fetchCount();
+
+        final List<Long> memberIds = members.stream()
+                .map(Member::getId)
+                .collect(Collectors.toList());
+        final Map<Long, List<GroupDto>> groupDtoMap = queryFactory
+                .select(new QGroupDto(
+                        groupMember.group.id,
+                        groupMember.group.name,
+                        groupMember.role,
+                        groupMember.createdDate,
+                        groupMember.member.id
+                ))
+                .from(groupMember)
+                .where(groupMember.member.id.in(memberIds).and(groupMember.role.ne(GroupRoles.APPLICANT)))
+                .innerJoin(groupMember.group)
+                .fetch()
+                .stream()
+                .collect(Collectors.groupingBy(GroupDto::getMemberId));
+
+        final List<MemberDto> memberDtos = members.stream()
+                .map(MemberDto::new)
+                .collect(Collectors.toList());
+        memberDtos.forEach(m -> {
+                    if (groupDtoMap.get(m.getId()) != null)
+                        m.setGroups(groupDtoMap.get(m.getId()));
+                }
+        );
+
+        return new PageImpl<>(memberDtos, pageable, total);
+    }
+
+    @Override
+    public Page<MemberDto> findMemberDtoPageByWordContainingAtSearchTypeAndGroup(Pageable pageable, Group group, MemberSearchType searchType, String word) {
+        final List<Long> ids = queryFactory
+                .selectFrom(groupMember)
+                .innerJoin(groupMember.member, member)
+                .where(groupMember.group.eq(group))
+                .fetch()
+                .stream()
+                .map(g -> g.getMember().getId())
+                .collect(Collectors.toList());
+
+        final List<Member> members = queryFactory
+                .selectFrom(member)
+                .innerJoin(member.roles, memberRole).fetchJoin()
+                .innerJoin(memberRole.role, role).fetchJoin()
+                .where(member.id.in(ids).and(search(searchType, word)))
+                .orderBy(memberSort(pageable))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        final long total = queryFactory
+                .selectFrom(member)
+                .where(member.id.in(ids).and(search(searchType, word)))
+                .fetchCount();
+
+        final List<Long> memberIds = members.stream()
+                .map(Member::getId)
+                .collect(Collectors.toList());
+        final Map<Long, List<GroupDto>> groupDtoMap = queryFactory
+                .select(new QGroupDto(
+                        groupMember.group.id,
+                        groupMember.group.name,
+                        groupMember.role,
+                        groupMember.createdDate,
+                        groupMember.member.id
+                ))
+                .from(groupMember)
+                .where(groupMember.member.id.in(memberIds).and(groupMember.role.ne(GroupRoles.APPLICANT)))
+                .innerJoin(groupMember.group)
+                .fetch()
+                .stream()
+                .collect(Collectors.groupingBy(GroupDto::getMemberId));
+
+        final List<MemberDto> memberDtos = members.stream()
+                .map(MemberDto::new)
+                .collect(Collectors.toList());
+        memberDtos.forEach(m -> {
+                    if (groupDtoMap.get(m.getId()) != null)
+                        m.setGroups(groupDtoMap.get(m.getId()));
+                }
+        );
+
+        return new PageImpl<>(memberDtos, pageable, total);
+    }
+
+    @Override
+    public Page<MemberDto> findMemberDtoPageByGenderAndGroup(Pageable pageable, Group group, Gender gender) {
+        final List<Long> ids = queryFactory
+                .selectFrom(groupMember)
+                .innerJoin(groupMember.member, member)
+                .where(groupMember.group.eq(group))
+                .fetch()
+                .stream()
+                .map(g -> g.getMember().getId())
+                .collect(Collectors.toList());
+
+        final List<Member> members = queryFactory
+                .selectFrom(member)
+                .innerJoin(member.roles, memberRole).fetchJoin()
+                .innerJoin(memberRole.role, role).fetchJoin()
+                .where(member.id.in(ids).and(member.gender.eq(gender)))
+                .orderBy(memberSort(pageable))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        final long total = queryFactory
+                .selectFrom(member)
+                .where(member.id.in(ids).and(member.gender.eq(gender)))
+                .fetchCount();
+
+        final List<Long> memberIds = members.stream()
+                .map(Member::getId)
+                .collect(Collectors.toList());
+        final Map<Long, List<GroupDto>> groupDtoMap = queryFactory
+                .select(new QGroupDto(
+                        groupMember.group.id,
+                        groupMember.group.name,
+                        groupMember.role,
+                        groupMember.createdDate,
+                        groupMember.member.id
+                ))
+                .from(groupMember)
+                .where(groupMember.member.id.in(memberIds).and(groupMember.role.ne(GroupRoles.APPLICANT)))
+                .innerJoin(groupMember.group)
+                .fetch()
+                .stream()
+                .collect(Collectors.groupingBy(GroupDto::getMemberId));
+
+        final List<MemberDto> memberDtos = members.stream()
+                .map(MemberDto::new)
+                .collect(Collectors.toList());
+        memberDtos.forEach(m -> {
+                    if (groupDtoMap.get(m.getId()) != null)
+                        m.setGroups(groupDtoMap.get(m.getId()));
+                }
+        );
+
+        return new PageImpl<>(memberDtos, pageable, total);
+    }
+
+    @Override
+    public Page<MemberDto> findMemberDtoPageByAcademicStatusAndGroup(Pageable pageable, Group group, MemberAcademicStatus academicStatus) {
+        final List<Long> ids = queryFactory
+                .selectFrom(groupMember)
+                .innerJoin(groupMember.member, member)
+                .where(groupMember.group.eq(group))
+                .fetch()
+                .stream()
+                .map(g -> g.getMember().getId())
+                .collect(Collectors.toList());
+
+        final List<Member> members = queryFactory
+                .selectFrom(member)
+                .innerJoin(member.roles, memberRole).fetchJoin()
+                .innerJoin(memberRole.role, role).fetchJoin()
+                .where(member.id.in(ids).and(member.academicStatus.eq(academicStatus)))
+                .orderBy(memberSort(pageable))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        final long total = queryFactory
+                .selectFrom(member)
+                .where(member.id.in(ids).and(member.academicStatus.eq(academicStatus)))
+                .fetchCount();
+
+        final List<Long> memberIds = members.stream()
+                .map(Member::getId)
+                .collect(Collectors.toList());
+        final Map<Long, List<GroupDto>> groupDtoMap = queryFactory
+                .select(new QGroupDto(
+                        groupMember.group.id,
+                        groupMember.group.name,
+                        groupMember.role,
+                        groupMember.createdDate,
+                        groupMember.member.id
+                ))
+                .from(groupMember)
+                .where(groupMember.member.id.in(memberIds))
+                .innerJoin(groupMember.group)
+                .fetch()
+                .stream()
+                .collect(Collectors.groupingBy(GroupDto::getMemberId));
+
+        final List<MemberDto> memberDtos = members.stream()
+                .map(MemberDto::new)
+                .collect(Collectors.toList());
+        memberDtos.forEach(m -> {
+                    if (groupDtoMap.get(m.getId()) != null)
+                        m.setGroups(groupDtoMap.get(m.getId()));
+                }
+        );
+
+        return new PageImpl<>(memberDtos, pageable, total);
+    }
+
+    @Override
+    public Page<MemberDto> findMemberDtoPageByGradeAndGroup(Pageable pageable, Group group, MemberGrade grade) {
+        final List<Long> ids = queryFactory
+                .selectFrom(groupMember)
+                .innerJoin(groupMember.member, member)
+                .where(groupMember.group.eq(group))
+                .fetch()
+                .stream()
+                .map(g -> g.getMember().getId())
+                .collect(Collectors.toList());
+
+
+        final List<Member> members = queryFactory
+                .selectFrom(member)
+                .innerJoin(member.roles, memberRole).fetchJoin()
+                .innerJoin(memberRole.role, role).fetchJoin()
+                .where(member.id.in(ids).and(member.grade.eq(grade)))
+                .orderBy(memberSort(pageable))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        final long total = queryFactory
+                .selectFrom(member)
+                .where(member.id.in(ids).and(member.grade.eq(grade)))
+                .fetchCount();
+
+        final List<Long> memberIds = members.stream()
+                .map(Member::getId)
+                .collect(Collectors.toList());
+        final Map<Long, List<GroupDto>> groupDtoMap = queryFactory
+                .select(new QGroupDto(
+                        groupMember.group.id,
+                        groupMember.group.name,
+                        groupMember.role,
+                        groupMember.createdDate,
+                        groupMember.member.id
+                ))
+                .from(groupMember)
+                .where(groupMember.member.id.in(memberIds))
+                .innerJoin(groupMember.group)
+                .fetch()
+                .stream()
+                .collect(Collectors.groupingBy(GroupDto::getMemberId));
+
+        final List<MemberDto> memberDtos = members.stream()
+                .map(MemberDto::new)
+                .collect(Collectors.toList());
+        memberDtos.forEach(m -> {
+                    if (groupDtoMap.get(m.getId()) != null)
+                        m.setGroups(groupDtoMap.get(m.getId()));
+                }
+        );
+
+        return new PageImpl<>(memberDtos, pageable, total);
+    }
+
+    private BooleanExpression searchRequester(RequesterSearchType type, String word) {
+        switch (type.getField()) {
+            case "member_name":
+                return member.name.contains(word);
+            case "member_student_id":
+                return member.studentId.contains(word);
+        }
+
+        return null;
+    }
+
     private BooleanExpression search(MemberSearchType searchType, String word) {
         switch (searchType.getField()) {
             case "member_name":

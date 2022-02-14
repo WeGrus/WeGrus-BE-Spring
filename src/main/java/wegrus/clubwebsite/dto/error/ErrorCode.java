@@ -55,6 +55,7 @@ public enum ErrorCode {
     MEMBER_ALREADY_BAN(400, "M011", "이미 재가입 불가인 회원 탈퇴를 할 수 없습니다."),
     CERTIFICATION_CODE_INVALID(400, "M012", "유효하지 않은 인증 코드입니다."),
     GROUP_PRESIDENT_CANNOT_RESIGN(400, "M013", "그룹 회장은 회원 탈퇴를 할 수 없습니다."),
+    MEMBER_ALREADY_APPLY_GROUP(400, "M013", "이미 해당 그룹에 가입신청을 한 회원입니다."),
 
     // Request
     REQUEST_NOT_FOUND(400, "R000", "존재하지 않는 권한 요청입니다."),

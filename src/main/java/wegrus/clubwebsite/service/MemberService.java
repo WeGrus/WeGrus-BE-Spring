@@ -40,6 +40,7 @@ import java.util.regex.Pattern;
 
 import static wegrus.clubwebsite.dto.error.ErrorCode.*;
 import static wegrus.clubwebsite.dto.result.ResultCode.*;
+import static wegrus.clubwebsite.entity.group.GroupRoles.*;
 import static wegrus.clubwebsite.entity.member.MemberRoles.*;
 import static wegrus.clubwebsite.util.ImageUtil.MEMBER_BASIC_IMAGE_URL;
 
@@ -356,8 +357,12 @@ public class MemberService {
         final Long memberId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
         final Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
         final Group group = groupRepository.findById(groupId).orElseThrow(GroupNotFoundException::new);
-        if (groupMemberRepository.findByMemberIdAndGroupId(memberId, groupId).isPresent())
+        final Optional<GroupMember> findGroupMember = groupMemberRepository.findByMemberIdAndGroupId(memberId, groupId);
+        if (findGroupMember.isPresent()) {
+            if (findGroupMember.get().getRole().equals(APPLICANT))
+                throw new MemberAlreadyApplyGroupException();
             throw new GroupMemberAlreadyExistException();
+        }
 
         final GroupMember groupMember = new GroupMember(member, group);
         groupMemberRepository.save(groupMember);

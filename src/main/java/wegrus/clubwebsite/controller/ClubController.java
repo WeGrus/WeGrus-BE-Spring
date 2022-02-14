@@ -205,7 +205,25 @@ public class ClubController {
 
         return ResponseEntity.ok(ResultResponse.of(SEARCH_MEMBER_SUCCESS, response));
     }
-    
+
+    @ApiOperation(value = "동아리 가입 신청 회원 검색(이름, 학번)")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "페이지", example = "1", required = true),
+            @ApiImplicitParam(name = "size", value = "페이지당 개수", example = "10", required = true),
+            @ApiImplicitParam(name = "type", value = "검색 타입", example = "STUDENT_ID", required = true),
+            @ApiImplicitParam(name = "word", value = "검색어", example = "12221234", required = true)
+    })
+    @GetMapping("/executives/requests/search")
+    public ResponseEntity<ResultResponse> searchRequester(
+            @NotNull(message = "page는 필수입니다.") @RequestParam int page,
+            @NotNull(message = "size는 필수입니다.") @RequestParam int size,
+            @NotNull(message = "검색 타입은 필수입니다.") @RequestParam RequesterSearchType type,
+            @NotBlank(message = "검색어는 필수입니다.") @RequestParam String word) {
+        final Page<MemberDto> response = clubService.searchRequester(page, size, type, word);
+
+        return ResponseEntity.ok(ResultResponse.of(SEARCH_MEMBER_SUCCESS, response));
+    }
+
     @ApiOperation(value = "회원 권한 해제")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "memberId", value = "회원 PK", example = "1", required = true),
@@ -252,11 +270,25 @@ public class ClubController {
             @ApiImplicitParam(name = "type", value = "회원 권한", example = "ROLE_MEMBER", required = true)
     })
     @PostMapping("/president/empower")
-    public ResponseEntity<ResultResponse> empower(
+    public ResponseEntity<ResultResponse> empowerMember(
             @NotNull(message = "회원 PK는 필수입니다.") @RequestParam Long memberId,
             @NotNull(message = "회원 권한은 필수입니다.") @RequestParam MemberEmpowerType type) {
-        final StatusResponse response = clubService.empower(memberId, type);
+        final StatusResponse response = clubService.empowerMember(memberId, type);
 
         return ResponseEntity.ok(ResultResponse.of(EMPOWER_MEMBER_SUCCESS, response));
+    }
+
+    @ApiOperation(value = "그룹 회장 권한 부여")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "groupId", value = "그룹 PK", example = "1", required = true),
+            @ApiImplicitParam(name = "memberId", value = "회원 PK", example = "1", required = true)
+    })
+    @PostMapping("/executives/groups")
+    public ResponseEntity<ResultResponse> empowerGroupPresident(
+            @NotNull(message = "그룹 PK는 필수입니다.") @RequestParam Long groupId,
+            @NotNull(message = "회원 PK는 필수입니다.") @RequestParam Long memberId) {
+        final StatusResponse response = clubService.empowerGroupPresident(groupId, memberId);
+
+        return ResponseEntity.ok(ResultResponse.of(EMPOWER_GROUP_PRESIDENT_SUCCESS, response));
     }
 }
