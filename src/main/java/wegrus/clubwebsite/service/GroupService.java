@@ -12,20 +12,21 @@ import wegrus.clubwebsite.dto.Status;
 import wegrus.clubwebsite.dto.StatusResponse;
 import wegrus.clubwebsite.dto.error.ErrorResponse;
 import wegrus.clubwebsite.dto.member.MemberDto;
+import wegrus.clubwebsite.dto.member.MemberSearchType;
 import wegrus.clubwebsite.dto.member.MemberSortType;
 import wegrus.clubwebsite.entity.group.Group;
 import wegrus.clubwebsite.entity.group.GroupMember;
 import wegrus.clubwebsite.entity.group.GroupRoles;
+import wegrus.clubwebsite.entity.member.*;
 import wegrus.clubwebsite.exception.*;
-import wegrus.clubwebsite.repository.GroupMemberRepository;
-import wegrus.clubwebsite.repository.GroupRepository;
-import wegrus.clubwebsite.repository.MemberRepository;
+import wegrus.clubwebsite.repository.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static wegrus.clubwebsite.dto.error.ErrorCode.*;
 import static wegrus.clubwebsite.entity.group.GroupRoles.*;
+import static wegrus.clubwebsite.entity.member.MemberRoles.*;
 
 @Service
 @Transactional(readOnly = true)
@@ -35,6 +36,8 @@ public class GroupService {
     private final MemberRepository memberRepository;
     private final GroupMemberRepository groupMemberRepository;
     private final GroupRepository groupRepository;
+    private final RoleRepository roleRepository;
+    private final MemberRoleRepository memberRoleRepository;
 
     @Transactional
     public StatusResponse approve(Long groupId, Long applicantId) {
@@ -81,7 +84,7 @@ public class GroupService {
     public StatusResponse promote(Long groupId, Long targetId) {
         final Long memberId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
         groupRepository.findById(groupId).orElseThrow(GroupNotFoundException::new);
-        memberRepository.findById(targetId).orElseThrow(MemberNotFoundException::new);
+        final Member target = memberRepository.findById(targetId).orElseThrow(MemberNotFoundException::new);
         final GroupMember president = groupMemberRepository.findByMemberIdAndGroupId(memberId, groupId).orElseThrow(GroupMemberNotFoundException::new);
 
         checkPresident(president);
@@ -89,7 +92,11 @@ public class GroupService {
         final GroupMember groupMember = groupMemberRepository.findByMemberIdAndGroupId(targetId, groupId).orElseThrow(GroupMemberNotFoundException::new);
         if (!groupMember.getRole().equals(MEMBER))
             throw new GroupMemberCannotPromoteException();
+
         groupMember.updateRole(EXECUTIVE);
+        final Role role = roleRepository.findByName(ROLE_CLUB_EXECUTIVE.name()).orElseThrow(MemberRoleNotFoundException::new);
+        if (memberRoleRepository.findByMemberIdAndRoleId(targetId, role.getId()).isEmpty())
+            memberRoleRepository.save(new MemberRole(target, role));
 
         return new StatusResponse(Status.SUCCESS);
     }
@@ -106,7 +113,12 @@ public class GroupService {
         final GroupMember groupMember = groupMemberRepository.findByMemberIdAndGroupId(targetId, groupId).orElseThrow(GroupMemberNotFoundException::new);
         if (!groupMember.getRole().equals(EXECUTIVE))
             throw new GroupMemberCannotDegradeException();
+
         groupMember.updateRole(MEMBER);
+        if (groupMemberRepository.findByMemberIdAndRole(targetId, EXECUTIVE).isEmpty()) {
+            final Role role = roleRepository.findByName(ROLE_GROUP_EXECUTIVE.name()).orElseThrow(MemberRoleNotFoundException::new);
+            memberRoleRepository.deleteByMemberIdAndRoleId(targetId, role.getId());
+        }
 
         return new StatusResponse(Status.SUCCESS);
     }
@@ -115,7 +127,7 @@ public class GroupService {
     public StatusResponse delegate(Long groupId, Long targetId) {
         final Long memberId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
         groupRepository.findById(groupId).orElseThrow(GroupNotFoundException::new);
-        memberRepository.findById(targetId).orElseThrow(MemberNotFoundException::new);
+        final Member target = memberRepository.findById(targetId).orElseThrow(MemberNotFoundException::new);
         final GroupMember president = groupMemberRepository.findByMemberIdAndGroupId(memberId, groupId).orElseThrow(GroupMemberNotFoundException::new);
 
         checkPresident(president);
@@ -123,8 +135,22 @@ public class GroupService {
         final GroupMember groupMember = groupMemberRepository.findByMemberIdAndGroupId(targetId, groupId).orElseThrow(GroupMemberNotFoundException::new);
         if (!groupMember.getRole().equals(EXECUTIVE) && !groupMember.getRole().equals(MEMBER))
             throw new GroupMemberCannotDelegateException();
+
         president.updateRole(MEMBER);
+        if (groupMemberRepository.findByMemberIdAndRole(memberId, PRESIDENT).isEmpty()) {
+            final Role role = roleRepository.findByName(ROLE_GROUP_PRESIDENT.name()).orElseThrow(MemberRoleNotFoundException::new);
+            memberRoleRepository.deleteByMemberIdAndRoleId(targetId, role.getId());
+        }
+
         groupMember.updateRole(PRESIDENT);
+        if (groupMemberRepository.findByMemberIdAndRole(targetId, PRESIDENT).isEmpty()) {
+            final Role role = roleRepository.findByName(ROLE_GROUP_PRESIDENT.name()).orElseThrow(MemberRoleNotFoundException::new);
+            memberRoleRepository.save(new MemberRole(target, role));
+        }
+        if (groupMemberRepository.findByMemberIdAndRole(targetId, EXECUTIVE).isEmpty()) {
+            final Role role = roleRepository.findByName(ROLE_GROUP_EXECUTIVE.name()).orElseThrow(MemberRoleNotFoundException::new);
+            memberRoleRepository.deleteByMemberIdAndRoleId(targetId, role.getId());
+        }
 
         return new StatusResponse(Status.SUCCESS);
     }
@@ -141,7 +167,12 @@ public class GroupService {
         final GroupMember groupMember = groupMemberRepository.findByMemberIdAndGroupId(targetId, groupId).orElseThrow(GroupMemberNotFoundException::new);
         if (groupMember.getRole().equals(PRESIDENT) || groupMember.getRole().equals(APPLICANT))
             throw new GroupMemberCannotKickException();
+
         groupMemberRepository.delete(groupMember);
+        if (groupMemberRepository.findByMemberIdAndRole(targetId, EXECUTIVE).isEmpty()) {
+            final Role role = roleRepository.findByName(ROLE_GROUP_EXECUTIVE.name()).orElseThrow(MemberRoleNotFoundException::new);
+            memberRoleRepository.deleteByMemberIdAndRoleId(targetId, role.getId());
+        }
 
         return new StatusResponse(Status.SUCCESS);
     }
@@ -163,5 +194,49 @@ public class GroupService {
         page = (page == 0 ? 0 : page - 1);
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, type.getField()));
         return memberRepository.findMemberDtoPageByGroupAndRole(pageable, group, role);
+    }
+
+    public Page<MemberDto> searchMember(Long groupId, int page, int size, MemberSortType sortType, Sort.Direction direction, MemberSearchType searchType, String word) {
+        final Long memberId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
+        final Group group = groupRepository.findById(groupId).orElseThrow(GroupNotFoundException::new);
+
+        checkExecutiveOrPresident(groupId, memberId);
+
+        page = (page == 0 ? 0 : page - 1);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortType.getField()));
+        return memberRepository.findMemberDtoPageByWordContainingAtSearchTypeAndGroup(pageable, group, searchType, word);
+    }
+
+    public Page<MemberDto> searchMemberByGender(Long groupId, int page, int size, MemberSortType sortType, Sort.Direction direction, Gender gender) {
+        final Long memberId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
+        final Group group = groupRepository.findById(groupId).orElseThrow(GroupNotFoundException::new);
+
+        checkExecutiveOrPresident(groupId, memberId);
+
+        page = (page == 0 ? 0 : page - 1);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortType.getField()));
+        return memberRepository.findMemberDtoPageByGenderAndGroup(pageable, group, gender);
+    }
+
+    public Page<MemberDto> searchMemberByAcademicStatus(Long groupId, int page, int size, MemberSortType sortType, Sort.Direction direction, MemberAcademicStatus academicStatus) {
+        final Long memberId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
+        final Group group = groupRepository.findById(groupId).orElseThrow(GroupNotFoundException::new);
+
+        checkExecutiveOrPresident(groupId, memberId);
+
+        page = (page == 0 ? 0 : page - 1);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortType.getField()));
+        return memberRepository.findMemberDtoPageByAcademicStatusAndGroup(pageable, group, academicStatus);
+    }
+
+    public Page<MemberDto> searchMemberByGrade(Long groupId, int page, int size, MemberSortType sortType, Sort.Direction direction, MemberGrade grade) {
+        final Long memberId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
+        final Group group = groupRepository.findById(groupId).orElseThrow(GroupNotFoundException::new);
+
+        checkExecutiveOrPresident(groupId, memberId);
+
+        page = (page == 0 ? 0 : page - 1);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortType.getField()));
+        return memberRepository.findMemberDtoPageByGradeAndGroup(pageable, group, grade);
     }
 }

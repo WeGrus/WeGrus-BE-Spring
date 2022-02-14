@@ -10,6 +10,9 @@ import wegrus.clubwebsite.dto.StatusResponse;
 import wegrus.clubwebsite.dto.error.ErrorResponse;
 import wegrus.clubwebsite.dto.member.*;
 import wegrus.clubwebsite.entity.Request;
+import wegrus.clubwebsite.entity.group.Group;
+import wegrus.clubwebsite.entity.group.GroupMember;
+import wegrus.clubwebsite.entity.group.GroupRoles;
 import wegrus.clubwebsite.entity.member.*;
 import wegrus.clubwebsite.exception.*;
 import wegrus.clubwebsite.repository.*;
@@ -29,6 +32,7 @@ public class ClubService {
     private final MemberRoleRepository memberRoleRepository;
     private final RoleRepository roleRepository;
     private final GroupMemberRepository groupMemberRepository;
+    private final GroupRepository groupRepository;
 
     @Transactional
     public StatusResponse approveRequest(Long requestId) {
@@ -101,6 +105,12 @@ public class ClubService {
         page = (page == 0 ? 0 : page - 1);
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortType.getField()));
         return memberRepository.findMemberDtoPageByGroup(pageable, groupId);
+    }
+
+    public Page<MemberDto> searchRequester(int page, int size, RequesterSearchType type, String word) {
+        page = (page == 0 ? 0 : page - 1);
+        Pageable pageable = PageRequest.of(page, size);
+        return memberRepository.findMemberDtoPageByWordContainingAtRequesterSearchType(pageable, type, word);
     }
 
     @Transactional
@@ -196,13 +206,32 @@ public class ClubService {
     }
 
     @Transactional
-    public StatusResponse empower(Long memberId, MemberEmpowerType type) {
+    public StatusResponse empowerMember(Long memberId, MemberEmpowerType type) {
         final Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
         final Role role = roleRepository.findByName(type.name()).orElseThrow(MemberRoleNotFoundException::new);
         if (memberRoleRepository.findByMemberIdAndRoleId(member.getId(), role.getId()).isPresent())
             throw new MemberAlreadyHasRoleException();
 
         memberRoleRepository.save(new MemberRole(member, role));
+
+        return new StatusResponse(Status.SUCCESS);
+    }
+
+    @Transactional
+    public StatusResponse empowerGroupPresident(Long groupId, Long memberId) {
+        final Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
+        final Group group = groupRepository.findById(groupId).orElseThrow(GroupNotFoundException::new);
+        final Role role = roleRepository.findByName(ROLE_GROUP_PRESIDENT.name()).orElseThrow(MemberRoleNotFoundException::new);
+
+        final GroupMember groupMember = groupMemberRepository.findByMemberIdAndGroupId(memberId, groupId).orElseThrow(GroupMemberNotFoundException::new);
+        if (groupMember.getRole().equals(GroupRoles.APPLICANT))
+            throw new GroupMemberNotFoundException();
+        if (groupMember.getRole().equals(GroupRoles.PRESIDENT))
+            throw new MemberAlreadyHasRoleException();
+
+        groupMemberRepository.save(new GroupMember(member, group));
+        if (memberRoleRepository.findByMemberIdAndRoleId(memberId, role.getId()).isEmpty())
+            memberRoleRepository.save(new MemberRole(member, role));
 
         return new StatusResponse(Status.SUCCESS);
     }
