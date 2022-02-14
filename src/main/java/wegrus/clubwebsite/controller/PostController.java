@@ -184,6 +184,14 @@ public class PostController {
         return ResponseEntity.ok(ResultResponse.of(UPDATE_POST_NOTICE_SUCCESS, response));
     }
 
+    @ApiOperation(value = "그룹 공지여부 변경")
+    @PatchMapping("groups/executives/boards/pin")
+    public ResponseEntity<ResultResponse> groupUpdateNoticeFlag(@Validated @RequestBody PostUpdateNoticeRequest request) {
+        final PostUpdateNoticeResponse response = postService.groupUpdateNotice(request);
+
+        return ResponseEntity.ok(ResultResponse.of(UPDATE_GROUP_POST_NOTICE_SUCCESS, response));
+    }
+
     @ApiOperation(value = "게시물 목록 조회")
     @GetMapping("boards/{boardId}")
     public ResponseEntity<ResultResponse> getPostList(

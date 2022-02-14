@@ -297,6 +297,24 @@ public class PostService {
     @Transactional
     public PostUpdateNoticeResponse updateNotice(PostUpdateNoticeRequest request) {
         final Post post = postRepository.findById(request.getPostId()).orElseThrow(PostNotFoundException::new);
+        final Long postBoardCategoryId = post.getBoard().getBoardCategory().getId();
+
+        // 소모임, 스터디는 변경 불가능
+        if (postBoardCategoryId.equals(2L) || postBoardCategoryId.equals(3L))
+            throw new CannotUpdateGroupPostException();
+
+        post.updateNotice(request);
+        return new PostUpdateNoticeResponse(request.getPostId(), request.getType());
+    }
+
+    @Transactional
+    public PostUpdateNoticeResponse groupUpdateNotice(PostUpdateNoticeRequest request) {
+        final Post post = postRepository.findById(request.getPostId()).orElseThrow(PostNotFoundException::new);
+        final Long postBoardCategoryId = post.getBoard().getBoardCategory().getId();
+
+        // 공지사항, 커뮤니티는 변경 불가능
+        if (postBoardCategoryId.equals(1L) || postBoardCategoryId.equals(4L))
+            throw new CannotUpdateNonGroupPostException();
 
         post.updateNotice(request);
         return new PostUpdateNoticeResponse(request.getPostId(), request.getType());
