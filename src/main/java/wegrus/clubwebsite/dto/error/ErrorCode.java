@@ -37,6 +37,8 @@ public enum ErrorCode {
     BOOKMARK_ALREADY_EXIST(400, "B011", "이미 존재하는 북마크입니다."),
     BOOKMARK_NOT_FOUND(400, "B012", "존재하지 않는 북마크입니다."),
     POST_IMAGE_NOT_FOUND(400, "B013", "존재하지 않는 게시물 이미지입니다."),
+    CANNOT_UPDATE_GROUP_POST(400, "B014", "그룹 게시물을 수정할 수 없습니다."),
+    CANNOT_UPDATE_NON_GROUP_POST(400, "B015", "그룹이 아닌 게시물을 수정할 수 없습니다."),
 
     // Member
     MEMBER_NOT_FOUND(400, "M000", "존재하지 않는 회원입니다."),
