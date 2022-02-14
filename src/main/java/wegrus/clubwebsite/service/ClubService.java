@@ -2,7 +2,6 @@ package wegrus.clubwebsite.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,7 +15,6 @@ import wegrus.clubwebsite.exception.*;
 import wegrus.clubwebsite.repository.*;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static wegrus.clubwebsite.dto.error.ErrorCode.*;
 import static wegrus.clubwebsite.entity.member.MemberRoles.*;
@@ -33,34 +31,17 @@ public class ClubService {
     private final GroupMemberRepository groupMemberRepository;
 
     @Transactional
-    public StatusResponse empower(Long requestId) {
+    public StatusResponse approveRequest(Long requestId) {
         final Request request = requestRepository.findWithRoleById(requestId).orElseThrow(RequestNotFoundException::new);
         final Role role = request.getRole();
-        final Set<String> authorities = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toSet());
 
         final Member applicant = memberRepository.findById(request.getMember().getId()).orElseThrow(MemberNotFoundException::new);
         if (memberRoleRepository.findByMemberIdAndRoleId(applicant.getId(), role.getId()).isPresent())
             throw new MemberAlreadyHasRoleException();
 
-        addAuthority(request, authorities, role, applicant);
+        final Set<String> roles = Set.of(ROLE_MEMBER.name());
+        saveMemberRole(request, role, applicant, roles);
         return new StatusResponse(Status.SUCCESS);
-    }
-
-    private void addAuthority(Request request, Set<String> authorities, Role role, Member applicant) {
-        if (authorities.contains(ROLE_CLUB_PRESIDENT.name())) {
-            final Set<String> roles = Set.of(ROLE_MEMBER.name(), ROLE_GROUP_PRESIDENT.name(), ROLE_CLUB_EXECUTIVE.name());
-            saveMemberRole(request, role, applicant, roles);
-        } else if (authorities.contains(ROLE_CLUB_EXECUTIVE.name())) {
-            final Set<String> roles = Set.of(ROLE_MEMBER.name(), ROLE_GROUP_PRESIDENT.name());
-            if (request.getRole().getName().equals(ROLE_CLUB_EXECUTIVE.name())) {
-                List<ErrorResponse.FieldError> errors = new ArrayList<>();
-                errors.add(new ErrorResponse.FieldError("authority", ROLE_CLUB_PRESIDENT.name(), INSUFFICIENT_AUTHORITY.getMessage()));
-                throw new InsufficientAuthorityException(errors);
-            }
-            saveMemberRole(request, role, applicant, roles);
-        }
     }
 
     private void saveMemberRole(Request request, Role role, Member applicant, Set<String> roles) {
@@ -203,6 +184,26 @@ public class ClubService {
                 role = r;
         }
         memberRoleRepository.save(new MemberRole(member, role));
+        return new StatusResponse(Status.SUCCESS);
+    }
+
+    @Transactional
+    public StatusResponse rejectRequest(Long requestId) {
+        final Request request = requestRepository.findById(requestId).orElseThrow(RequestNotFoundException::new);
+        requestRepository.delete(request);
+
+        return new StatusResponse(Status.SUCCESS);
+    }
+
+    @Transactional
+    public StatusResponse empower(Long memberId, MemberEmpowerType type) {
+        final Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
+        final Role role = roleRepository.findByName(type.name()).orElseThrow(MemberRoleNotFoundException::new);
+        if (memberRoleRepository.findByMemberIdAndRoleId(member.getId(), role.getId()).isPresent())
+            throw new MemberAlreadyHasRoleException();
+
+        memberRoleRepository.save(new MemberRole(member, role));
+
         return new StatusResponse(Status.SUCCESS);
     }
 }

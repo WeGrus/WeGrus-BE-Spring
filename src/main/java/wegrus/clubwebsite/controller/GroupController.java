@@ -38,7 +38,7 @@ public class GroupController {
     @PatchMapping("/executives/applicants/approve")
     public ResponseEntity<ResultResponse> approve(
             @NotNull(message = "그룹 PK는 필수입니다.") @RequestParam Long groupId,
-            @NotNull(message = "회원 PK는 필수입니다.") Long memberId) {
+            @NotNull(message = "회원 PK는 필수입니다.") @RequestParam Long memberId) {
         final StatusResponse response = groupService.approve(groupId, memberId);
 
         return ResponseEntity.ok(ResultResponse.of(APPROVE_APPLICANT_SUCCESS, response));
@@ -52,7 +52,7 @@ public class GroupController {
     @DeleteMapping("/executives/applicants/reject")
     public ResponseEntity<ResultResponse> reject(
             @NotNull(message = "그룹 PK는 필수입니다.") @RequestParam Long groupId,
-            @NotNull(message = "회원 PK는 필수입니다.") Long memberId) {
+            @NotNull(message = "회원 PK는 필수입니다.") @RequestParam Long memberId) {
         final StatusResponse response = groupService.reject(groupId, memberId);
 
         return ResponseEntity.ok(ResultResponse.of(REJECT_APPLICANT_SUCCESS, response));
@@ -66,7 +66,7 @@ public class GroupController {
     @PatchMapping("/president/promote")
     public ResponseEntity<ResultResponse> promote(
             @NotNull(message = "그룹 PK는 필수입니다.") @RequestParam Long groupId,
-            @NotNull(message = "회원 PK는 필수입니다.") Long memberId) {
+            @NotNull(message = "회원 PK는 필수입니다.") @RequestParam Long memberId) {
         final StatusResponse response = groupService.promote(groupId, memberId);
 
         return ResponseEntity.ok(ResultResponse.of(PROMOTE_MEMBER_SUCCESS, response));
@@ -80,7 +80,7 @@ public class GroupController {
     @PatchMapping("/president/degrade")
     public ResponseEntity<ResultResponse> degrade(
             @NotNull(message = "그룹 PK는 필수입니다.") @RequestParam Long groupId,
-            @NotNull(message = "회원 PK는 필수입니다.") Long memberId) {
+            @NotNull(message = "회원 PK는 필수입니다.") @RequestParam Long memberId) {
         final StatusResponse response = groupService.degrade(groupId, memberId);
 
         return ResponseEntity.ok(ResultResponse.of(DEGRADE_MEMBER_SUCCESS, response));
@@ -94,7 +94,7 @@ public class GroupController {
     @PatchMapping("/president/delegate")
     public ResponseEntity<ResultResponse> delegate(
             @NotNull(message = "그룹 PK는 필수입니다.") @RequestParam Long groupId,
-            @NotNull(message = "회원 PK는 필수입니다.") Long memberId) {
+            @NotNull(message = "회원 PK는 필수입니다.") @RequestParam Long memberId) {
         final StatusResponse response = groupService.delegate(groupId, memberId);
 
         return ResponseEntity.ok(ResultResponse.of(DEGRADE_MEMBER_SUCCESS, response));
@@ -108,7 +108,7 @@ public class GroupController {
     @PatchMapping("/president/kick")
     public ResponseEntity<ResultResponse> kickMember(
             @NotNull(message = "그룹 PK는 필수입니다.") @RequestParam Long groupId,
-            @NotNull(message = "회원 PK는 필수입니다.") Long memberId) {
+            @NotNull(message = "회원 PK는 필수입니다.") @RequestParam Long memberId) {
         final StatusResponse response = groupService.kickMember(groupId, memberId);
 
         return ResponseEntity.ok(ResultResponse.of(KICK_GROUP_MEMBER_SUCCESS, response));

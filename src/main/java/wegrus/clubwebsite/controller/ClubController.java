@@ -16,7 +16,6 @@ import wegrus.clubwebsite.dto.result.ResultResponse;
 import wegrus.clubwebsite.entity.member.Gender;
 import wegrus.clubwebsite.entity.member.MemberAcademicStatus;
 import wegrus.clubwebsite.entity.member.MemberGrade;
-import wegrus.clubwebsite.entity.member.MemberRoles;
 import wegrus.clubwebsite.service.ClubService;
 
 import javax.validation.constraints.NotBlank;
@@ -33,14 +32,24 @@ public class ClubController {
 
     private final ClubService clubService;
 
-    @ApiOperation(value = "회원 권한 부여")
+    @ApiOperation(value = "회원 권한 요청 승인")
     @ApiImplicitParam(name = "requestId", value = "권한 요청 PK", example = "1", required = true)
     @PostMapping("/executives/authority")
-    public ResponseEntity<ResultResponse> empower(
+    public ResponseEntity<ResultResponse> approve(
             @NotNull(message = "권한 요청 PK는 필수입니다.") @RequestParam Long requestId) {
-        final StatusResponse response = clubService.empower(requestId);
+        final StatusResponse response = clubService.approveRequest(requestId);
 
-        return ResponseEntity.ok(ResultResponse.of(EMPOWER_MEMBER_SUCCESS, response));
+        return ResponseEntity.ok(ResultResponse.of(APPROVE_AUTHORITY_REQUEST_SUCCESS, response));
+    }
+
+    @ApiOperation(value = "회원 권한 요청 거절")
+    @ApiImplicitParam(name = "requestId", value = "권한 요청 PK", example = "1", required = true)
+    @DeleteMapping("/executives/authority")
+    public ResponseEntity<ResultResponse> reject(
+            @NotNull(message = "권한 요청 PK는 필수입니다.") @RequestParam Long requestId) {
+        final StatusResponse response = clubService.rejectRequest(requestId);
+
+        return ResponseEntity.ok(ResultResponse.of(REJECT_AUTHORITY_REQUEST_SUCCESS, response));
     }
 
     @ApiOperation(value = "회원 권한 요청 목록 조회")
@@ -235,5 +244,19 @@ public class ClubController {
         final StatusResponse response = clubService.resetAuthorities();
 
         return ResponseEntity.ok(ResultResponse.of(RESET_AUTHORITIES_SUCCESS, response));
+    }
+
+    @ApiOperation(value = "회원 권한 부여")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "memberId", value = "회원 PK", example = "1", required = true),
+            @ApiImplicitParam(name = "type", value = "회원 권한", example = "ROLE_MEMBER", required = true)
+    })
+    @PostMapping("/president/empower")
+    public ResponseEntity<ResultResponse> empower(
+            @NotNull(message = "회원 PK는 필수입니다.") @RequestParam Long memberId,
+            @NotNull(message = "회원 권한은 필수입니다.") @RequestParam MemberEmpowerType type) {
+        final StatusResponse response = clubService.empower(memberId, type);
+
+        return ResponseEntity.ok(ResultResponse.of(EMPOWER_MEMBER_SUCCESS, response));
     }
 }
