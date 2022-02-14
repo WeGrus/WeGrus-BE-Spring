@@ -297,10 +297,10 @@ public class PostService {
     @Transactional
     public PostUpdateNoticeResponse updateNotice(PostUpdateNoticeRequest request) {
         final Post post = postRepository.findById(request.getPostId()).orElseThrow(PostNotFoundException::new);
-        final Long postBoardCategoryId = post.getBoard().getBoardCategory().getId();
+        final String postBoardCategoryName = post.getBoard().getBoardCategory().getName();
 
         // 소모임, 스터디는 변경 불가능
-        if (postBoardCategoryId.equals(2L) || postBoardCategoryId.equals(3L))
+        if (postBoardCategoryName.equals(BoardCategories.GROUP.name()) || postBoardCategoryName.equals(BoardCategories.STUDY.name()))
             throw new CannotUpdateGroupPostException();
 
         post.updateNotice(request);
@@ -310,10 +310,10 @@ public class PostService {
     @Transactional
     public PostUpdateNoticeResponse groupUpdateNotice(PostUpdateNoticeRequest request) {
         final Post post = postRepository.findById(request.getPostId()).orElseThrow(PostNotFoundException::new);
-        final Long postBoardCategoryId = post.getBoard().getBoardCategory().getId();
+        final String postBoardCategoryName = post.getBoard().getBoardCategory().getName();
 
         // 공지사항, 커뮤니티는 변경 불가능
-        if (postBoardCategoryId.equals(1L) || postBoardCategoryId.equals(4L))
+        if (postBoardCategoryName.equals(BoardCategories.NOTICE.name()) || postBoardCategoryName.equals(BoardCategories.BOARD.name()))
             throw new CannotUpdateNonGroupPostException();
 
         post.updateNotice(request);
