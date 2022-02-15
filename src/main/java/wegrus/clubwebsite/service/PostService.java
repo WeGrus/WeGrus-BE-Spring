@@ -167,6 +167,13 @@ public class PostService {
         }
         postImageRepository.deletePostImagesByPost(post);
 
+        // 파일 삭제
+        List<PostFile> postFiles = post.getFiles();
+        for (PostFile postFile : postFiles) {
+            amazonS3Util.deleteFile(postFile.getFile(), "files/posts/" + postId);
+        }
+        postFileRepository.deletePostFilesByPost(post);
+
         postRepository.delete(post);
     }
 

@@ -58,6 +58,11 @@ public class AmazonS3Util {
         deleteS3(filename);
     }
 
+    public void deleteFile(wegrus.clubwebsite.vo.File file, String dirName) {
+        final String filename = dirName + "/" + file.getUuid() + "_" + file.getName() + "." + file.getType();
+        deleteS3(filename);
+    }
+
     public String uploadFile(File uploadFile, String fileName) {
         final String uploadImageUrl = putS3(uploadFile, fileName);
         removeNewFile(uploadFile);
