@@ -457,7 +457,7 @@ public class MemberRepositoryQuerydslImpl implements MemberRepositoryQuerydsl {
     }
 
     @Override
-    public Page<MemberDto> findMemberDtoPageByGroupAndRole(Pageable pageable, Group group, GroupRoles groupRole) {
+    public Page<MemberDto> findMemberDtoPageByGroupAndRole(Pageable pageable, Group group, List<GroupRoles> groupRoles) {
         final List<Member> members = queryFactory
                 .selectFrom(member)
                 .innerJoin(member.roles, memberRole).fetchJoin()
@@ -465,7 +465,7 @@ public class MemberRepositoryQuerydslImpl implements MemberRepositoryQuerydsl {
                 .where(
                         JPAExpressions
                                 .selectFrom(groupMember)
-                                .where(groupMember.group.id.eq(group.getId()).and(groupMember.member.eq(member)).and(groupMember.role.eq(groupRole)))
+                                .where(groupMember.group.id.eq(group.getId()).and(groupMember.member.eq(member)).and(groupMember.role.in(groupRoles)))
                                 .exists()
                 )
                 .orderBy(memberSort(pageable))
@@ -478,7 +478,7 @@ public class MemberRepositoryQuerydslImpl implements MemberRepositoryQuerydsl {
                 .where(
                         JPAExpressions
                                 .selectFrom(groupMember)
-                                .where(groupMember.group.id.eq(group.getId()).and(groupMember.member.eq(member)).and(groupMember.role.eq(groupRole)))
+                                .where(groupMember.group.id.eq(group.getId()).and(groupMember.member.eq(member)).and(groupMember.role.in(groupRoles)))
                                 .exists()
                 )
                 .fetchCount();

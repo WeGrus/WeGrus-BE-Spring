@@ -9,6 +9,7 @@ import wegrus.clubwebsite.entity.member.Gender;
 import wegrus.clubwebsite.entity.member.MemberAcademicStatus;
 import wegrus.clubwebsite.entity.member.MemberGrade;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface MemberRepositoryQuerydsl {
@@ -31,7 +32,7 @@ public interface MemberRepositoryQuerydsl {
 
     Page<MemberDto> findMemberDtoPageByGroup(Pageable pageable, Long groupId);
 
-    Page<MemberDto> findMemberDtoPageByGroupAndRole(Pageable pageable, Group group, GroupRoles applicant);
+    Page<MemberDto> findMemberDtoPageByGroupAndRole(Pageable pageable, Group group, List<GroupRoles> roles);
 
     Page<MemberDto> findMemberDtoPageByWordContainingAtRequesterSearchType(Pageable pageable, RequesterSearchType type, String word);
 

@@ -191,9 +191,17 @@ public class GroupService {
 
         checkExecutiveOrPresident(groupId, memberId);
 
+        final List<GroupRoles> roles = new ArrayList<>();
+        roles.add(role);
+        if (role.equals(MEMBER)) {
+            roles.add(EXECUTIVE);
+            roles.add(PRESIDENT);
+        } else if (roles.equals(EXECUTIVE))
+            roles.add(PRESIDENT);
+
         page = (page == 0 ? 0 : page - 1);
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, type.getField()));
-        return memberRepository.findMemberDtoPageByGroupAndRole(pageable, group, role);
+        return memberRepository.findMemberDtoPageByGroupAndRole(pageable, group, roles);
     }
 
     public Page<MemberDto> searchMember(Long groupId, int page, int size, MemberSortType sortType, Sort.Direction direction, MemberSearchType searchType, String word) {
