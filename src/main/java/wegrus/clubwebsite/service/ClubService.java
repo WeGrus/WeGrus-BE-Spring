@@ -18,6 +18,7 @@ import wegrus.clubwebsite.exception.*;
 import wegrus.clubwebsite.repository.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static wegrus.clubwebsite.dto.error.ErrorCode.*;
 import static wegrus.clubwebsite.entity.member.MemberRoles.*;
@@ -123,11 +124,15 @@ public class ClubService {
             throw new MemberRoleNotFoundException();
 
         final MemberRole memberRole = findMemberRole.get();
-        memberRoleRepository.delete(memberRole);
         if (role.getName().equals(ROLE_MEMBER.name())) {
             final List<GroupMember> groupMembers = groupMemberRepository.findAllByMemberId(memberId);
+            final List<MemberRole> memberRoles = memberRoleRepository.findAllWithRoleByMemberId(memberId).stream()
+                    .filter(mr -> !mr.getRole().getName().equals(ROLE_GUEST.name()))
+                    .collect(Collectors.toList());
             groupMemberRepository.deleteAllInBatch(groupMembers);
-        }
+            memberRoleRepository.deleteAllInBatch(memberRoles);
+        } else
+            memberRoleRepository.delete(memberRole);
 
         return new StatusResponse(Status.SUCCESS);
     }
@@ -238,7 +243,8 @@ public class ClubService {
                 throw new MemberAlreadyHasRoleException();
         }
 
-        groupMemberRepository.save(new GroupMember(member, group));
+        final GroupMember groupMember = groupMemberRepository.save(new GroupMember(member, group));
+        groupMember.updateRole(GroupRoles.PRESIDENT);
         if (memberRoleRepository.findByMemberIdAndRoleId(memberId, role.getId()).isEmpty())
             memberRoleRepository.save(new MemberRole(member, role));
 
