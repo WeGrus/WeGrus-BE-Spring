@@ -94,7 +94,7 @@ public class GroupService {
             throw new GroupMemberCannotPromoteException();
 
         groupMember.updateRole(EXECUTIVE);
-        final Role role = roleRepository.findByName(ROLE_CLUB_EXECUTIVE.name()).orElseThrow(MemberRoleNotFoundException::new);
+        final Role role = roleRepository.findByName(ROLE_GROUP_EXECUTIVE.name()).orElseThrow(MemberRoleNotFoundException::new);
         if (memberRoleRepository.findByMemberIdAndRoleId(targetId, role.getId()).isEmpty())
             memberRoleRepository.save(new MemberRole(target, role));
 
