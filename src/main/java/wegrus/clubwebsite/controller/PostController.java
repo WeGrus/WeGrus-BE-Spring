@@ -41,7 +41,7 @@ public class PostController {
     @PostMapping(value = "/posts")
     public ResponseEntity<ResultResponse> createPost(
             @RequestPart(name = "postCreateRequest") PostCreateRequest request,
-            @RequestPart(name = "file", required = false) MultipartFile file) throws IOException{
+            @RequestPart(name = "file", required = false) MultipartFile file) throws IOException {
         final PostCreateResponse response = postService.create(request, file);
 
         return ResponseEntity.ok(ResultResponse.of(CREATE_POST_SUCCESS, response));
