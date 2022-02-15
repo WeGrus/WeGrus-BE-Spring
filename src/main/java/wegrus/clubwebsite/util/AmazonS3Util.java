@@ -23,12 +23,23 @@ public class AmazonS3Util {
 
     private final AmazonS3Client amazonS3Client;
     private final ImageUtil imageUtil;
+    private final FileUtil fileUtil;
 
     @Value("${cloud.aws.s3.bucket}")
     public String bucket;
 
     public void createDirectory(String dirName) {
         amazonS3Client.putObject(bucket, dirName + "/", new ByteArrayInputStream(new byte[0]), new ObjectMetadata());
+    }
+
+    public wegrus.clubwebsite.vo.File uploadFile(MultipartFile multipartFile, String dirName) throws IOException {
+        final wegrus.clubwebsite.vo.File file = fileUtil.convertMultipartFile(multipartFile);
+        final String fileName = dirName + "/" + file.getUuid() + "_" + file.getName() + "." + file.getType();
+
+        final File uploadFile = convert(multipartFile).orElseThrow(MultipartfileConvertException::new);
+        final String url = uploadFile(uploadFile, fileName);
+        file.setUrl(url);
+        return file;
     }
 
     public Image uploadImage(MultipartFile multipartFile, String dirName) throws IOException {

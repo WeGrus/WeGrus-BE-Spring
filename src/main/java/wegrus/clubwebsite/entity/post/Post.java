@@ -51,6 +51,9 @@ public class Post {
     @OneToMany(mappedBy = "post")
     private List<PostImage> images = new ArrayList<>();
 
+    @OneToMany(mappedBy = "post")
+    private List<PostFile> files = new ArrayList<>();
+
     @Enumerated(EnumType.STRING)
     @Column(name = "post_type")
     private PostType type;

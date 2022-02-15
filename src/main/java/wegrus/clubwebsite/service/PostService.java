@@ -17,6 +17,7 @@ import wegrus.clubwebsite.entity.member.Member;
 import wegrus.clubwebsite.exception.*;
 import wegrus.clubwebsite.repository.*;
 import wegrus.clubwebsite.util.AmazonS3Util;
+import wegrus.clubwebsite.vo.File;
 import wegrus.clubwebsite.vo.Image;
 
 import java.io.IOException;
@@ -31,6 +32,7 @@ public class PostService {
     private final BoardCategoryRepository boardCategoryRepository;
     private final PostRepository postRepository;
     private final PostImageRepository postImageRepository;
+    private final PostFileRepository postFileRepository;
     private final MemberRepository memberRepository;
     private final MemberRoleRepository memberRoleRepository;
     private final ReplyRepository replyRepository;
@@ -55,7 +57,7 @@ public class PostService {
     }
 
     @Transactional
-    public Long create(PostCreateRequest request) {
+    public PostCreateResponse create(PostCreateRequest request, MultipartFile multipartFile) throws IOException {
         String memberId = SecurityContextHolder.getContext().getAuthentication().getName();
         final Member member = memberRepository.findById(Long.valueOf(memberId)).orElseThrow(MemberNotFoundException::new);
         final Board board = boardRepository.findById(request.getBoardId()).orElseThrow(BoardNotFoundException::new);
@@ -72,6 +74,27 @@ public class PostService {
                 .build();
 
         final Long postId = postRepository.save(post).getId();
+
+
+        // 파일 업로드
+        String fileUrl = "";
+
+        if (multipartFile != null) {
+            final String dirName = "files/posts/" + postId;
+
+            amazonS3Util.createDirectory(dirName);
+
+            final File file = amazonS3Util.uploadFile(multipartFile, dirName);
+
+            PostFile postFile = PostFile.builder()
+                    .file(file)
+                    .post(post)
+                    .build();
+
+            fileUrl = file.getUrl();
+
+            postFileRepository.save(postFile);
+        }
 
         // 게시물 사진 이동경로 변경
         List<Long> postImageIds = request.getPostImageIds();
@@ -92,7 +115,7 @@ public class PostService {
             }
         }
 
-        return postId;
+        return new PostCreateResponse(postId, fileUrl);
     }
 
     @Transactional
@@ -181,7 +204,6 @@ public class PostService {
         Optional<Bookmark> bookmarks = bookmarkRepository.findByMemberAndPost(member, post);
         if (bookmarks.isPresent())
             userPostBookmarked = true;
-
         List<MemberRole> memberRoles = memberRoleRepository.findAllByMemberId(post.getMember().getId());
         List<String> roles = memberRoles.stream()
                 .map(s -> s.getRole().getName())

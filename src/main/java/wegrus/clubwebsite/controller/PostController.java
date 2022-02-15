@@ -38,10 +38,11 @@ public class PostController {
     }
 
     @ApiOperation(value = "게시물 등록")
-    @PostMapping("/posts")
-    public ResponseEntity<ResultResponse> createPost(@Validated @RequestBody PostCreateRequest request) {
-        final Long postId = postService.create(request);
-        final PostCreateResponse response = new PostCreateResponse(postId);
+    @PostMapping(value = "/posts")
+    public ResponseEntity<ResultResponse> createPost(
+            @RequestPart(name = "postCreateRequest") PostCreateRequest request,
+            @RequestPart(name = "file", required = false) MultipartFile file) throws IOException{
+        final PostCreateResponse response = postService.create(request, file);
 
         return ResponseEntity.ok(ResultResponse.of(CREATE_POST_SUCCESS, response));
     }

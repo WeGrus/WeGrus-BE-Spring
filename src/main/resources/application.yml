@@ -3,3 +3,7 @@ spring:
     group:
       local: local, aws, oauth
       prod: prod, aws, oauth
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 20MB
