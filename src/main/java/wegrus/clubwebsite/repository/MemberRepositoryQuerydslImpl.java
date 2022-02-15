@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static wegrus.clubwebsite.entity.QRequest.request;
 import static wegrus.clubwebsite.entity.group.QGroupMember.groupMember;
 import static wegrus.clubwebsite.entity.member.QMember.member;
 import static wegrus.clubwebsite.entity.member.QMemberRole.memberRole;
@@ -456,7 +457,7 @@ public class MemberRepositoryQuerydslImpl implements MemberRepositoryQuerydsl {
     }
 
     @Override
-    public Page<MemberDto> findMemberDtoPageByGroupAndRole(Pageable pageable, Group group, GroupRoles groupRole) {
+    public Page<MemberDto> findMemberDtoPageByGroupAndRole(Pageable pageable, Group group, List<GroupRoles> groupRoles) {
         final List<Member> members = queryFactory
                 .selectFrom(member)
                 .innerJoin(member.roles, memberRole).fetchJoin()
@@ -464,7 +465,7 @@ public class MemberRepositoryQuerydslImpl implements MemberRepositoryQuerydsl {
                 .where(
                         JPAExpressions
                                 .selectFrom(groupMember)
-                                .where(groupMember.group.id.eq(group.getId()).and(groupMember.member.eq(member)).and(groupMember.role.eq(groupRole)))
+                                .where(groupMember.group.id.eq(group.getId()).and(groupMember.member.eq(member)).and(groupMember.role.in(groupRoles)))
                                 .exists()
                 )
                 .orderBy(memberSort(pageable))
@@ -477,7 +478,7 @@ public class MemberRepositoryQuerydslImpl implements MemberRepositoryQuerydsl {
                 .where(
                         JPAExpressions
                                 .selectFrom(groupMember)
-                                .where(groupMember.group.id.eq(group.getId()).and(groupMember.member.eq(member)).and(groupMember.role.eq(groupRole)))
+                                .where(groupMember.group.id.eq(group.getId()).and(groupMember.member.eq(member)).and(groupMember.role.in(groupRoles)))
                                 .exists()
                 )
                 .fetchCount();
@@ -515,18 +516,28 @@ public class MemberRepositoryQuerydslImpl implements MemberRepositoryQuerydsl {
 
     @Override
     public Page<MemberDto> findMemberDtoPageByWordContainingAtRequesterSearchType(Pageable pageable, RequesterSearchType type, String word) {
+        final List<Long> ids = queryFactory
+                .selectFrom(request)
+                .innerJoin(request.member, member).fetchJoin()
+                .where(searchRequester(type, word))
+                .orderBy(request.id.desc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch()
+                .stream()
+                .map(r -> r.getMember().getId())
+                .collect(Collectors.toList());
+
         final List<Member> members = queryFactory
                 .selectFrom(member)
                 .innerJoin(member.roles, memberRole).fetchJoin()
                 .innerJoin(memberRole.role, role).fetchJoin()
-                .where(searchRequester(type, word))
-                .orderBy(memberSort(pageable))
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
+                .where(member.id.in(ids))
                 .fetch();
 
         final long total = queryFactory
-                .selectFrom(member)
+                .selectFrom(request)
+                .innerJoin(request.member, member).fetchJoin()
                 .where(searchRequester(type, word))
                 .fetchCount();
 
@@ -739,7 +750,6 @@ public class MemberRepositoryQuerydslImpl implements MemberRepositoryQuerydsl {
                 .map(g -> g.getMember().getId())
                 .collect(Collectors.toList());
 
-
         final List<Member> members = queryFactory
                 .selectFrom(member)
                 .innerJoin(member.roles, memberRole).fetchJoin()
@@ -788,9 +798,9 @@ public class MemberRepositoryQuerydslImpl implements MemberRepositoryQuerydsl {
     private BooleanExpression searchRequester(RequesterSearchType type, String word) {
         switch (type.getField()) {
             case "member_name":
-                return member.name.contains(word);
+                return request.member.name.contains(word);
             case "member_student_id":
-                return member.studentId.contains(word);
+                return request.member.studentId.contains(word);
         }
 
         return null;
