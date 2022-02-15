@@ -21,6 +21,7 @@ import wegrus.clubwebsite.vo.File;
 import wegrus.clubwebsite.vo.Image;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -204,15 +205,26 @@ public class PostService {
         Optional<Bookmark> bookmarks = bookmarkRepository.findByMemberAndPost(member, post);
         if (bookmarks.isPresent())
             userPostBookmarked = true;
+
+        // 첨부파일 있다면 추가
+        List<String> postFileUrls = new ArrayList<>();
+        Optional<PostFile> postFiles = postFileRepository.findByPostId(postId);
+        if (postFiles.isPresent()) {
+            postFileUrls = postFiles.stream()
+                    .map(s -> s.getFile().getUrl())
+                    .collect(Collectors.toList());
+        }
+
+        // 작성자 알수 없는 상태면 '알 수 없음' 변경
         List<MemberRole> memberRoles = memberRoleRepository.findAllByMemberId(post.getMember().getId());
         List<String> roles = memberRoles.stream()
                 .map(s -> s.getRole().getName())
                 .collect(Collectors.toList());
 
         if (roles.contains(MemberRoles.ROLE_BAN.name()) || roles.contains(MemberRoles.ROLE_RESIGN.name()))
-            return new PostResponse(new PostUnknownDto(post, userPostLiked, userPostBookmarked), replies);
+            return new PostResponse(new PostUnknownDto(post, userPostLiked, userPostBookmarked, postFileUrls), replies);
 
-        return new PostResponse(new PostDto(post, userPostLiked, userPostBookmarked), replies);
+        return new PostResponse(new PostDto(post, userPostLiked, userPostBookmarked, postFileUrls), replies);
     }
 
     @Transactional
