@@ -78,8 +78,6 @@ public class PostService {
 
 
         // 파일 업로드
-        String fileUrl = "";
-
         if (multipartFile != null) {
             final String dirName = "files/posts/" + postId;
 
@@ -91,8 +89,6 @@ public class PostService {
                     .file(file)
                     .post(post)
                     .build();
-
-            fileUrl = file.getUrl();
 
             postFileRepository.save(postFile);
         }
@@ -116,7 +112,7 @@ public class PostService {
             }
         }
 
-        return new PostCreateResponse(postId, fileUrl);
+        return new PostCreateResponse(postId);
     }
 
     @Transactional

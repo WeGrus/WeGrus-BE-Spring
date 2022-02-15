@@ -7,5 +7,4 @@ import lombok.Getter;
 @AllArgsConstructor
 public class PostCreateResponse {
     private Long postId;
-    private String fileUrl;
 }
