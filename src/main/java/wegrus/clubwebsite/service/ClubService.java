@@ -117,11 +117,17 @@ public class ClubService {
     public StatusResponse deleteAuthority(Long memberId, MemberRoleDeleteType type) {
         final Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
         final Role role = roleRepository.findByName(type.name()).orElseThrow(MemberRoleNotFoundException::new);
-        final Optional<MemberRole> memberRole = memberRoleRepository.findByMemberIdAndRoleId(member.getId(), role.getId());
+        final Optional<MemberRole> findMemberRole = memberRoleRepository.findByMemberIdAndRoleId(member.getId(), role.getId());
 
-        if (memberRole.isEmpty())
+        if (findMemberRole.isEmpty())
             throw new MemberRoleNotFoundException();
-        memberRoleRepository.delete(memberRole.get());
+
+        final MemberRole memberRole = findMemberRole.get();
+        memberRoleRepository.delete(memberRole);
+        if (role.getName().equals(ROLE_MEMBER.name())) {
+            final List<GroupMember> groupMembers = groupMemberRepository.findAllByMemberId(memberId);
+            groupMemberRepository.deleteAllInBatch(groupMembers);
+        }
 
         return new StatusResponse(Status.SUCCESS);
     }
@@ -182,9 +188,9 @@ public class ClubService {
                 roleIds.add(r.getId());
         });
 
-
         final List<MemberRole> memberRoles = memberRoleRepository.findAllByRoleIdIn(roleIds);
         memberRoleRepository.deleteAllInBatch(memberRoles);
+        groupMemberRepository.deleteAllInBatch();
 
         final Long memberId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
         final Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
@@ -223,11 +229,14 @@ public class ClubService {
         final Group group = groupRepository.findById(groupId).orElseThrow(GroupNotFoundException::new);
         final Role role = roleRepository.findByName(ROLE_GROUP_PRESIDENT.name()).orElseThrow(MemberRoleNotFoundException::new);
 
-        final GroupMember groupMember = groupMemberRepository.findByMemberIdAndGroupId(memberId, groupId).orElseThrow(GroupMemberNotFoundException::new);
-        if (groupMember.getRole().equals(GroupRoles.APPLICANT))
-            throw new GroupMemberNotFoundException();
-        if (groupMember.getRole().equals(GroupRoles.PRESIDENT))
-            throw new MemberAlreadyHasRoleException();
+        final Optional<GroupMember> findGroupMember = groupMemberRepository.findByMemberIdAndGroupId(memberId, groupId);
+        if (findGroupMember.isPresent()) {
+            final GroupMember groupMember = findGroupMember.get();
+            if (groupMember.getRole().equals(GroupRoles.APPLICANT))
+                throw new GroupMemberNotFoundException();
+            if (groupMember.getRole().equals(GroupRoles.PRESIDENT))
+                throw new MemberAlreadyHasRoleException();
+        }
 
         groupMemberRepository.save(new GroupMember(member, group));
         if (memberRoleRepository.findByMemberIdAndRoleId(memberId, role.getId()).isEmpty())
