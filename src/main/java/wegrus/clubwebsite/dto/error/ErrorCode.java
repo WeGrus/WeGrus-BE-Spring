@@ -21,6 +21,8 @@ public enum ErrorCode {
     INSUFFICIENT_AUTHORITY(403, "C009", "접근 권한이 부족합니다."),
     MULTIPARTFILE_CONVERT_FAIL(400, "C010", "MultipartFile을 File로 변환하는 데 실패하였습니다."),
     INVALID_AUTHORIZATION_CODE(400, "C011", "유효하지 않은 인증 코드입니다."),
+    HTTP_MEDIA_TYPE_NOT_SUPPORTED(415, "C012", "지원하지 않는 Http Media Type 입니다."),
+    INVALID_HTTP_MEDIA_TYPE(415, "C013", "유효하지 않은 Http Media Type 입니다."),
 
     // Post
     POST_NOT_FOUND(400, "B000", "존재하지 않는 게시물입니다."),
