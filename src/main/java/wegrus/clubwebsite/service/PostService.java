@@ -17,9 +17,11 @@ import wegrus.clubwebsite.entity.member.Member;
 import wegrus.clubwebsite.exception.*;
 import wegrus.clubwebsite.repository.*;
 import wegrus.clubwebsite.util.AmazonS3Util;
+import wegrus.clubwebsite.vo.File;
 import wegrus.clubwebsite.vo.Image;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -31,6 +33,7 @@ public class PostService {
     private final BoardCategoryRepository boardCategoryRepository;
     private final PostRepository postRepository;
     private final PostImageRepository postImageRepository;
+    private final PostFileRepository postFileRepository;
     private final MemberRepository memberRepository;
     private final MemberRoleRepository memberRoleRepository;
     private final ReplyRepository replyRepository;
@@ -55,7 +58,7 @@ public class PostService {
     }
 
     @Transactional
-    public Long create(PostCreateRequest request) {
+    public PostCreateResponse create(PostCreateRequest request, MultipartFile multipartFile) throws IOException {
         String memberId = SecurityContextHolder.getContext().getAuthentication().getName();
         final Member member = memberRepository.findById(Long.valueOf(memberId)).orElseThrow(MemberNotFoundException::new);
         final Board board = boardRepository.findById(request.getBoardId()).orElseThrow(BoardNotFoundException::new);
@@ -72,6 +75,23 @@ public class PostService {
                 .build();
 
         final Long postId = postRepository.save(post).getId();
+
+
+        // 파일 업로드
+        if (multipartFile != null) {
+            final String dirName = "files/posts/" + postId;
+
+            amazonS3Util.createDirectory(dirName);
+
+            final File file = amazonS3Util.uploadFile(multipartFile, dirName);
+
+            PostFile postFile = PostFile.builder()
+                    .file(file)
+                    .post(post)
+                    .build();
+
+            postFileRepository.save(postFile);
+        }
 
         // 게시물 사진 이동경로 변경
         List<Long> postImageIds = request.getPostImageIds();
@@ -92,7 +112,7 @@ public class PostService {
             }
         }
 
-        return postId;
+        return new PostCreateResponse(postId);
     }
 
     @Transactional
@@ -143,6 +163,13 @@ public class PostService {
         }
         postImageRepository.deletePostImagesByPost(post);
 
+        // 파일 삭제
+        List<PostFile> postFiles = post.getFiles();
+        for (PostFile postFile : postFiles) {
+            amazonS3Util.deleteFile(postFile.getFile(), "files/posts/" + postId);
+        }
+        postFileRepository.deletePostFilesByPost(post);
+
         postRepository.delete(post);
     }
 
@@ -182,15 +209,25 @@ public class PostService {
         if (bookmarks.isPresent())
             userPostBookmarked = true;
 
+        // 첨부파일 있다면 추가
+        List<String> postFileUrls = new ArrayList<>();
+        Optional<PostFile> postFiles = postFileRepository.findByPostId(postId);
+        if (postFiles.isPresent()) {
+            postFileUrls = postFiles.stream()
+                    .map(s -> s.getFile().getUrl())
+                    .collect(Collectors.toList());
+        }
+
+        // 작성자 알수 없는 상태면 '알 수 없음' 변경
         List<MemberRole> memberRoles = memberRoleRepository.findAllByMemberId(post.getMember().getId());
         List<String> roles = memberRoles.stream()
                 .map(s -> s.getRole().getName())
                 .collect(Collectors.toList());
 
         if (roles.contains(MemberRoles.ROLE_BAN.name()) || roles.contains(MemberRoles.ROLE_RESIGN.name()))
-            return new PostResponse(new PostUnknownDto(post, userPostLiked, userPostBookmarked), replies);
+            return new PostResponse(new PostUnknownDto(post, userPostLiked, userPostBookmarked, postFileUrls), replies);
 
-        return new PostResponse(new PostDto(post, userPostLiked, userPostBookmarked), replies);
+        return new PostResponse(new PostDto(post, userPostLiked, userPostBookmarked, postFileUrls), replies);
     }
 
     @Transactional

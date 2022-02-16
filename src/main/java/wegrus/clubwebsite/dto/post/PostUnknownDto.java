@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import wegrus.clubwebsite.entity.post.Post;
 
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 @Getter
 @NoArgsConstructor
@@ -23,11 +24,12 @@ public class PostUnknownDto {
     private Integer postReplies;
     private Integer postView;
     private Integer postBookmarks;
+    private List<String> postFileUrls;
     private boolean userPostLiked;
     private boolean userPostBookmarked;
     private boolean secretFlag;
 
-    public PostUnknownDto(Post post, boolean userPostLiked, boolean userPostBookmarked) {
+    public PostUnknownDto(Post post, boolean userPostLiked, boolean userPostBookmarked, List<String> postFileUrls) {
         this.postId = post.getId();
         this.memberId = post.getMember().getId();
         this.memberName = "알 수 없음";
@@ -42,6 +44,7 @@ public class PostUnknownDto {
         this.postReplies = post.getPostReplyNum();
         this.postView = post.getViews().size();
         this.postBookmarks = post.getBookmarks().size();
+        this.postFileUrls = postFileUrls;
         this.userPostLiked = userPostLiked;
         this.userPostBookmarked = userPostBookmarked;
         this.secretFlag = post.isSecretFlag();
