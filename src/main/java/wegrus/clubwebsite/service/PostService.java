@@ -194,7 +194,7 @@ public class PostService {
         // 정보 반환
         List<ReplyDto> replies = post.getReplies()
                 .stream()
-                .map(ReplyDto::new)
+                .map(m -> new ReplyDto(m, Long.valueOf(memberId)))
                 .collect(Collectors.toList());
 
         // 현재 유저 추천, 북마크 여부
