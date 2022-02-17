@@ -21,6 +21,8 @@ public class KakaoUtil {
 
     @Value("${oauth.kakao.rest-api-key}")
     private String KAKAO_CLIENT_REST_API_KEY;
+    @Value("${front.host}")
+    private String FRONT_HOST;
     private RestTemplate restTemplate = new RestTemplate();
 
     public String getUserIdFromKakaoAPI(String accessToken) {
@@ -42,7 +44,7 @@ public class KakaoUtil {
         headers.set("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
         final String url = "https://kauth.kakao.com/oauth/token";
         final String grant_type = "authorization_code";
-        final String redirect_url = "http://localhost:3000/oauth/kakao/callback";
+        final String redirect_url = FRONT_HOST + "/oauth/kakao/callback";
         HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(null, headers);
         final ResponseEntity<Map> responseEntity;
         try {
