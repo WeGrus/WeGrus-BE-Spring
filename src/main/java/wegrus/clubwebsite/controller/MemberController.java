@@ -110,6 +110,7 @@ public class MemberController {
         ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true)
                 .sameSite("strict")
+                .domain("igrus.net")
                 .maxAge(14 * 24 * 60 * 60)
                 .path("/")
                 .build();
