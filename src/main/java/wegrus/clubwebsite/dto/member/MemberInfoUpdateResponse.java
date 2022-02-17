@@ -4,8 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import wegrus.clubwebsite.entity.member.Member;
-import wegrus.clubwebsite.entity.member.MemberAcademicStatus;
-import wegrus.clubwebsite.entity.member.MemberGrade;
 
 @Getter
 @AllArgsConstructor
@@ -17,16 +15,16 @@ public class MemberInfoUpdateResponse {
     private String department;
     private String phone;
     private String introduce;
-    private MemberAcademicStatus academicStatus;
-    private MemberGrade grade;
+    private String academicStatus;
+    private String grade;
 
     public MemberInfoUpdateResponse(String status, Member member) {
         this.status = status;
         this.name = member.getName();
         this.department = member.getDepartment();
         this.phone = member.getPhone();
-        this.academicStatus = member.getAcademicStatus();
-        this.grade = member.getGrade();
+        this.academicStatus = member.getAcademicStatus().getValue();
+        this.grade = member.getGrade().getValue();
         this.introduce = member.getIntroduce();
     }
 }
