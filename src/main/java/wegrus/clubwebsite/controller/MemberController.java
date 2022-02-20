@@ -108,7 +108,7 @@ public class MemberController {
     private void putRefreshTokenToCookie(HttpServletResponse httpServletResponse, String refreshToken) {
         // TODO: HTTPS 적용 후에 secure(true) 적용하기
         //  Frontend 호스팅 시 sameSite 적용하기
-        ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
+        ResponseCookie cookie = ResponseCookie.from("igrus-rt", refreshToken)
                 .httpOnly(true)
                 .sameSite("strict")
                 .domain("igrus.net")
@@ -119,11 +119,28 @@ public class MemberController {
         httpServletResponse.addHeader("Set-Cookie", cookie.toString());
     }
 
+    @ApiOperation(value = "로그아웃")
+    @PostMapping("/signout")
+    public ResponseEntity<ResultResponse> signout(HttpServletResponse httpServletResponse) {
+        removeCookie(httpServletResponse, "igrus-rt");
+        final StatusResponse response = new StatusResponse(Status.SUCCESS);
+
+        return ResponseEntity.ok(ResultResponse.of(SIGNOUT_SUCCESS, response));
+    }
+
+    private void removeCookie(HttpServletResponse httpServletResponse, String name) {
+        final Cookie cookie = new Cookie(name, null);
+        cookie.setMaxAge(0);
+        cookie.setPath("/");
+
+        httpServletResponse.addCookie(cookie);
+    }
+
     @ApiOperation(value = "토큰 재발급")
     @ApiImplicitParam(name = "Authorization", value = "불필요", example = " ")
     @PostMapping("/reissue")
     public ResponseEntity<ResultResponse> reissue(
-            @NotNull(message = "refreshToken 쿠키는 필수입니다.") @CookieValue(value = "refreshToken", required = false) Cookie cookie,
+            @NotNull(message = "refreshToken 쿠키는 필수입니다.") @CookieValue(value = "igrus-rt", required = false) Cookie cookie,
             HttpServletResponse httpServletResponse) {
         final JwtDto jwtDto = memberService.reIssueJwt(cookie.getValue());
         putRefreshTokenToCookie(httpServletResponse, jwtDto.getRefreshToken());
