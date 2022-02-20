@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -148,6 +149,14 @@ public class MemberController {
     @GetMapping("/members/info/{memberId}")
     public ResponseEntity<ResultResponse> getInfo(@NotNull(message = "회원 순번은 필수입니다.") @PathVariable Long memberId) {
         final MemberInfoResponse response = memberService.getMemberInfo(memberId);
+
+        return ResponseEntity.ok(ResultResponse.of(GET_MEMBER_INFO_SUCCESS, response));
+    }
+
+    @ApiOperation(value = "본인 정보 조회")
+    @GetMapping("/info")
+    public ResponseEntity<ResultResponse> getInfo() {
+        final MemberInfoResponse response = memberService.getMemberInfo(Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName()));
 
         return ResponseEntity.ok(ResultResponse.of(GET_MEMBER_INFO_SUCCESS, response));
     }
