@@ -39,17 +39,23 @@ public class SetupConfig {
                 4L, 4L, 4L, 4L, 4L, 4L
         );
 
+        final List<Boolean> boardSecretFlags = Arrays.asList(
+                false,
+                false, false, false, false,
+                false,
+                false, false, false, false, false, true);
+
         final List<String> boards = Arrays.stream(Boards.values())
                 .map(Boards::getKrName)
                 .collect(Collectors.toList());
 
-        final String boardSql = "INSERT INTO boards (`board_category_id`, `board_name`) VALUES(?, ?)";
+        final String boardSql = "INSERT INTO boards (`board_category_id`, `board_name`, `board_secret_flag`) VALUES(?, ?, ?)";
         final BatchPreparedStatementSetter boardPss = new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
                 ps.setLong(1, boardCategoryIdOrders.get(i));
                 ps.setString(2, boards.get(i));
-
+                ps.setBoolean(3, boardSecretFlags.get(i));
             }
 
             @Override

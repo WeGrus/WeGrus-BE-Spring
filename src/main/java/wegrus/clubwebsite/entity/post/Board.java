@@ -28,9 +28,13 @@ public class Board {
     @Column(name = "board_name", nullable = false)
     private String name;
 
+    @Column(name = "board_secret_flag", nullable = false)
+    private boolean secretFlag;
+
     @Builder
-    public Board(BoardCategory boardCategory, String name){
+    public Board(BoardCategory boardCategory, String name, boolean secretFlag) {
         this.boardCategory = boardCategory;
         this.name = name;
+        this.secretFlag = secretFlag;
     }
 }
