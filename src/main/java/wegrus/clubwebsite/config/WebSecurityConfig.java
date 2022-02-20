@@ -92,7 +92,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowedOriginPatterns(List.of("http://igrus.net"));
+        config.setAllowedOriginPatterns(List.of("http://igrus.net", "http://www.igrus.net"));
         config.setAllowedMethods(List.of(ALL));
         config.setAllowedHeaders(List.of(ALL));
         config.setAllowCredentials(true);
