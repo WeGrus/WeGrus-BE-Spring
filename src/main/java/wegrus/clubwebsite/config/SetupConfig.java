@@ -62,7 +62,7 @@ public class SetupConfig {
 
     private void initTableBoardCategories() {
         final List<String> boardCategories = Arrays.stream(BoardCategories.values())
-                .map(Enum::name)
+                .map(BoardCategories::getKrName)
                 .collect(Collectors.toList());
 
         final String categorySql = "INSERT INTO board_categories (`board_category_name`) VALUES(?)";
