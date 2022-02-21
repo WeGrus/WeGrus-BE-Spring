@@ -36,8 +36,7 @@ public class AmazonS3Util {
         final wegrus.clubwebsite.vo.File file = fileUtil.convertMultipartFile(multipartFile);
         final String fileName = dirName + "/" + file.getUuid() + "_" + file.getName() + "." + file.getType();
 
-        final File uploadFile = convert(multipartFile).orElseThrow(MultipartfileConvertException::new);
-        final String url = uploadFile(uploadFile, fileName);
+        final String url = uploadFileByOMD(multipartFile, fileName);
         file.setUrl(url);
         return file;
     }
@@ -69,6 +68,11 @@ public class AmazonS3Util {
         return uploadImageUrl;
     }
 
+    public String uploadFileByOMD(MultipartFile multipartFile, String dirName) throws IOException {
+        final String uploadFileUrl = putS3ByOMD(multipartFile, dirName);
+        return uploadFileUrl;
+    }
+
     public Image updateImage(Image image, String prevDirName, String dirName) {
         final String oldSource = prevDirName + "/" + image.getUuid() + "_" + image.getName() + "." + image.getType().toString();
         final String newSource = dirName + "/" + image.getUuid() + "_" + image.getName() + "." + image.getType().toString();
@@ -85,6 +89,18 @@ public class AmazonS3Util {
      */
     private String putS3(File uploadFile, String fileName) {
         amazonS3Client.putObject(new PutObjectRequest(bucket, fileName, uploadFile).withCannedAcl(CannedAccessControlList.PublicRead));
+        return amazonS3Client.getUrl(bucket, fileName).toString();
+    }
+
+    /**
+     * S3에 <b>File</b> content-type: "application/octet-stream" 으로 업로드
+     */
+    private String putS3ByOMD(MultipartFile multipartFile, String fileName) throws IOException {
+        ObjectMetadata objectMetadata = new ObjectMetadata();
+        objectMetadata.setContentType("application/octet-stream");
+        objectMetadata.setContentLength(multipartFile.getSize());
+        objectMetadata.setHeader("filename", multipartFile.getOriginalFilename());
+        amazonS3Client.putObject(new PutObjectRequest(bucket, fileName, multipartFile.getInputStream(), objectMetadata).withCannedAcl(CannedAccessControlList.PublicRead));
         return amazonS3Client.getUrl(bucket, fileName).toString();
     }
 
