@@ -30,6 +30,7 @@ import wegrus.clubwebsite.util.RedisUtil;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -121,23 +122,18 @@ public class MemberController {
 
     @ApiOperation(value = "로그아웃")
     @PostMapping("/signout")
-    public ResponseEntity<ResultResponse> signout(HttpServletResponse httpServletResponse) {
-        removeCookie(httpServletResponse, "igrus-rt");
+    public ResponseEntity<ResultResponse> signout(
+            @NotNull(message = "refreshToken 쿠키는 필수입니다.") @CookieValue(value = "igrus-rt", required = false) Cookie cookie,
+            HttpServletResponse httpServletResponse) {
+        removeCookie(cookie, httpServletResponse);
         final StatusResponse response = new StatusResponse(Status.SUCCESS);
 
         return ResponseEntity.ok(ResultResponse.of(SIGNOUT_SUCCESS, response));
     }
 
-    private void removeCookie(HttpServletResponse httpServletResponse, String name) {
-        ResponseCookie cookie = ResponseCookie.from(name, null)
-                .httpOnly(true)
-                .sameSite("strict")
-                .domain("igrus.net")
-                .maxAge(0)
-                .path("/")
-                .build();
-
-        httpServletResponse.addHeader("Set-Cookie", cookie.toString());
+    private void removeCookie(Cookie cookie, HttpServletResponse httpServletResponse) {
+        cookie.setMaxAge(0);
+        httpServletResponse.addCookie(cookie);
     }
 
     @ApiOperation(value = "토큰 재발급")
