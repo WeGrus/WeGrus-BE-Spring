@@ -123,17 +123,19 @@ public class MemberController {
     @ApiOperation(value = "로그아웃")
     @PostMapping("/signout")
     public ResponseEntity<ResultResponse> signout(
-            @NotNull(message = "refreshToken 쿠키는 필수입니다.") @CookieValue(value = "igrus-rt", required = false) Cookie cookie,
+            HttpServletRequest httpServletRequest,
             HttpServletResponse httpServletResponse) {
-        removeCookie(cookie, httpServletResponse);
+        removeCookie("igrus.net", httpServletRequest, httpServletResponse);
         final StatusResponse response = new StatusResponse(Status.SUCCESS);
 
         return ResponseEntity.ok(ResultResponse.of(SIGNOUT_SUCCESS, response));
     }
 
-    private void removeCookie(Cookie cookie, HttpServletResponse httpServletResponse) {
+    private void removeCookie(String name, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
+        final Cookie cookie = new Cookie(name, "");
+        final Cookie[] cookies = httpServletRequest.getCookies();
+        cookie.setDomain(cookies[0].getDomain());
         cookie.setMaxAge(0);
-        cookie.setDomain(".igrus.net");
         httpServletResponse.addCookie(cookie);
     }
 
