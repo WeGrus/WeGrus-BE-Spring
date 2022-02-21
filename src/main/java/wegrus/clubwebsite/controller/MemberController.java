@@ -131,7 +131,7 @@ public class MemberController {
     private void removeCookie(HttpServletResponse httpServletResponse, String name) {
         final Cookie cookie = new Cookie(name, null);
         cookie.setMaxAge(0);
-        cookie.setDomain("igrus.net");
+        cookie.setDomain(".igrus.net");
         cookie.setPath("/");
 
         httpServletResponse.addCookie(cookie);
