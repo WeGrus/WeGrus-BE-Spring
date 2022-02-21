@@ -133,6 +133,7 @@ public class MemberController {
 
     private void removeCookie(Cookie cookie, HttpServletResponse httpServletResponse) {
         cookie.setMaxAge(0);
+        cookie.setDomain(".igrus.net");
         httpServletResponse.addCookie(cookie);
     }
 
