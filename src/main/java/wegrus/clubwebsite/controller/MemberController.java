@@ -132,7 +132,7 @@ public class MemberController {
         ResponseCookie cookie = ResponseCookie.from(name, null)
                 .httpOnly(true)
                 .sameSite("strict")
-                .domain("www.igrus.net")
+                .domain("igrus.net")
                 .maxAge(0)
                 .path("/")
                 .build();
