@@ -125,18 +125,19 @@ public class MemberController {
     public ResponseEntity<ResultResponse> signout(
             HttpServletRequest httpServletRequest,
             HttpServletResponse httpServletResponse) {
-        removeCookie("igrus.net", httpServletRequest, httpServletResponse);
+        removeCookie(httpServletRequest, httpServletResponse);
         final StatusResponse response = new StatusResponse(Status.SUCCESS);
 
         return ResponseEntity.ok(ResultResponse.of(SIGNOUT_SUCCESS, response));
     }
 
-    private void removeCookie(String name, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
-        final Cookie cookie = new Cookie(name, "");
+    private void removeCookie(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
         final Cookie[] cookies = httpServletRequest.getCookies();
-        cookie.setDomain(cookies[0].getDomain());
-        cookie.setMaxAge(0);
-        httpServletResponse.addCookie(cookie);
+        for (Cookie cookie : cookies) {
+            cookie.setDomain(cookie.getDomain());
+            cookie.setMaxAge(0);
+            httpServletResponse.addCookie(cookie);
+        }
     }
 
     @ApiOperation(value = "토큰 재발급")
