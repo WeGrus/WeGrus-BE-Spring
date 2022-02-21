@@ -129,12 +129,15 @@ public class MemberController {
     }
 
     private void removeCookie(HttpServletResponse httpServletResponse, String name) {
-        final Cookie cookie = new Cookie(name, null);
-        cookie.setMaxAge(0);
-        cookie.setDomain("igrus.net");
-        cookie.setPath("/");
+        ResponseCookie cookie = ResponseCookie.from(name, null)
+                .httpOnly(true)
+                .sameSite("strict")
+                .domain("igrus.net")
+                .maxAge(0)
+                .path("/")
+                .build();
 
-        httpServletResponse.addCookie(cookie);
+        httpServletResponse.addHeader("Set-Cookie", cookie.toString());
     }
 
     @ApiOperation(value = "토큰 재발급")
