@@ -84,6 +84,7 @@ public class Member {
     @Column(name = "member_introduce")
     private String introduce = "";
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "member_gender")
     private Gender gender;
 
