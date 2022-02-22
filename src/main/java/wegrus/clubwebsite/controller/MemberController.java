@@ -134,7 +134,6 @@ public class MemberController {
     private void removeCookie(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
         final Cookie[] cookies = httpServletRequest.getCookies();
         for (Cookie cookie : cookies) {
-            cookie.setDomain(cookie.getDomain());
             cookie.setMaxAge(0);
             httpServletResponse.addCookie(cookie);
         }

@@ -1,6 +1,7 @@
 package wegrus.clubwebsite.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -44,6 +45,7 @@ import static wegrus.clubwebsite.entity.group.GroupRoles.*;
 import static wegrus.clubwebsite.entity.member.MemberRoles.*;
 import static wegrus.clubwebsite.util.ImageUtil.MEMBER_BASIC_IMAGE_URL;
 
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -153,7 +155,9 @@ public class MemberService {
 
     @Transactional
     public MemberAndJwtDto findMemberAndGenerateJwt(String authorizationCode) {
+        log.info("authorizationCode = {}", authorizationCode);
         final String userId = kakaoUtil.getUserIdFromKakaoAPI(kakaoUtil.getAccessTokenFromKakaoAPI(authorizationCode));
+        log.info("userId = {}", userId);
 
         redisUtil.set(authorizationCode, userId, 1);
         final Member member = memberRepository.findByUserId(userId).orElseThrow(MemberNotFoundException::new);
