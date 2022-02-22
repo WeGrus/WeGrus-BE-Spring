@@ -98,7 +98,9 @@ public class MemberService {
                 .phone(request.getPhone())
                 .build();
         memberRepository.save(member);
+        log.info("member saved : {}", member.toString());
         amazonS3Util.createDirectory("members/" + member.getId());
+        log.info("create directory in s3");
 
         final Role role = roleRepository.findByName(MemberRoles.ROLE_GUEST.name()).get();
         memberRoleRepository.save(new MemberRole(member, role));

@@ -1,6 +1,5 @@
 package wegrus.clubwebsite.util;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -17,7 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-@Slf4j
 @Component
 public class KakaoUtil {
 
@@ -48,9 +46,9 @@ public class KakaoUtil {
         final String grant_type = "authorization_code";
         final String redirect_url = FRONT_HOST + "/oauth/kakao/callback";
         HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(null, headers);
-        final ResponseEntity<Map> responseEntity;
+
         try {
-            responseEntity = restTemplate.exchange(
+            final ResponseEntity<Map> responseEntity = restTemplate.exchange(
                     url + "?grant_type=" + grant_type + "&client_id=" + KAKAO_CLIENT_REST_API_KEY + "&redirect_url=" + redirect_url + "&code=" + authorizationCode
                     , HttpMethod.POST, requestEntity, Map.class);
             final Map response = responseEntity.getBody();
@@ -58,8 +56,6 @@ public class KakaoUtil {
 
             return accessToken;
         } catch(Exception e) {
-            log.info("exception message: {}", e.getMessage());
-            log.info("exception: {}", e.toString());
             final List<ErrorResponse.FieldError> errors = new ArrayList<>();
             errors.add(new ErrorResponse.FieldError("authorizationCode", authorizationCode, ErrorCode.INVALID_AUTHORIZATION_CODE.getMessage()));
             throw new AuthorizationCodeInvalidException(errors);
