@@ -98,9 +98,9 @@ public class MemberService {
                 .phone(request.getPhone())
                 .build();
         memberRepository.save(member);
-        log.info("member saved : {}", member.toString());
+        log.info("[member saved] : {}", member.toString());
         amazonS3Util.createDirectory("members/" + member.getId());
-        log.info("create directory in s3");
+        log.info("[create directory in s3]");
 
         final Role role = roleRepository.findByName(MemberRoles.ROLE_GUEST.name()).get();
         memberRoleRepository.save(new MemberRole(member, role));
@@ -157,11 +157,13 @@ public class MemberService {
 
     @Transactional
     public MemberAndJwtDto findMemberAndGenerateJwt(String authorizationCode) {
-        log.info("authorizationCode = {}", authorizationCode);
+        log.info("[로그인 API 호출]");
+        log.info("[authorizationCode] = {}", authorizationCode);
         final String userId = kakaoUtil.getUserIdFromKakaoAPI(kakaoUtil.getAccessTokenFromKakaoAPI(authorizationCode));
-        log.info("userId = {}", userId);
+        log.info("[userId] = {}", userId);
 
         redisUtil.set(authorizationCode, userId, 1);
+        log.info("[Redis에 코드 저장 완료]");
         final Member member = memberRepository.findByUserId(userId).orElseThrow(MemberNotFoundException::new);
         final Long resignId = roleRepository.findByName(MemberRoles.ROLE_RESIGN.name()).get().getId();
         final Long banId = roleRepository.findByName(MemberRoles.ROLE_BAN.name()).get().getId();
@@ -170,6 +172,7 @@ public class MemberService {
         else if (memberRoleRepository.findByMemberIdAndRoleId(member.getId(), banId).isPresent())
             throw new MemberAlreadyBanException();
         redisUtil.delete(authorizationCode);
+        log.info("[Redis에서 코드 제거 완료]");
 
         UserDetails userDetails = jwtUserDetailsUtil.loadUserByUsername(String.valueOf(member.getId()));
         final String accessToken = jwtTokenUtil.generateAccessToken(userDetails);
@@ -177,11 +180,14 @@ public class MemberService {
 
         member.updateRefreshToken(refreshToken);
         final MemberDto memberDto = memberRepository.findMemberDtoById(member.getId()).get();
+        log.info("[로그인 API 종료]");
         return new MemberAndJwtDto(memberDto, accessToken, refreshToken);
     }
 
     @Transactional
     public JwtDto reIssueJwt(String refreshToken) {
+        log.info("[재발급 API 호출]");
+        log.info("[refreshToken] = {}", refreshToken);
         jwtTokenUtil.validateRefreshToken(refreshToken);
         final Long memberId = Long.valueOf(jwtTokenUtil.getUsernameFromRefreshToken(refreshToken));
         final Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
@@ -196,6 +202,7 @@ public class MemberService {
         final String newRefreshToken = jwtTokenUtil.generateRefreshToken(userDetails);
         member.updateRefreshToken(newRefreshToken);
 
+        log.info("[재발급 API 종료]");
         return new JwtDto(newAccessToken, newRefreshToken);
     }
 
