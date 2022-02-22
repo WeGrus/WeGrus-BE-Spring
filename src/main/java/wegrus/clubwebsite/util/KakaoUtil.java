@@ -1,5 +1,6 @@
 package wegrus.clubwebsite.util;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Component
 public class KakaoUtil {
 
@@ -56,6 +58,8 @@ public class KakaoUtil {
 
             return accessToken;
         } catch(Exception e) {
+            log.info("exception message: {}", e.getMessage());
+            log.info("exception: {}", e.toString());
             final List<ErrorResponse.FieldError> errors = new ArrayList<>();
             errors.add(new ErrorResponse.FieldError("authorizationCode", authorizationCode, ErrorCode.INVALID_AUTHORIZATION_CODE.getMessage()));
             throw new AuthorizationCodeInvalidException(errors);
