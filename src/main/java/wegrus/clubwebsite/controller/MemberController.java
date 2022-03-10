@@ -235,44 +235,50 @@ public class MemberController {
         return ResponseEntity.ok(ResultResponse.of(SEND_CERTIFICATION_CODE_SUCCESS, response));
     }
 
-    @ApiOperation(value = "내가 작성한 게시물 목록 조회")
+    @ApiOperation(value = "회원이 작성한 게시물 목록 조회")
     @ApiImplicitParams({
+            @ApiImplicitParam(name = "memberId", value = "회원 PK", example = "1", required = true),
             @ApiImplicitParam(name = "page", value = "페이지", example = "1", required = true),
             @ApiImplicitParam(name = "size", value = "페이지당 개수", example = "10", required = true)
     })
     @GetMapping("/members/posts")
     public ResponseEntity<ResultResponse> getMyPosts(
+            @NotNull(message = "회원 PK는 필수입니다.") @RequestParam Long memberId,
             @NotNull(message = "게시물 page는 필수입니다.") @RequestParam int page,
             @NotNull(message = "게시물 page당 size는 필수입니다.") @RequestParam int size) {
-        final Page<PostDto> response = memberService.getMyPosts(page, size);
+        final Page<PostDto> response = memberService.getMyPosts(memberId, page, size);
 
         return ResponseEntity.ok(ResultResponse.of(GET_MY_POSTS_SUCCESS, response));
     }
 
-    @ApiOperation(value = "내가 작성한 댓글 목록 조회")
+    @ApiOperation(value = "회원이 작성한 댓글 목록 조회")
     @ApiImplicitParams({
+            @ApiImplicitParam(name = "memberId", value = "회원 PK", example = "1", required = true),
             @ApiImplicitParam(name = "page", value = "페이지", example = "1", required = true),
             @ApiImplicitParam(name = "size", value = "페이지당 개수", example = "10", required = true)
     })
     @GetMapping("/members/replies")
     public ResponseEntity<ResultResponse> getMyReplies(
+            @NotNull(message = "회원 PK는 필수입니다.") @RequestParam Long memberId,
             @NotNull(message = "게시물 page는 필수입니다.") @RequestParam int page,
             @NotNull(message = "게시물 page당 size는 필수입니다.") @RequestParam int size) {
-        final Page<PostReplyDto> response = memberService.getMyReplies(page, size);
+        final Page<PostReplyDto> response = memberService.getMyReplies(memberId, page, size);
 
         return ResponseEntity.ok(ResultResponse.of(GET_MY_REPLIES_SUCCESS, response));
     }
 
-    @ApiOperation(value = "내가 저장한 게시물 목록 조회")
+    @ApiOperation(value = "회원이 저장한 게시물 목록 조회")
     @ApiImplicitParams({
+            @ApiImplicitParam(name = "memberId", value = "회원 PK", example = "1", required = true),
             @ApiImplicitParam(name = "page", value = "페이지", example = "1", required = true),
             @ApiImplicitParam(name = "size", value = "페이지당 개수", example = "10", required = true)
     })
     @GetMapping("/members/bookmarks")
     public ResponseEntity<ResultResponse> getMyBookmarks(
+            @NotNull(message = "회원 PK는 필수입니다.") @RequestParam Long memberId,
             @NotNull(message = "게시물 page는 필수입니다.") @RequestParam int page,
             @NotNull(message = "게시물 page당 size는 필수입니다.") @RequestParam int size) {
-        final Page<BookmarkDto> response = memberService.getMyBookmarks(page, size);
+        final Page<BookmarkDto> response = memberService.getMyBookmarks(memberId, page, size);
 
         return ResponseEntity.ok(ResultResponse.of(GET_MY_BOOKMARKS_SUCCESS, response));
     }
