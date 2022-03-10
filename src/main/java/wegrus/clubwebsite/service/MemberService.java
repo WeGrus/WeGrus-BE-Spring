@@ -328,25 +328,22 @@ public class MemberService {
         return new StatusResponse(Status.SUCCESS);
     }
 
-    public Page<PostDto> getMyPosts(int page, int size) {
-        final Long memberId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
-
+    public Page<PostDto> getMyPosts(Long memberId, int page, int size) {
+        memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
         page = (page == 0 ? 0 : page - 1);
         Pageable pageable = PageRequest.of(page, size);
         return postRepository.findPostDtoPageByMemberIdOrderByCreatedDateDesc(memberId, pageable);
     }
 
-    public Page<PostReplyDto> getMyReplies(int page, int size) {
-        final Long memberId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
-
+    public Page<PostReplyDto> getMyReplies(Long memberId, int page, int size) {
+        memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
         page = (page == 0 ? 0 : page - 1);
         Pageable pageable = PageRequest.of(page, size);
         return postRepository.findPostReplyDtoPageByMemberIdOrderByCreatedDateDesc(memberId, pageable);
     }
 
-    public Page<BookmarkDto> getMyBookmarks(int page, int size) {
-        final Long memberId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
-
+    public Page<BookmarkDto> getMyBookmarks(Long memberId, int page, int size) {
+        memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
         page = (page == 0 ? 0 : page - 1);
         Pageable pageable = PageRequest.of(page, size);
         return postRepository.findBookmarkedPostDtoPageByMemberIdOrderByCreatedDateDesc(memberId, pageable);
