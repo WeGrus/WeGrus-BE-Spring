@@ -5,7 +5,7 @@
   <h3 align="center">WeGrus-BE-Spring</h3>
 
   <p align="center">
-    인하대학교 SW 프로그래밍 동아리 <b>IGRUS</b> 웹사이트 제작 프로젝트
+    SW 프로그래밍 동아리 <b>IGRUS</b> 웹사이트 제작 프로젝트
     <br />
     <a href="https://github.com/WeGrus"><strong>Explore the Organization</strong></a>
     <br /><br />
